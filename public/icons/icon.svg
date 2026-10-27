@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="BusTrack icon">
+  <rect width="192" height="192" rx="46" fill="#0a182c"/>
+  <path d="M48 50h96a18 18 0 0 1 18 18v58a18 18 0 0 1-18 18H48a18 18 0 0 1-18-18V68a18 18 0 0 1 18-18Z" fill="#1c5ff0"/>
+  <rect x="45" y="63" width="102" height="41" rx="10" fill="#eaf3ff"/>
+  <rect x="55" y="72" width="34" height="22" rx="5" fill="#bcdaff"/>
+  <rect x="103" y="72" width="34" height="22" rx="5" fill="#bcdaff"/>
+  <circle cx="58" cy="128" r="11" fill="#eaf3ff"/>
+  <circle cx="134" cy="128" r="11" fill="#eaf3ff"/>
+  <path d="M48 112h96v12a10 10 0 0 1-10 10H58a10 10 0 0 1-10-10v-12Z" fill="#1749b8"/>
+  <circle cx="76" cy="36" r="8" fill="#60a5fa"/>
+  <path d="M76 44v6" stroke="#60a5fa" stroke-width="5" stroke-linecap="round"/>
+</svg>
