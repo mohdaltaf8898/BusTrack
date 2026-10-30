@@ -7,7 +7,7 @@ import { greetingForHour, hourInTimeZone } from "@/lib/format";
 import { Logo } from "@/components/brand";
 import { RouteSelector } from "@/components/route-selector";
 import { Badge } from "@/components/ui/badge";
-import { SimulatedTag, SourceLabel } from "@/components/ui/labels";
+import { SourceLabel } from "@/components/ui/labels";
 
 export function DashboardHeader() {
   const { state, snapshot, unreadCount } = useApp();
@@ -42,9 +42,9 @@ export function DashboardHeader() {
           </Link>
         </div>
       </div>
-      <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_260px] sm:items-end">
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_260px] sm:items-end">
         <div>
-          <p className="text-xs font-semibold text-brand-600">{greeting}, {firstName} 👋</p>
+          <p className="text-xs font-semibold text-brand-600">{greeting}, {firstName}</p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-navy-950 sm:text-[28px]">
             Your bus, before you wait.
           </h1>
@@ -67,7 +67,6 @@ export function DashboardHeader() {
               {snapshot.route.status}
             </Badge>
             <SourceLabel mode={snapshot.dataMode} />
-            <SimulatedTag label="ETA estimate" />
           </div>
         </div>
       </div>

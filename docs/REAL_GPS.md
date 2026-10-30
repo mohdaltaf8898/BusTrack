@@ -42,7 +42,7 @@ Student pages never call `navigator.geolocation` for driver tracking. They recei
 
 ```json
 {
-  "busId": "bus-bt01",
+  "busId": "bus-sim01",
   "tripId": "00000000-0000-4000-8000-000000000001",
   "latitude": 17.3418,
   "longitude": 78.368,
@@ -82,12 +82,13 @@ API route rejects:
 - Invalid Zod payload (`400`).
 - Stale timestamp older than 60s or more than 15s in the future (`422`).
 - Coordinates outside valid bounds or the Hyderabad service area (`422`).
-- Coordinates more than 800m from the route polyline (`422`).
+- Route geometry not marked `verified` by a trusted operator (`409 ROUTE_NOT_VERIFIED`).
+- Coordinates more than 800m from the verified route polyline (`422`).
 - Trip not active or sharing disabled (`409`).
 - Bus/trip/driver/route mismatch (`400/403/409`).
 - Too many updates (`429`).
 
-The `submit_bus_location` RPC repeats role/assignment/trip/timing checks and adds a shape bounding-box check. Direct client writes to `bus_locations` are revoked.
+Direct client writes to `bus_locations` and execution of the older, bounding-box-only `submit_bus_location` RPC are revoked for browser roles. GPS writes go through this API. The historical seed and OSRM estimates are not verified corridors; staff must supply a reviewed trace before live GPS can be accepted.
 
 ## 5. Realtime dashboard updates
 
@@ -113,7 +114,7 @@ The provider also polls `GET /api/locations?busId=...` every five seconds for th
 This checklist requires a configured Supabase project and a real device; it has **not** been executed in this repository:
 
 1. Deploy over HTTPS.
-2. Create admin and driver Auth users; assign roles and bus.
+2. Create admin and driver Auth users; assign roles and bus. Have transport staff verify pickup points and provision a reviewed route corridor first (see SETUP.md).
 3. Sign in as driver on the device.
 4. Start trip and confirm the server returns a UUID.
 5. Enable sharing and grant browser location permission.
@@ -129,6 +130,6 @@ This checklist requires a configured Supabase project and a real device; it has 
 
 - Browser GPS accuracy depends on device, satellite visibility, and OS permissions.
 - The app does not guarantee background GPS while the screen is locked; a native mobile app is better for production.
-- Polyline distance is not road distance; off-route rejection uses a corridor, not map matching.
+- The corridor must be a staff-verified trace; an OSRM estimate is not one. Off-route rejection uses polyline distance, not map matching or proof of the bus route.
 - Rate limiting is in-memory and should be distributed for production.
 - SMS/WhatsApp/push notification delivery is not implemented.

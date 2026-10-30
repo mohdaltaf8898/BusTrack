@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s · BusTrack",
   },
   description:
-    "BusTrack is a mobile-first college bus tracking prototype for Lords Institute of Engineering and Technology, Hyderabad.",
+    "Explore historical college bus routes and simulated tracking for Lords Institute of Engineering and Technology, Hyderabad.",
   applicationName: "BusTrack",
   manifest: "/manifest.webmanifest",
   appleWebApp: {

@@ -1,3 +1,4 @@
+import { sampleRoutes } from "@/data/routes";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import DashboardPage from "@/app/page";
@@ -48,9 +49,9 @@ describe("student dashboard flow", () => {
     renderWithProvider(<DashboardPage />);
 
     const routeSelect = await screen.findByLabelText("Selected bus route");
-    expect(routeSelect).toHaveValue("route-a");
-    expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-a");
-    expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", "17.341800");
+    expect(routeSelect).toHaveValue("route-01");
+    expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-01");
+    expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", sampleRoutes[0].shape[0].lat.toFixed(6));
 
     fireEvent.click(screen.getByRole("button", { name: /Add 5-min delay/i }));
     await waitFor(() => {
@@ -69,11 +70,11 @@ describe("student dashboard flow", () => {
       expect(screen.getByRole("button", { name: /^Start trip$/i })).toBeInTheDocument();
     });
 
-    fireEvent.change(routeSelect, { target: { value: "route-b" } });
+    fireEvent.change(routeSelect, { target: { value: "route-02" } });
     await waitFor(() => {
-      expect(routeSelect).toHaveValue("route-b");
-      expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-b");
-      expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", "17.341800");
+      expect(routeSelect).toHaveValue("route-02");
+      expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-02");
+      expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", sampleRoutes[1].shape[0].lat.toFixed(6));
     });
   });
 });

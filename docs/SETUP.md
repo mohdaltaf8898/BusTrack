@@ -1,93 +1,48 @@
 # Setup guide
 
-## 1. Credential-free demo (recommended first)
+## Credential-free demo
 
-1. Install Node.js 20.9+ and npm 10+.
-2. Run:
+Install Node 22 (or supported Node 20.9+/24), then run `npm ci` and `npm run dev`. Open `http://localhost:3000`. No `.env.local` or Supabase account is needed. The 16 stop lists/times are from the historical 2025–26 document; vehicles, positions, ETAs and alerts are simulated. Reset via Profile or remove the `bustrack:demo-state:v2` localStorage key.
 
-   ```bash
-   npm ci
-   npm run dev
-   ```
+## Optional Supabase project
 
-3. Open `http://localhost:3000`.
+This repository/deployment has **not** been connected to a Supabase project. Only configure an authorized test project; creating a project and enabling services may have account/tier limits or costs. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
 
-No `.env.local` is required. The app reads `data/routes.ts`, initializes three simulated routes, and stores demo role/admin/driver state in `localStorage`. All generated locations and timings are labelled simulated.
+### 1. Create project and apply SQL
 
-To reset the demo, open **Profile → Local demo reset**, or clear this browser key:
+1. Create a project in the Supabase dashboard and wait for it to finish provisioning.
+2. Open **SQL Editor**, paste and run the complete contents of these repository files, in this order:
+   - `supabase/migrations/20261027000000_init.sql`
+   - `supabase/migrations/20261030000000_published_routes.sql`
+   - `supabase/seed.sql`
+3. The seed adds 16 historical routes and placeholder `SIM-*` buses without overwriting matching rows. It contains no real driver identities or contacts. An older installation may still contain old demo routes; review and remove/migrate them deliberately after backing up, rather than deleting real records automatically.
+4. Check **Database → Publications → supabase_realtime** includes `bus_locations` and `notifications`. The initial migration tries to add them. If a table is absent, add only the missing table in the dashboard or SQL editor.
 
-```text
-bustrack.state.v1
-```
+The migrations create the schema, RLS policies, trip functions, nullable stop positions, historical time fields and the verified-route gate. The legacy `submit_bus_location` RPC is revoked from browser roles; the driver client uses the validated server API instead. The seed can be regenerated with `python3 scripts/generate_seed.py` after editing the source JSON.
 
-## 2. Optional Supabase project
+### 2. Create accounts and assign roles
 
-Only follow this section if you have an authorized Supabase project. The prototype remains fully functional without it.
-
-### 2.1 Create the project
-
-1. Create a project at Supabase.
-2. Open **Project Settings → API**.
-3. Copy:
-   - Project URL
-   - `anon` / `public` key
-   - `service_role` key (keep server-only)
-
-### 2.2 Apply SQL
-
-Run these files in the Supabase SQL editor in order:
-
-1. `supabase/migrations/20261027000000_init.sql`
-2. `supabase/seed.sql`
-
-Or use the Supabase CLI from the repository root:
-
-```bash
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-supabase db push
-```
-
-The migration creates tables, constraints, indexes, triggers, RLS policies, secure RPCs, and the `bus_location_health` view. It also attempts to add `bus_locations` and `notifications` to the `supabase_realtime` publication.
-
-### 2.3 Create Auth users and roles
-
-1. In Supabase **Authentication → Users**, create an admin user and at least one driver user.
-2. The `handle_new_user` trigger creates a `profiles` row with the default `student` role.
-3. Promote the users in SQL:
+1. In **Authentication → Users**, create test accounts for an admin, drivers and students. The `handle_new_user` trigger creates their `public.profiles` rows as students.
+2. In the trusted project SQL editor (database owner), use the UUIDs shown in Auth to promote the first admin and intended drivers. Replace the angle-bracket values locally; they are not real IDs:
 
    ```sql
-   update public.profiles set role = 'admin'
-   where id = '<ADMIN_AUTH_USER_UUID>';
-
-   update public.profiles set role = 'driver'
-   where id = '<DRIVER_AUTH_USER_UUID>';
-
-   update public.buses
-   set driver_id = '<DRIVER_AUTH_USER_UUID>'
-   where id = 'bus-bt01';
+   update public.profiles set role = 'admin' where id = '<ADMIN_AUTH_USER_UUID>';
+   update public.profiles set role = 'driver' where id = '<DRIVER_AUTH_USER_UUID>';
    ```
 
-4. Repeat bus assignment for other drivers as needed. A bus must have a driver profile before a real trip can start.
+   The trigger allows trusted database-owner bootstrap and blocks a normal student from promoting themself. Later role changes should be restricted to authorized admins. Confirm the updates affect the expected rows.
+3. Replace the `SIM-*` placeholder vehicle details with approved real records. Assign one authorized driver to the intended bus (replace both values):
 
-### 2.4 Enable Realtime
+   ```sql
+   update public.buses set driver_id = '<DRIVER_AUTH_USER_UUID>'
+   where id = '<BUS_ID>';
+   ```
 
-Check **Database → Publications → supabase_realtime**. If the tables are not listed, run:
+   The driver's profile must already have the `driver` role. Confirm `assigned_route_id` matches the route, and test each assignment. Do not import old phone numbers as current contact details.
 
-```sql
-alter publication supabase_realtime add table public.bus_locations;
-alter publication supabase_realtime add table public.notifications;
-```
+### 3. Configure local environment securely
 
-The client also polls `/api/locations` every five seconds for the selected bus, so a missed Realtime event should recover on the next poll.
-
-### 2.5 Configure environment
-
-```bash
-cp .env.example .env.local
-```
-
-Fill only these values:
+In Supabase **Project Settings → API / API Keys**, obtain the project URL, public anon key and server-side service-role key. Copy `.env.example` to `.env.local` and fill in:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -96,61 +51,35 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_SERVICE_ROLE_KEY
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Optional demo tuning:
+The first two values are public and rely on RLS. The service-role key bypasses RLS and must be kept **server-side only**; never use `NEXT_PUBLIC_` for it, commit it, share it in chat or put it in a browser. Restart the server after changing variables. `/api/config` can confirm that variables are present, not that integrations are operational.
 
-```dotenv
-NEXT_PUBLIC_SIMULATION_SPEED_MULTIPLIER=8
-NEXT_PUBLIC_STALE_LOCATION_SECONDS=45
-```
+For Vercel, add these values to the correct environment in Project Settings → Environment Variables and redeploy. In Supabase **Authentication → URL Configuration**, set the deployed HTTPS site URL and approved redirect URLs. Do not reuse production secrets in untrusted preview environments.
 
-Restart the dev server after changing environment variables. Next.js only inlines `NEXT_PUBLIC_*` variables at build/start time.
+### 4. Verify actual routes before GPS
 
-### 2.6 Verify
+The seed's approximate points and best-effort OSRM path are for the demo only. Real location writes return `409 ROUTE_NOT_VERIFIED` until transport staff have:
 
-```bash
-curl http://localhost:3000/api/config
-```
+1. Confirmed current route order, timetable and actual pickup coordinates, including previously unmapped stops.
+2. Supplied and reviewed the actual ordered route corridor, preferably an approved trace or surveyed route. The API accepts GPS only within 800 m of the stored corridor.
+3. Updated each stop's `latitude`/`longitude` (both present or both null), `scheduled_time` and source fields as appropriate. Coordinate/order changes invalidate verification automatically. Admin stop edits rebuild a straight line and also invalidate it.
+4. Stored the verified ordered `routes.shape` JSON array (`[{"lat":...,"lng":...}, ...]`) and the corresponding `stop_indices` array (one shape index per ordered stop, `-1` only for unmapped stops). After reviewing those values, a trusted operator can set that route's `geometry_source = 'verified'` in the same controlled SQL workflow. Set it **after** stop edits; do not mark an OSRM estimate or a straight-line seed as verified.
+5. Replaced simulation vehicles and assigned the correct drivers, then tested each authorized trip and reviewed GPS accuracy on a real device.
 
-Expected when fully configured:
+There is currently no trace-import UI; the route shape must be provisioned by a trusted operator. Use a private test project, back up data, and have the college validate the corridor before enabling actual tracking.
 
-```json
-{
-  "publicConfigured": true,
-  "serverConfigured": true,
-  "demoMode": false
-}
-```
+### 5. Verify the integration
 
-Expected in demo mode:
+- Sign in as the admin, driver and student accounts and confirm role boundaries. A demo role is not an Auth account.
+- On HTTPS, an assigned driver starts a server-authorized trip, enables sharing and explicitly grants device location permission. A student opening the site never starts the driver's GPS.
+- Verify database rows and a second signed-in student's view, and test sharing-off/end-trip, stale/off-route rejection and Realtime/polling. Live GPS is **not** proven merely by the config endpoint.
+- ETAs still use simulated traffic even with GPS, so **DEMO MODE** remains visible. Review [REAL_GPS.md](REAL_GPS.md), [SECURITY.md](SECURITY.md), and the manual checklist in [TESTING.md](TESTING.md).
 
-```json
-{
-  "publicConfigured": false,
-  "serverConfigured": false,
-  "demoMode": true
-}
-```
-
-Then sign in at `/login` with the admin user. The `/admin` page should show the backend data. Refresh backend data from the admin workspace if routes were added after the page loaded.
-
-## 3. Troubleshooting
-
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `/api/config` says `demoMode: true` | Missing service role key or public variables | Set all three Supabase variables and restart. |
-| Login form appears but API returns 503 | Public Auth is configured, server role key is not | Set `SUPABASE_SERVICE_ROLE_KEY` server-side only. |
-| Admin page says no routes | Seed not applied or RLS blocks read | Run `supabase/seed.sql`; check policies. |
-| Driver cannot start real trip | No driver profile, no bus assignment, or wrong route | Apply role/assignment SQL; verify bus route. |
-| GPS writes return 403 | Student role or unassigned driver | Use an assigned driver/admin Auth account. |
-| GPS writes return 422 | Stale timestamp or coordinates off route | Use current device time and verify route geometry. |
-| Realtime does not update | Tables missing from publication or RLS | Add publication tables; confirm authenticated session. |
-| Map tiles do not load | Network/blocked OSM tiles | Use the built-in schematic fallback or retry tiles. |
-| Stale demo state after code change | localStorage persisted old shapes | Use Profile → Local demo reset. |
-
-## 4. Safety notes
-
-- Do not commit `.env.local` or a service role key.
-- Do not expose the service role key through `NEXT_PUBLIC_*`.
-- Do not use real student/driver personal data in this prototype.
-- Do not claim real GPS, SMS, WhatsApp, or push delivery is operational unless the provider is configured and tested.
-- Do not deploy publicly or enable paid services without institutional authorization.
+| Symptom | What to check |
+| --- | --- |
+| `503 DEMO_MODE` | URL, anon key and server-only service key are all present; restart/redeploy. |
+| Cannot promote first admin | Run the update in the trusted database-owner SQL editor after both migrations; verify Auth user/profile exists. |
+| Driver cannot start a trip | Driver role, bus assignment, route and vehicle status. |
+| `409 ROUTE_NOT_VERIFIED` | Staff must supply and review a real corridor; never mark an estimate verified just to bypass the gate. |
+| `422` GPS rejection | Timestamp may be stale or the coordinate outside Hyderabad/800 m corridor; check device and verified trace. |
+| Missing live updates | Check sign-in, driver sharing, Realtime publication/RLS, network and polling. |
+| Road line is straight or tiles missing | OSRM/OSM may be unavailable; the labelled fallback is intentional. |

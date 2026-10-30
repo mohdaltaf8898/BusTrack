@@ -10,7 +10,6 @@ import {
   Gauge,
   GraduationCap,
   Home,
-  Info,
   LogIn,
   MapPinned,
   Menu,
@@ -21,11 +20,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
-import { DemoModeBadge, LiveDataTag } from "@/components/ui/labels";
+import { DemoModeBadge } from "@/components/ui/labels";
 import { Logo } from "@/components/brand";
 import { RouteSelector } from "@/components/route-selector";
 import { Alert, LoadingScreen, OfflineNotice } from "@/components/ui/feedback";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +101,6 @@ function NavLink({
 }
 
 function Sidebar({ pathname }: { pathname: string }) {
-  const { state, snapshot } = useApp();
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col border-r border-slate-200/80 bg-white/90 backdrop-blur-xl md:flex">
       <div className="px-5 py-5">
@@ -128,17 +125,9 @@ function Sidebar({ pathname }: { pathname: string }) {
         </nav>
       </div>
       <div className="border-t border-slate-100 p-4">
-        <div className="rounded-2xl bg-navy-50 p-3.5">
-          <div className="mb-2 flex items-center gap-2">
-            {snapshot.dataMode === "live" ? <LiveDataTag /> : <DemoModeBadge compact />}
-          </div>
-          <p className="text-[11px] font-semibold text-navy-800">
-            {state.backendMessage ?? "Local simulation active."}
-          </p>
-        </div>
-        <div className="mt-3 flex items-center gap-2 px-1 text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 px-1 text-[11px] text-slate-400">
           <GraduationCap className="h-4 w-4" aria-hidden="true" />
-          <span>LIET Hyderabad · Design Thinking prototype</span>
+          <span>LIET Hyderabad · Transport</span>
         </div>
       </div>
     </aside>
@@ -268,7 +257,7 @@ function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-  const { state, snapshot, unreadCount, clearError } = useApp();
+  const { state, unreadCount, clearError } = useApp();
   const pageTitle = titles[pathname] ?? "BusTrack";
 
   useEffect(() => {
@@ -295,7 +284,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <RouteSelector showLabel={false} compact />
             </div>
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-              {snapshot.dataMode === "live" ? <LiveDataTag /> : <DemoModeBadge compact />}
+              <DemoModeBadge compact />
               <Link
                 href="/notifications"
                 aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
@@ -329,12 +318,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomNav pathname={pathname} onMore={() => setMoreOpen(true)} />
       <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} pathname={pathname} />
-      <div className="pointer-events-none fixed bottom-24 right-3 z-30 hidden lg:block">
-        <Badge tone="blue" className="shadow-card">
-          <Info className="h-3 w-3" aria-hidden="true" />
-          Prototype · not official transport data
-        </Badge>
-      </div>
     </div>
   );
 }

@@ -90,7 +90,17 @@ export function calculateStopEtas({
   );
 
   return route.stops.map((stop, index) => {
-    const stopDistance = geometry.stopDistances[index] ?? 0;
+    const stopDistance = geometry.stopDistances[index];
+    if (stopDistance == null) {
+      return {
+        stop,
+        etaSeconds: null,
+        etaAt: null,
+        distanceMeters: null,
+        status: "unmapped" as const,
+        isSelected: stop.id === selectedStopId,
+      };
+    }
     const hasDeparted = simulation.distanceMeters > stopDistance + 35;
     const distanceMeters = Math.max(0, stopDistance - simulation.distanceMeters);
     const etaSeconds = hasDeparted
@@ -174,7 +184,10 @@ export function getProgressPercent(
 }
 
 export function describeEtaMethod(route: Route, traffic: TrafficCondition): string {
-  return `Estimated from ${route.averageSpeedKmh} km/h demo speed and polyline distance, reduced to ${Math.round(
+  const distance = route.geometrySource === "road"
+    ? "an estimated road-aligned route"
+    : "a straight-line preview (not road distance)";
+  return `Estimated from ${distance} at ${route.averageSpeedKmh} km/h, reduced to ${Math.round(
     route.averageSpeedKmh * traffic.factor,
-  )} km/h for simulated ${traffic.label.toLowerCase()} traffic. Straight-line distance is not road distance; this is an estimate, not a guarantee.`;
+  )} km/h for simulated ${traffic.label.toLowerCase()} traffic. This is not a live-traffic prediction or a guarantee.`;
 }

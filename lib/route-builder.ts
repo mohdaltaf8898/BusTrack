@@ -3,8 +3,13 @@ import type { Coordinates, Route, RouteStatus, Stop } from "@/lib/types";
 export interface RouteSeedStop {
   id: string;
   name: string;
-  coordinates: Coordinates;
+  /** Omitted coordinates are never replaced with invented stop positions. */
+  coordinates: Coordinates | null;
   landmark?: string;
+  scheduledTime?: string | null;
+  locationSource?: string | null;
+  locationReference?: string | null;
+  note?: string | null;
 }
 
 export interface RouteSeed {
@@ -18,9 +23,12 @@ export interface RouteSeed {
   color: string;
   averageSpeedKmh: number;
   estimatedDurationMinutes: number;
+  scheduledDurationMinutes?: number | null;
+  scheduleYear?: string | null;
+  geometrySource?: Route["geometrySource"];
   status: RouteStatus;
   stops: RouteSeedStop[];
-  /** One array of intermediate shape points between each consecutive stop pair. */
+  /** Intermediate shape points between consecutive mapped stop pairs. */
   legs: Coordinates[][];
 }
 
@@ -29,32 +37,41 @@ function samePoint(a: Coordinates, b: Coordinates) {
 }
 
 export function buildRoute(seed: RouteSeed): Route {
-  if (seed.stops.length < 2) {
-    throw new Error(`Route ${seed.id} needs at least two stops.`);
-  }
+  if (seed.stops.length < 2) throw new Error(`Route ${seed.id} needs at least two stops.`);
   if (seed.legs.length !== seed.stops.length - 1) {
     throw new Error(`Route ${seed.id} needs one leg per stop-to-stop segment.`);
   }
 
-  const shape: Coordinates[] = [seed.stops[0].coordinates];
-  const stopIndices: number[] = [0];
-
-  for (let legIndex = 0; legIndex < seed.legs.length; legIndex += 1) {
-    for (const via of seed.legs[legIndex]) {
-      if (!samePoint(shape[shape.length - 1], via)) shape.push(via);
+  const shape: Coordinates[] = [];
+  const stopIndices: number[] = [];
+  seed.stops.forEach((stop, index) => {
+    if (!stop.coordinates) {
+      stopIndices.push(-1);
+      return;
     }
-    const destination = seed.stops[legIndex + 1].coordinates;
-    if (!samePoint(shape[shape.length - 1], destination)) shape.push(destination);
+    if (index > 0 && seed.stops[index - 1].coordinates && shape.length > 0) {
+      for (const via of seed.legs[index - 1]) {
+        if (!samePoint(shape[shape.length - 1], via)) shape.push(via);
+      }
+    }
+    if (shape.length === 0 || !samePoint(shape[shape.length - 1], stop.coordinates)) {
+      shape.push(stop.coordinates);
+    }
     stopIndices.push(shape.length - 1);
-  }
+  });
+  if (shape.length < 2) throw new Error(`Route ${seed.id} needs two mapped locations.`);
 
   const stops: Stop[] = seed.stops.map((stop, index) => ({
     id: stop.id,
     name: stop.name,
-    lat: stop.coordinates.lat,
-    lng: stop.coordinates.lng,
+    lat: stop.coordinates?.lat ?? null,
+    lng: stop.coordinates?.lng ?? null,
     order: index + 1,
     landmark: stop.landmark,
+    scheduledTime: stop.scheduledTime ?? null,
+    locationSource: stop.locationSource ?? null,
+    locationReference: stop.locationReference ?? null,
+    note: stop.note ?? null,
   }));
 
   return {
@@ -68,6 +85,9 @@ export function buildRoute(seed: RouteSeed): Route {
     stops,
     shape,
     stopIndices,
+    geometrySource: seed.geometrySource ?? "straight",
+    scheduleYear: seed.scheduleYear,
+    scheduledDurationMinutes: seed.scheduledDurationMinutes,
     color: seed.color,
     averageSpeedKmh: seed.averageSpeedKmh,
     estimatedDurationMinutes: seed.estimatedDurationMinutes,

@@ -125,9 +125,8 @@ export function apiErrorResponse(error: unknown) {
       status: error.status,
     };
   }
-  const message = error instanceof Error ? error.message : "Unexpected server error.";
   return {
-    body: { error: "The request could not be completed safely.", detail: message },
+    body: { error: "The request could not be completed safely." },
     status: 500,
   };
 }

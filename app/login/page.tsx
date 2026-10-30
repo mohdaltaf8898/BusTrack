@@ -98,7 +98,7 @@ export default function LoginPage() {
       <PageHeader
         eyebrow="Account"
         title="Login & role access"
-        description="Use Supabase Auth when configured, or choose a clearly labelled local demo role for the prototype."
+        description="Sign in when authentication is configured, or choose a local demo role."
         actions={config.demoMode ? <DemoModeBadge /> : <Badge tone="green" dot>Supabase Auth</Badge>}
       />
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
         </Alert>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
@@ -192,8 +192,7 @@ export default function LoginPage() {
             ) : (
               <div className="space-y-4">
                 <Alert tone="info" title="Credential-free mode">
-                  No Supabase public credentials were found. The form is disabled; all screens below work with local
-                  sample data.
+                  Authentication is not configured. You can explore the app with local simulated data.
                 </Alert>
                 <div className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                   <p className="font-bold text-navy-950">To enable real authentication:</p>
@@ -201,7 +200,7 @@ export default function LoginPage() {
                     <li>Copy <code>.env.example</code> to <code>.env.local</code>.</li>
                     <li>Set <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.</li>
                     <li>Set server-only <code>SUPABASE_SERVICE_ROLE_KEY</code> for API authorization.</li>
-                    <li>Apply the migration and seed profiles, routes, buses and stops.</li>
+                    <li>Apply both migrations and the route seed; create profiles through Supabase Auth.</li>
                   </ol>
                 </div>
               </div>

@@ -1,28 +1,13 @@
-# Supabase SQL
+# Optional Supabase schema
 
-This folder contains the optional backend definition for BusTrack. The app works fully without these files; they enable server-authorized real GPS, Supabase Auth roles, Realtime location updates, and persistent admin data.
+Apply in this order using the trusted SQL editor:
 
-## Files
+1. `migrations/20261027000000_init.sql` — tables, constraints, indexes, RLS, trip functions and Realtime publication.
+2. `migrations/20261030000000_published_routes.sql` — nullable stop coordinates, timetable/provenance fields, verification invalidation, safe admin bootstrap and revocation of the legacy GPS RPC.
+3. `seed.sql` — insert-only historical 2025–26 routes, stops and placeholder `SIM-*` vehicles; no real contacts or credentials. Existing rows are not overwritten or automatically deleted.
 
-- `migrations/20261027000000_init.sql` — tables, constraints, indexes, triggers, RLS policies, health view, secure RPCs, and Realtime publication setup.
-- `seed.sql` — three sample Hyderabad-area routes, their ordered stops, and three buses. No credentials, real contacts, or personal data are included.
+`python3 scripts/generate_seed.py` regenerates the seed from `data/lords-routes-2025-26.json`. The timetable is historical and unverified as current. Contains data provided by TGSRTC; mapped locations are approximate and the seed geometry is not an authorized GPS corridor.
 
-## Apply order
+The location API accepts GPS only on a staff-verified corridor; editing stop positions/order invalidates that verification. Direct client inserts to `bus_locations` and execution of the older, weaker `submit_bus_location` RPC are revoked. Students cannot change their own roles. Real Auth, Realtime, hosted RLS and driver-device GPS remain unconfigured and untested here.
 
-1. `migrations/20261027000000_init.sql`
-2. `seed.sql`
-3. Role/assignment SQL from [`docs/SETUP.md`](../docs/SETUP.md)
-
-Do not run `seed.sql` before the migration. Re-running the seed is safe: it uses `ON CONFLICT` upserts.
-
-## Important design choices
-
-- `profiles.role` defaults to `student`; a trigger prevents non-admins from escalating their own role.
-- `trips` and `bus_locations` have no direct client write grants; writes flow through validated API routes or security-definer RPCs.
-- Only one active trip per bus is allowed by a partial unique index.
-- `bus_locations` RLS exposes only active-trip, own-driver, recent-completed-trip, or admin-readable positions.
-- `bus_location_health` uses `security_invoker = true` so the view cannot bypass RLS.
-- Realtime is enabled for `bus_locations` and `notifications` if the `supabase_realtime` publication exists.
-- Coordinates are approximate prototype geometry, not verified road routes or official college bus paths.
-
-For the full security model, see [`docs/SECURITY.md`](../docs/SECURITY.md). For real GPS authorization and validation, see [`docs/REAL_GPS.md`](../docs/REAL_GPS.md).
+See [SETUP.md](../docs/SETUP.md), [SECURITY.md](../docs/SECURITY.md), and [REAL_GPS.md](../docs/REAL_GPS.md) before connecting a project or collecting real locations.

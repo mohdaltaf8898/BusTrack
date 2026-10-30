@@ -48,6 +48,7 @@ export function RoutePreview({
         <polyline points={path} fill="none" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
         <polyline points={path} fill="none" stroke={route.color} strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" />
         {route.stops.map((stop, index) => {
+          if (stop.lat == null || stop.lng == null) return null;
           const point = project({ lat: stop.lat, lng: stop.lng });
           const selected = stop.id === selectedStopId;
           return (

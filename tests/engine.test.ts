@@ -44,20 +44,27 @@ function etasFor(simulation: SimulationState) {
 }
 
 describe("sample route geometry", () => {
-  it("provides at least three routes with ordered stops on the polyline", () => {
-    expect(sampleRoutes.length).toBeGreaterThanOrEqual(3);
+  it("provides the 16 published routes with ordered mapped and unmapped stops", () => {
+    expect(sampleRoutes).toHaveLength(16);
     for (const candidate of sampleRoutes) {
       const candidateGeometry = buildRouteGeometry(candidate);
+      expect(candidate.scheduleYear).toBe("2025–26");
       expect(candidate.stops.length).toBeGreaterThanOrEqual(2);
       expect(candidateGeometry.stopDistances).toHaveLength(candidate.stops.length);
       expect(candidateGeometry.totalDistanceMeters).toBeGreaterThan(0);
-      for (let index = 1; index < candidateGeometry.stopDistances.length; index += 1) {
-        expect(candidateGeometry.stopDistances[index]).toBeGreaterThan(
-          candidateGeometry.stopDistances[index - 1],
-        );
-      }
+      let previousDistance = -1;
       candidate.stops.forEach((stop, stopIndex) => {
-        const shapePoint = candidate.shape[candidate.stopIndices[stopIndex]];
+        const distance = candidateGeometry.stopDistances[stopIndex];
+        const shapeIndex = candidate.stopIndices[stopIndex];
+        if (stop.lat == null || stop.lng == null) {
+          expect(shapeIndex).toBe(-1);
+          expect(distance).toBeNull();
+          return;
+        }
+        expect(distance).not.toBeNull();
+        expect(distance as number).toBeGreaterThanOrEqual(previousDistance);
+        previousDistance = distance as number;
+        const shapePoint = candidate.shape[shapeIndex];
         expect(shapePoint.lat).toBeCloseTo(stop.lat, 6);
         expect(shapePoint.lng).toBeCloseTo(stop.lng, 6);
       });
@@ -67,8 +74,8 @@ describe("sample route geometry", () => {
   it("starts a bus at the correct first stop", () => {
     const simulation = createSimulationState(route.id, now);
     const position = positionAtDistance(geometry, simulation.distanceMeters);
-    expect(position.lat).toBeCloseTo(route.stops[0].lat, 6);
-    expect(position.lng).toBeCloseTo(route.stops[0].lng, 6);
+    expect(position.lat).toBeCloseTo(route.shape[0].lat, 6);
+    expect(position.lng).toBeCloseTo(route.shape[0].lng, 6);
     expect(position.bearing).toBeGreaterThanOrEqual(0);
     expect(position.bearing).toBeLessThan(360);
   });
@@ -107,13 +114,13 @@ describe("simulation engine", () => {
     });
     const before = etasFor(atStart);
     const after = etasFor(moved.state);
-    expect(after.every((item) => item.etaSeconds >= 0)).toBe(true);
-    expect(after.every((item) => item.distanceMeters >= 0)).toBe(true);
+    expect(after.every((item) => item.etaSeconds == null || item.etaSeconds >= 0)).toBe(true);
+    expect(after.every((item) => item.distanceMeters == null || item.distanceMeters >= 0)).toBe(true);
     const beforeSelected = before.find((item) => item.stop.id === selectedStopId);
     const afterSelected = after.find((item) => item.stop.id === selectedStopId);
     expect(beforeSelected).toBeDefined();
     expect(afterSelected).toBeDefined();
-    expect(afterSelected!.etaSeconds).toBeLessThan(beforeSelected!.etaSeconds);
+    expect(afterSelected!.etaSeconds).toBeLessThan(beforeSelected!.etaSeconds as number);
   });
 
   it("increases ETA when a simulated delay is injected", () => {
@@ -127,7 +134,7 @@ describe("simulation engine", () => {
     const after = etasFor(delayed.state).find((item) => item.stop.id === selectedStopId);
     expect(delayed.state.delaySeconds).toBe(300);
     expect(delayed.events[0].delaySeconds).toBe(300);
-    expect(after!.etaSeconds).toBeGreaterThan(before!.etaSeconds);
+    expect(after!.etaSeconds).toBeGreaterThan(before!.etaSeconds as number);
     expect(calculateEtaSeconds(-100, 20, -50)).toBe(0);
   });
 

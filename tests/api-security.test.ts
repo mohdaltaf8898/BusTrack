@@ -34,7 +34,7 @@ describe("credential-free backend behavior", () => {
   it("rejects GPS submissions without a token and reports demo mode when credentials are incomplete", async () => {
     const unauthenticated = await locationsPost(
       jsonRequest("/api/locations", {
-        busId: "bus-bt01",
+        busId: "bus-sim01",
         tripId: "00000000-0000-4000-8000-000000000001",
         latitude: 17.3418,
         longitude: 78.368,
@@ -49,7 +49,7 @@ describe("credential-free backend behavior", () => {
       jsonRequest(
         "/api/locations",
         {
-          busId: "bus-bt01",
+          busId: "bus-sim01",
           tripId: "00000000-0000-4000-8000-000000000001",
           latitude: 17.3418,
           longitude: 78.368,
@@ -66,10 +66,10 @@ describe("credential-free backend behavior", () => {
 
   it("protects trip, admin and location read endpoints from anonymous requests", async () => {
     const [tripResponse, adminMutation, adminRead, locationRead] = await Promise.all([
-      tripsPost(jsonRequest("/api/trips", { action: "start", busId: "bus-bt01", routeId: "route-a" })),
+      tripsPost(jsonRequest("/api/trips", { action: "start", busId: "bus-sim01", routeId: "route-01" })),
       adminPost(jsonRequest("/api/admin", { resource: "buses", action: "create", data: {} })),
       adminGet(new Request(`${baseUrl}/api/admin`)),
-      locationsGet(new Request(`${baseUrl}/api/locations?busId=bus-bt01`)),
+      locationsGet(new Request(`${baseUrl}/api/locations?busId=bus-sim01`)),
     ]);
     expect(tripResponse.status).toBe(401);
     expect(adminMutation.status).toBe(401);
@@ -86,7 +86,7 @@ describe("GPS payload, timing and route validation", () => {
   it("rejects invalid coordinates, stale timestamps and future timestamps", () => {
     expect(
       locationPayloadSchema.safeParse({
-        busId: "bus-bt01",
+        busId: "bus-sim01",
         tripId: "00000000-0000-4000-8000-000000000001",
         latitude: 200,
         longitude: 78.368,
@@ -119,7 +119,7 @@ describe("GPS payload, timing and route validation", () => {
       adminMutationSchema.safeParse({
         resource: "buses",
         action: "delete",
-        id: "bus-bt01",
+        id: "bus-sim01",
         unexpected: true,
       }).success,
     ).toBe(false);

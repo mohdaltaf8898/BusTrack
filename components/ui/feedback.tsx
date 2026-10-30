@@ -30,7 +30,7 @@ export function LoadingScreen() {
       </div>
       <Skeleton className="h-44 w-full rounded-3xl" />
       <Skeleton className="h-[320px] w-full rounded-3xl" />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Skeleton className="h-64 rounded-3xl" />
         <Skeleton className="h-64 rounded-3xl" />
       </div>

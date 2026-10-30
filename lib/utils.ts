@@ -1,7 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
+/** Let component variants override defaults without conflicting Tailwind classes. */
 export function cn(...inputs: ClassValue[]) {
-  return clsx(inputs);
+  return twMerge(clsx(inputs));
 }
 
 export function makeId(prefix: string) {

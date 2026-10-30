@@ -12,7 +12,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { demoUsers } from "@/data/routes";
+import { demoUsers, sampleRoutes } from "@/data/routes";
+import { routeCoordinateKey, type RoadGeometry } from "@/lib/road-routing";
 import {
   APP_STORAGE_KEY,
   appReducer,
@@ -231,6 +232,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     nextState = { ...nextState, isOnline: navigator.onLine !== false };
     dispatch({ type: "HYDRATE", state: nextState });
   }, []);
+
+  useEffect(() => {
+    if (!state.hydrated || !state.isOnline) return;
+    const route = state.routes.find((item) => item.id === state.selectedRouteId);
+    if (!route || route.geometrySource !== "straight") return;
+    const published = sampleRoutes.find((item) => item.id === route.id);
+    // Never replace a staff-edited route with geometry for old coordinates.
+    if (!published || routeCoordinateKey(route) !== routeCoordinateKey(published)) return;
+    const controller = new AbortController();
+    void fetch(`/api/road-route?routeId=${encodeURIComponent(route.id)}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const geometry = (await response.json()) as RoadGeometry;
+        if (!controller.signal.aborted) {
+          dispatch({ type: "SET_ROAD_GEOMETRY", routeId: route.id, geometry });
+        }
+      })
+      .catch(() => { /* The labelled straight-line preview is the fallback. */ });
+    return () => controller.abort();
+  }, [state.hydrated, state.isOnline, state.selectedRouteId, state.routes]);
 
   useEffect(() => {
     const update = () => dispatch({ type: "SET_ONLINE", value: navigator.onLine });

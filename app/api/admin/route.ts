@@ -97,14 +97,18 @@ async function syncRouteGeometry(client: SupabaseClient, routeId: string) {
   if (!stops || stops.length < 2) {
     throw new ApiError(400, "TOO_FEW_STOPS", "A route must keep at least two stops.");
   }
-  const shape = stops.map((stop) => ({
-    lat: Number(stop.latitude),
-    lng: Number(stop.longitude),
-  }));
-  const stopIndices = stops.map((_, index) => index);
+  const shape: Coordinates[] = [];
+  const stopIndices = stops.map((stop) => {
+    if (stop.latitude == null || stop.longitude == null) return -1;
+    shape.push({ lat: Number(stop.latitude), lng: Number(stop.longitude) });
+    return shape.length - 1;
+  });
+  if (shape.length < 2) {
+    throw new ApiError(400, "TOO_FEW_MAPPED_STOPS", "A route needs at least two mapped stops.");
+  }
   const { error: updateError } = await client
     .from("routes")
-    .update({ shape, stop_indices: stopIndices })
+    .update({ shape, stop_indices: stopIndices, geometry_source: "straight" })
     .eq("id", routeId);
   throwOnDbError(updateError, "Could not synchronize route geometry.");
 }
@@ -123,28 +127,30 @@ async function loadAdminData(request: Request) {
     client
       .from("routes")
       .select(
-        "id,code,route_name,start_location,destination,bus_number,description,average_speed_kmh,estimated_duration_minutes,status,color,shape,stop_indices",
+        "id,code,route_name,start_location,destination,bus_number,description,average_speed_kmh,estimated_duration_minutes,status,color,shape,stop_indices,geometry_source,schedule_year,scheduled_duration_minutes",
       )
       .order("code"),
     client
       .from("stops")
-      .select("id,route_id,stop_name,latitude,longitude,stop_order")
+      .select("id,route_id,stop_name,latitude,longitude,stop_order,scheduled_time,location_source,location_reference,note")
       .order("stop_order"),
     client
       .from("buses")
       .select("id,bus_number,assigned_route_id,driver_id,capacity,status,model,service_availability")
       .order("bus_number"),
-    client
-      .from("trips")
-      .select("id,bus_id,route_id,driver_id,started_at,ended_at,status,sharing_enabled,last_location_at")
-      .order("started_at", { ascending: false })
-      .limit(50),
-    client
-      .from("delay_reports")
-      .select("id,bus_id,route_id,delay_seconds,reason,created_at")
-      .order("created_at", { ascending: false })
-      .limit(50),
-    client.from("bus_location_health").select("*"),
+    auth
+      ? client.from("trips")
+          .select("id,bus_id,route_id,driver_id,started_at,ended_at,status,sharing_enabled,last_location_at")
+          .order("started_at", { ascending: false }).limit(50)
+      : Promise.resolve({ data: [], error: null }),
+    auth
+      ? client.from("delay_reports")
+          .select("id,bus_id,route_id,delay_seconds,reason,created_at")
+          .order("created_at", { ascending: false }).limit(50)
+      : Promise.resolve({ data: [], error: null }),
+    auth?.profile.role === "admin"
+      ? client.from("bus_location_health").select("*")
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
   throwOnDbError(routesResult.error, "Could not read routes.");
@@ -167,6 +173,9 @@ async function loadAdminData(request: Request) {
     color: row.color,
     shape: asShape(row.shape),
     stop_indices: asIndices(row.stop_indices),
+    geometry_source: row.geometry_source,
+    schedule_year: row.schedule_year,
+    scheduled_duration_minutes: row.scheduled_duration_minutes,
   }));
   const stops = (stopsResult.data ?? []) as BackendStopRow[];
   const buses = (busesResult.data ?? []) as BackendBusRow[];
@@ -364,11 +373,14 @@ async function mutateStop(
     if (!id) throw new ApiError(400, "MISSING_ID", "A stop ID is required.");
     const { data: existing, error: countError } = await client
       .from("stops")
-      .select("id")
+      .select("id,latitude,longitude")
       .eq("route_id", routeId);
     throwOnDbError(countError, "Could not count stops.");
     if (!existing || existing.length <= 2) {
       throw new ApiError(400, "TOO_FEW_STOPS", "A route must keep at least two stops.");
+    }
+    if (existing.filter((stop) => stop.id !== id && stop.latitude != null && stop.longitude != null).length < 2) {
+      throw new ApiError(400, "TOO_FEW_MAPPED_STOPS", "A route needs at least two mapped stops.");
     }
     const { error } = await client.from("stops").delete().eq("id", id).eq("route_id", routeId);
     throwOnDbError(error, "Could not delete stop.");
@@ -384,6 +396,8 @@ async function mutateStop(
     latitude: input.lat,
     longitude: input.lng,
     stop_order: input.order,
+    location_source: "Admin-entered; verification required",
+    location_reference: null,
   };
   const query = action === "create"
     ? client.from("stops").insert({ id: stopId, ...row })

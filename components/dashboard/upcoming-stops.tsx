@@ -20,11 +20,12 @@ const statusMeta: Record<
   approaching: { label: "Approaching", tone: "amber", dot: "bg-amber-500" },
   upcoming: { label: "Upcoming", tone: "violet", dot: "bg-violet-500" },
   completed: { label: "Trip ended", tone: "green", dot: "bg-emerald-500" },
+  unmapped: { label: "Location pending", tone: "neutral", dot: "bg-slate-300" },
 };
 
 export function UpcomingStops({ limit = 5 }: { limit?: number }) {
   const { snapshot, selectStop } = useApp();
-  const stops = snapshot.stopEtas.slice(0, limit);
+  const stops = snapshot.stopEtas.filter((item) => item.status !== "departed").slice(0, limit);
 
   return (
     <Card className="h-full">
@@ -90,13 +91,13 @@ export function UpcomingStops({ limit = 5 }: { limit?: number }) {
                       <p className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
                         <span className="inline-flex items-center gap-1">
                           <MapPin className="h-3 w-3" aria-hidden="true" />
-                          {formatDistance(item.distanceMeters)} away
+                          {item.distanceMeters == null ? "Location not mapped" : `${formatDistance(item.distanceMeters)} away`}
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Clock3 className="h-3 w-3" aria-hidden="true" />
                           {item.status === "departed"
                             ? "Passed"
-                            : `${formatClock(item.etaAt)} IST`}
+                            : item.etaAt == null ? "ETA unavailable" : `${formatClock(item.etaAt)} IST`}
                         </span>
                       </p>
                     </div>

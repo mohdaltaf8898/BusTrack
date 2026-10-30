@@ -243,7 +243,7 @@ export function AdminDashboard() {
 
   const renderOverview = () => (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Routes", value: state.routes.length, Icon: RouteIcon, tone: "bg-brand-50 text-brand-700" },
           { label: "Buses", value: state.buses.length, Icon: BusFront, tone: "bg-emerald-50 text-emerald-700" },
@@ -264,7 +264,7 @@ export function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
             <div>
@@ -406,7 +406,7 @@ export function AdminDashboard() {
         cell: (bus) =>
           state.drivers.find((driver) => driver.id === bus.driverId)?.name ?? "Unassigned",
       },
-      { key: "capacity", header: "Capacity", cell: (bus) => `${bus.capacity} seats` },
+      { key: "capacity", header: "Capacity", cell: (bus) => bus.capacity == null ? "Not provided" : `${bus.capacity} seats` },
       { key: "status", header: "Status", cell: (bus) => badgeForStatus(bus.status) },
       { key: "model", header: "Model", cell: (bus) => bus.model, hideOnMobile: true },
     ];
@@ -475,7 +475,7 @@ export function AdminDashboard() {
       { key: "stops", header: "Stops", cell: (route) => route.stops.length },
       {
         key: "duration",
-        header: "Duration",
+        header: "Simulation duration",
         cell: (route) => `${route.estimatedDurationMinutes} min`,
       },
       { key: "status", header: "Status", cell: (route) => badgeForStatus(route.status) },
@@ -485,7 +485,7 @@ export function AdminDashboard() {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle>Routes</CardTitle>
-            <p className="mt-1 text-xs text-slate-500">Metadata and status for every sample route.</p>
+            <p className="mt-1 text-xs text-slate-500">Metadata and status for each configured route.</p>
           </div>
           <Button onClick={() => setForm({ type: "route", editing: null })}>
             <Plus className="h-4 w-4" /> Add route
@@ -557,7 +557,7 @@ export function AdminDashboard() {
         header: "Coordinates",
         cell: (stop) => (
           <span className="font-mono text-xs">
-            {stop.lat.toFixed(5)}, {stop.lng.toFixed(5)}
+            {stop.lat == null || stop.lng == null ? "Not mapped" : `${stop.lat.toFixed(5)}, ${stop.lng.toFixed(5)}`}
           </span>
         ),
       },
@@ -951,7 +951,7 @@ export function AdminDashboard() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
               { label: "Fresh", value: healthRows.filter((row) => row.condition === "Fresh").length, tone: "bg-emerald-50 text-emerald-700" },
               { label: "Stale", value: healthRows.filter((row) => row.condition === "Stale").length, tone: "bg-amber-50 text-amber-700" },

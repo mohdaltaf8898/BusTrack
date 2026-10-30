@@ -43,7 +43,7 @@ export interface RouteSnapshot {
   busStatus: BusStatus;
   progressPercent: number;
   lastUpdateAt: number;
-  dataMode: "live" | "simulation";
+  dataMode: "live" | "simulation" | "last-known";
   sourceLabel: "Device GPS" | "Last known GPS" | "Simulated";
 }
 
@@ -172,11 +172,9 @@ export function deriveRouteSnapshot(
     busStatus,
     progressPercent: getProgressPercent(geometry, effectiveDistanceMeters),
     lastUpdateAt: etaSimulation.lastUpdateAt,
-    dataMode: isLiveData ? "live" : "simulation",
-    sourceLabel: isLiveData
-      ? "Device GPS"
-      : remoteLocation
-        ? "Last known GPS"
-        : "Simulated",
+    dataMode: remoteLocation?.source === "gps" ? (isLiveData ? "live" : "last-known") : "simulation",
+    sourceLabel: remoteLocation?.source === "gps"
+      ? (isLiveData ? "Device GPS" : "Last known GPS")
+      : "Simulated",
   };
 }

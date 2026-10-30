@@ -26,7 +26,7 @@ if (!globalThis.crypto.randomUUID) {
   });
 }
 
-if (!window.matchMedia) {
+if (typeof window !== "undefined" && !window.matchMedia) {
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
     matches: false,
     media: query,
@@ -41,5 +41,5 @@ if (!window.matchMedia) {
 
 afterEach(() => {
   cleanup();
-  window.localStorage.clear();
+  if (typeof window !== "undefined") window.localStorage.clear();
 });

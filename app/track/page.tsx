@@ -23,6 +23,7 @@ import { bearingToCompass } from "@/lib/geo";
 import { PageHeader } from "@/components/page-header";
 import { RouteSelector } from "@/components/route-selector";
 import { LiveMap } from "@/components/maps/live-map";
+import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { SimulationControls } from "@/components/dashboard/simulation-controls";
 import { UpcomingStops } from "@/components/dashboard/upcoming-stops";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ export default function TrackPage() {
             </Alert>
           )}
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card className="overflow-hidden">
               <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
                 <div>
@@ -92,6 +93,7 @@ export default function TrackPage() {
                   onSelectStop={selectStop}
                   className="h-[430px] sm:h-[520px] lg:h-[590px]"
                 />
+                <RouteAccuracyNote route={snapshot.route} />
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
                   <span className="inline-flex items-center gap-1.5">
                     <Compass className="h-3.5 w-3.5" aria-hidden="true" />
@@ -132,12 +134,14 @@ export default function TrackPage() {
                   <div className="rounded-2xl bg-navy-950 p-4 text-white">
                     <p className="text-xs font-semibold text-brand-200">Estimated arrival</p>
                     <p className="mt-1 text-4xl font-extrabold">
-                      {snapshot.busStatus === "offline" ? "Paused" : formatEta(snapshot.selectedStopEta.etaSeconds)}
+                      {snapshot.selectedStopEta.status === "unmapped" ? "Unavailable" : snapshot.busStatus === "offline" ? "Paused" : formatEta(snapshot.selectedStopEta.etaSeconds)}
                     </p>
                     <p className="mt-1 text-xs text-white/60">
-                      {snapshot.busStatus === "offline"
-                        ? "Waiting for a fresh location update."
-                        : `Around ${formatClock(snapshot.selectedStopEta.etaAt)} IST`}
+                      {snapshot.selectedStopEta.status === "unmapped"
+                        ? "This stop needs verified coordinates before an ETA can be calculated."
+                        : snapshot.busStatus === "offline"
+                          ? "Waiting for a fresh location update."
+                          : `Around ${formatClock(snapshot.selectedStopEta.etaAt)} IST`}
                     </p>
                     <div className="mt-4 flex items-center justify-between text-[11px] text-white/60">
                       <span>{formatDistance(snapshot.selectedStopEta.distanceMeters)} to stop</span>
@@ -239,7 +243,7 @@ export default function TrackPage() {
             </div>
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
             <SimulationControls />
             <UpcomingStops limit={7} />
           </div>

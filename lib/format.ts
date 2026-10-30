@@ -23,8 +23,8 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   timeZone: TIME_ZONE,
 });
 
-export function formatDistance(meters: number): string {
-  if (!Number.isFinite(meters)) return "—";
+export function formatDistance(meters: number | null): string {
+  if (meters == null || !Number.isFinite(meters)) return "—";
   if (meters < 1000) return `${Math.max(0, Math.round(meters / 10) * 10)} m`;
   return `${(meters / 1000).toFixed(meters < 10_000 ? 1 : 0)} km`;
 }
@@ -39,12 +39,13 @@ export function formatDuration(seconds: number): string {
   return minutes === 0 ? `${hours} hr` : `${hours} hr ${minutes} min`;
 }
 
-export function formatEta(seconds: number): string {
+export function formatEta(seconds: number | null): string {
+  if (seconds == null) return "Unavailable";
   if (seconds <= 30) return "Arriving";
   return formatDuration(seconds);
 }
 
-export function formatClock(timestamp: number | string | Date): string {
+export function formatClock(timestamp: number | string | Date | null): string {
   if (!timestamp) return "—";
   return clockFormatter.format(new Date(timestamp));
 }
@@ -57,6 +58,14 @@ export function formatDateTime(timestamp: number | string | Date): string {
 export function formatDate(timestamp: number | string | Date): string {
   if (!timestamp) return "—";
   return dateFormatter.format(new Date(timestamp));
+}
+
+/** Time printed in the source timetable, independent of the viewer's timezone. */
+export function formatScheduledTime(value: string | null | undefined): string {
+  if (!value || !/^\d{2}:\d{2}(?::\d{2})?$/.test(value)) return "Not listed";
+  const [hour, minute] = value.split(":").map(Number);
+  if (hour > 23 || minute > 59) return "Not listed";
+  return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
 }
 
 export function formatRelativeTime(timestamp: number, now: number): string {

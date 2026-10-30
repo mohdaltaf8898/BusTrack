@@ -14,7 +14,6 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SimulatedTag } from "@/components/ui/labels";
 import { cn } from "@/lib/utils";
 
 const actionStyles =
@@ -29,7 +28,6 @@ export function QuickActions() {
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle>Quick actions</CardTitle>
-          <SimulatedTag label="Demo" />
         </div>
       </CardHeader>
       <CardContent>
@@ -43,7 +41,7 @@ export function QuickActions() {
           >
             <span className="flex items-center justify-between w-full">
               <Navigation className="h-5 w-5 text-brand-300" aria-hidden="true" />
-              <span className="text-[10px] font-bold uppercase tracking-wide text-white/45">Live</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-white/45">Map</span>
             </span>
             <span>
               <span className="block text-sm font-extrabold">Track Bus</span>

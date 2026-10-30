@@ -113,11 +113,16 @@ export async function POST(request: Request) {
 
     const { data: route, error: routeError } = await client
       .from("routes")
-      .select("id,shape")
+      .select("id,shape,geometry_source")
       .eq("id", trip.route_id)
       .maybeSingle();
     if (routeError || !route) {
       throw new ApiError(404, "ROUTE_NOT_FOUND", "The configured route was not found.");
+    }
+    // Inferred catalogue/OSRM geometry is for simulation only. An operator must
+    // verify and store a route corridor before accepting real driver positions.
+    if (route.geometry_source !== "verified") {
+      throw new ApiError(409, "ROUTE_NOT_VERIFIED", "This route needs a verified GPS corridor before live location sharing can be used.");
     }
     const shape = Array.isArray(route.shape) ? (route.shape as Coordinates[]) : [];
     const gps = validateGpsPoint(payload.latitude, payload.longitude, shape);

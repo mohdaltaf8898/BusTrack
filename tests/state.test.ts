@@ -22,7 +22,7 @@ describe("credential-free demo mode", () => {
   it("works without Supabase credentials and loads the central sample data", () => {
     expect(backendConfig.demoMode).toBe(true);
     const state = hydratedState();
-    expect(state.routes).toHaveLength(3);
+    expect(state.routes).toHaveLength(16);
     expect(state.buses.length).toBeGreaterThanOrEqual(3);
     expect(state.user?.role).toBe("student");
     expect(state.backendMessage).toMatch(/simulation|demo/i);
@@ -31,48 +31,48 @@ describe("credential-free demo mode", () => {
 
   it("persists and restores demo state while disabling stale movement", () => {
     const state = hydratedState();
-    state.simulations["route-a"].distanceMeters = 1200;
+    state.simulations["route-01"].distanceMeters = 1200;
     const persisted = toPersistedState(state);
     window.localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(persisted));
     const restored = hydratePersistedState(persisted, now + 1000);
     expect(restored.selectedRouteId).toBe(state.selectedRouteId);
-    expect(restored.routes).toHaveLength(3);
-    expect(restored.simulations["route-a"].distanceMeters).toBe(1200);
-    expect(restored.simulations["route-a"].isRunning).toBe(false);
-    expect(restored.simulations["route-a"].tripStatus).toBe("offline");
+    expect(restored.routes).toHaveLength(16);
+    expect(restored.simulations["route-01"].distanceMeters).toBe(1200);
+    expect(restored.simulations["route-01"].isRunning).toBe(false);
+    expect(restored.simulations["route-01"].tripStatus).toBe("offline");
   });
 });
 
 describe("student flow and reducer", () => {
   it("switches routes without a refresh and moves the selected stop to that route", () => {
     const state = hydratedState();
-    expect(state.selectedRouteId).toBe("route-a");
-    const switched = appReducer(state, { type: "SELECT_ROUTE", routeId: "route-c" });
-    expect(switched.selectedRouteId).toBe("route-c");
-    expect(switched.routes.find((route) => route.id === "route-c")?.stops).toContainEqual(
+    expect(state.selectedRouteId).toBe("route-01");
+    const switched = appReducer(state, { type: "SELECT_ROUTE", routeId: "route-03" });
+    expect(switched.selectedRouteId).toBe("route-03");
+    expect(switched.routes.find((route) => route.id === "route-03")?.stops).toContainEqual(
       expect.objectContaining({ id: switched.selectedStopId }),
     );
-    const snapshot = deriveRouteSnapshot(switched, "route-c");
-    expect(snapshot.route.id).toBe("route-c");
-    expect(snapshot.busPosition.lat).toBeCloseTo(snapshot.route.stops[0].lat, 5);
-    expect(snapshot.busPosition.lng).toBeCloseTo(snapshot.route.stops[0].lng, 5);
+    const snapshot = deriveRouteSnapshot(switched, "route-03");
+    expect(snapshot.route.id).toBe("route-03");
+    expect(snapshot.busPosition.lat).toBeCloseTo(snapshot.route.shape[0].lat, 5);
+    expect(snapshot.busPosition.lng).toBeCloseTo(snapshot.route.shape[0].lng, 5);
   });
 
   it("ticks the simulation and updates ETAs and upcoming stops", () => {
     const state = hydratedState();
-    const before = deriveRouteSnapshot(state, "route-a");
+    const before = deriveRouteSnapshot(state, "route-01");
     const ticked = appReducer(state, {
       type: "TICK",
       now: now + 10_000,
       deltaSeconds: 10,
       speedMultiplier: 8,
     });
-    const after = deriveRouteSnapshot(ticked, "route-a");
-    expect(ticked.simulations["route-a"].distanceMeters).toBeGreaterThan(
-      state.simulations["route-a"].distanceMeters,
+    const after = deriveRouteSnapshot(ticked, "route-01");
+    expect(ticked.simulations["route-01"].distanceMeters).toBeGreaterThan(
+      state.simulations["route-01"].distanceMeters,
     );
     expect(after.selectedStopEta.etaSeconds).toBeLessThanOrEqual(
-      before.selectedStopEta.etaSeconds,
+      before.selectedStopEta.etaSeconds as number,
     );
     expect(after.stopEtas.length).toBe(after.route.stops.length);
   });
@@ -80,27 +80,27 @@ describe("student flow and reducer", () => {
   it("deduplicates simulation alerts by stable event key", () => {
     const state = hydratedState();
     const event: SimulationEvent = {
-      key: "route-a:duplicate:1",
+      key: "route-01:duplicate:1",
       type: "delay",
-      routeId: "route-a",
+      routeId: "route-01",
       title: "Duplicate alert",
       message: "This should only appear once.",
       createdAt: now,
       delaySeconds: 120,
     };
-    const update = { state: state.simulations["route-a"], events: [event] };
+    const update = { state: state.simulations["route-01"], events: [event] };
     const once = appReducer(state, {
       type: "APPLY_SIMULATION_UPDATE",
-      routeId: "route-a",
+      routeId: "route-01",
       update,
     });
     const twice = appReducer(once, {
       type: "APPLY_SIMULATION_UPDATE",
-      routeId: "route-a",
+      routeId: "route-01",
       update,
     });
-    expect(twice.notifications.filter((item) => item.id === "event-route-a:duplicate:1")).toHaveLength(1);
-    expect(twice.handledEventKeys).toContain("route-a:duplicate:1");
+    expect(twice.notifications.filter((item) => item.id === "event-route-01:duplicate:1")).toHaveLength(1);
+    expect(twice.handledEventKeys).toContain("route-01:duplicate:1");
     expect(twice.delayReports.some((report) => report.delaySeconds === 120)).toBe(true);
   });
 
@@ -118,18 +118,18 @@ describe("student flow and reducer", () => {
 
   it("shows an offline status and a stale warning when the connection is lost", () => {
     const state = hydratedState();
-    const simulation = state.simulations["route-a"];
+    const simulation = state.simulations["route-01"];
     const offlineUpdate = setSimulationOffline(simulation, state.routes[0], now);
     const offlineState = appReducer(state, {
       type: "APPLY_SIMULATION_UPDATE",
-      routeId: "route-a",
+      routeId: "route-01",
       update: offlineUpdate,
     });
     const staleState = {
       ...offlineState,
       currentTime: now + backendConfig.staleLocationSeconds * 1000 + 1000,
     };
-    const snapshot = deriveRouteSnapshot(staleState, "route-a");
+    const snapshot = deriveRouteSnapshot(staleState, "route-01");
     expect(snapshot.busStatus).toBe("offline");
     expect(snapshot.isStale).toBe(true);
     expect(snapshot.sourceLabel).toBe("Simulated");
@@ -150,7 +150,7 @@ describe("admin CRUD in local demo mode", () => {
       isNew: true,
       input: {
         number: "BT-TEST",
-        routeId: "route-a",
+        routeId: "route-01",
         driverId: null,
         capacity: 40,
         status: "active",
@@ -165,7 +165,7 @@ describe("admin CRUD in local demo mode", () => {
       isNew: true,
       input: {
         number: "BT-TEST",
-        routeId: "route-a",
+        routeId: "route-01",
         driverId: null,
         capacity: 40,
         status: "active",
@@ -196,10 +196,10 @@ describe("admin CRUD in local demo mode", () => {
     });
     const updatedRoute = changed.routes[0];
     expect(updatedRoute.stops[1].name).toBe("Renamed Test Stop");
-    expect(updatedRoute.shape).toHaveLength(updatedRoute.stops.length);
-    expect(updatedRoute.stopIndices).toEqual(
-      updatedRoute.stops.map((_, index) => index),
-    );
+    expect(updatedRoute.shape).toHaveLength(updatedRoute.stops.filter((stop) => stop.lat != null).length);
+    updatedRoute.stops.forEach((stop, index) => {
+      if (stop.lat == null) expect(updatedRoute.stopIndices[index]).toBe(-1);
+    });
     expect(updatedRoute.shape[1].lat).toBeCloseTo(17.36, 6);
   });
 

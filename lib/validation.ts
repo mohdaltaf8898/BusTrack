@@ -37,11 +37,14 @@ export const busInputSchema = z
     number: z.string().trim().min(2, "Enter a bus number.").max(24),
     routeId: z.string().trim().min(1, "Select a route."),
     driverId: z.string().trim().nullable(),
-    capacity: z.coerce
-      .number()
-      .int("Capacity must be a whole number.")
-      .min(1, "Capacity must be at least 1.")
-      .max(120, "Capacity cannot exceed 120."),
+    capacity: z.preprocess(
+      (value) => value === "" || value == null ? null : value,
+      z.coerce.number()
+        .int("Capacity must be a whole number.")
+        .min(1, "Capacity must be at least 1.")
+        .max(120, "Capacity cannot exceed 120.")
+        .nullable(),
+    ),
     status: routeStatusSchema,
     model: z.string().trim().min(2).max(100),
     serviceAvailability: z.string().trim().max(180).optional().default(""),
@@ -115,7 +118,7 @@ export const adminMutationSchema = z
     resource: adminResourceSchema,
     action: z.enum(["create", "update", "delete", "end-trip"]),
     id: z.string().trim().min(1).max(120).optional(),
-    data: z.record(z.unknown()).optional(),
+    data: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 

@@ -84,14 +84,12 @@ export function SourceLabel({
   mode,
   className,
 }: {
-  mode: "live" | "simulation";
+  mode: "live" | "simulation" | "last-known";
   className?: string;
 }) {
-  return mode === "live" ? (
-    <LiveDataTag className={className} />
-  ) : (
-    <SimulatedTag label="Simulated data" className={className} />
-  );
+  if (mode === "live") return <LiveDataTag className={className} />;
+  if (mode === "last-known") return <Badge tone="neutral" className={className}>Last known GPS</Badge>;
+  return <SimulatedTag label="Simulated data" className={className} />;
 }
 
 export function SatelliteHint({ className }: { className?: string }) {

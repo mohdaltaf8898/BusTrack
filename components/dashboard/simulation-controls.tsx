@@ -77,7 +77,7 @@ export function SimulationControls({
             Device GPS is active for this route. These controls only affect the local simulation fallback.
           </Alert>
         )}
-        <div className="grid gap-2.5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           <div className="rounded-xl bg-slate-50 p-3">
             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Trip status</p>
             <p className="mt-1 text-sm font-extrabold capitalize text-navy-950">

@@ -20,7 +20,7 @@ All checks must pass. Confirm:
 - `README.md` and this docs folder are committed.
 - `.env.local` is not committed.
 - No service role key appears in any `NEXT_PUBLIC_*` variable.
-- Sample routes and placeholder contacts are acceptable for a prototype.
+- The 2025–26 timetable is clearly identified as historical; approximate map locations and placeholder contacts are acceptable for the demo.
 - OSM tile usage policy is acceptable for expected traffic.
 
 ## 2. Push and import
@@ -36,7 +36,7 @@ All checks must pass. Confirm:
 4. Framework preset: **Next.js**.
 5. Build command: `npm run build`.
 6. Install command: `npm ci`.
-7. Node.js version: **22.x**.
+7. Node.js version: **22.x or 24.x**.
 8. Output: Next.js default (no static export).
 
 The API routes require the Node.js runtime; do not switch to a static `output: export` build.
@@ -70,14 +70,14 @@ Set the same values for Production and Preview environments as needed. Keep `SUP
 
 ## 4. Supabase configuration for the deployed domain
 
-1. Apply `supabase/migrations/20261027000000_init.sql`.
+1. Apply `supabase/migrations/20261027000000_init.sql`, then `supabase/migrations/20261030000000_published_routes.sql`.
 2. Apply `supabase/seed.sql`.
 3. Add the Vercel domain to **Authentication → URL Configuration**:
    - Site URL: `https://YOUR_VERCEL_DOMAIN`
    - Redirect URLs: `https://YOUR_VERCEL_DOMAIN/**`
 4. Confirm Realtime publication includes `bus_locations` and `notifications`.
 5. Confirm Auth users and `profiles.role` assignments exist.
-6. Set `buses.driver_id` for each assigned driver.
+6. Replace `SIM-*` vehicles, verify routes/stop coordinates, provision a verified corridor, and set `buses.driver_id` for each assigned driver before real tracking.
 7. Test sign-in at `/login`.
 
 ## 5. HTTPS and GPS
@@ -88,7 +88,7 @@ Browser Geolocation requires a secure context. Vercel provides HTTPS by default.
 
 1. Open `/api/config` and verify the expected `demoMode` value.
 2. Open `/` and confirm the **DEMO MODE** badge, greeting, ETA, map, and bottom/mobile or sidebar/desktop navigation.
-3. Open `/track`, select Route A, and verify the bus marker starts at the first stop and moves along the route.
+3. Open `/track`, select Route 01, and verify the bus marker starts at the first stop and moves along the route.
 4. Trigger a test delay and confirm ETA increases and a simulated delay alert appears.
 5. Toggle offline and confirm the warning and last-known position.
 6. Open `/driver`, start/end a demo trip, and toggle share.
@@ -96,6 +96,8 @@ Browser Geolocation requires a secure context. Vercel provides HTTPS by default.
 8. Open `/login` and switch demo roles; confirm driver/admin route guards.
 9. If Supabase is configured, sign in as an assigned driver and verify server-authorized start/share; test stale/off-route rejection.
 10. Test on iPhone Safari and Android Chrome at 375px and 430px widths; check no horizontal scrolling.
+
+For the existing `bustrack` project, Git auto-deployments are disabled; pushing a branch alone does not update production. An authorized operator must explicitly deploy the desired commit and confirm the production alias.
 
 ## 7. Rollback
 
@@ -107,5 +109,5 @@ Browser Geolocation requires a secure context. Vercel provides HTTPS by default.
 
 - Supabase free tier and Vercel hobby tier limits may apply; this project does not require paid services for the demo.
 - Realtime and frequent GPS polling consume resources; tune intervals before a pilot.
-- OSM public tile servers should not be used for high-volume production without an appropriate tile provider.
+- OSM public tile servers and the public OSRM demo router have no production SLA. Use appropriate providers for production volume; the app falls back to a schematic/straight-line map when they fail.
 - No push/SMS/WhatsApp provider is configured; adding one is a separate project with its own secrets and costs.

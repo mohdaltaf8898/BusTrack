@@ -19,7 +19,7 @@ export default function NotificationsPage() {
         actions={<DemoModeBadge />}
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">

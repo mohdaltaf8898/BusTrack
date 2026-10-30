@@ -13,8 +13,10 @@ import {
   UserRound,
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
+import { TIMETABLE_SOURCE_URL } from "@/data/routes";
 import { buildRouteGeometry } from "@/lib/geo";
-import { formatClock, formatDistance, formatEta } from "@/lib/format";
+import { formatClock, formatDistance, formatEta, formatScheduledTime } from "@/lib/format";
+import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { PageHeader } from "@/components/page-header";
 import { RoutePreview } from "@/components/routes/route-preview";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +47,7 @@ export default function RoutesPage() {
       <PageHeader
         eyebrow="Routes & stops"
         title="Choose your route"
-        description="Three sample routes use approximate Hyderabad landmarks. Select a route and a stop to personalize ETA without a page refresh."
+        description="Browse the 16 morning pickup routes from the 2025–26 college timetable, then select a stop for its simulated ETA."
         actions={
           <ButtonLink href="/track" variant="primary">
             <Navigation className="h-4 w-4" /> Track selected bus
@@ -54,11 +56,12 @@ export default function RoutesPage() {
       />
 
       <Alert tone="info">
-        <span className="inline-flex items-start gap-2">
-          <SimulatedTag label="Sample data" />
-          <span>
-            Route shapes, stop names, duration and coordinates are prototype values — not official college transport data.
-          </span>
+        <span>
+          Pickup order and times are transcribed from the{" "}
+          <a href={TIMETABLE_SOURCE_URL} target="_blank" rel="noreferrer" className="font-bold underline underline-offset-2">
+            2025–26 route document
+          </a>. It is a historical schedule and may have changed; confirm current routes and times with the transport office.
+          SIM-* vehicles are placeholders; positions are simulated unless marked as device GPS, and ETAs use simulated traffic.
         </span>
       </Alert>
 
@@ -86,7 +89,7 @@ export default function RoutesPage() {
           action={<Button onClick={() => setQuery("")}>Clear search</Button>}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredRoutes.map((route) => {
             const routeSnapshot = getRouteSnapshot(route.id);
             const bus = state.buses.find((item) => item.routeId === route.id);
@@ -106,9 +109,7 @@ export default function RoutesPage() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <Badge tone="blue">{route.code}</Badge>
-                        <Badge tone={route.status === "active" ? "green" : "amber"} dot>
-                          {route.status}
-                        </Badge>
+                        <Badge tone="neutral">{route.scheduleYear ?? "Custom route"}</Badge>
                       </div>
                       <CardTitle className="mt-2 truncate">{route.name}</CardTitle>
                     </div>
@@ -124,17 +125,17 @@ export default function RoutesPage() {
                   />
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Bus</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{route.busNumber.startsWith("SIM-") ? "Simulation vehicle" : "Vehicle"}</p>
                       <p className="mt-0.5 font-extrabold text-navy-950">{bus?.number ?? route.busNumber}</p>
                     </div>
                     <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Journey</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Timetable span</p>
                       <p className="mt-0.5 font-extrabold text-navy-950">
-                        {route.estimatedDurationMinutes} min
+                        {route.scheduledDurationMinutes == null ? "Not listed" : `${route.scheduledDurationMinutes} min`}
                       </p>
                     </div>
                     <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Distance</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Approx. distance</p>
                       <p className="mt-0.5 font-extrabold text-navy-950">
                         {formatDistance(geometry.totalDistanceMeters)}
                       </p>
@@ -157,7 +158,11 @@ export default function RoutesPage() {
                   <Button
                     variant={selected ? "soft" : "outline"}
                     className="w-full"
-                    onClick={() => selectRoute(route.id)}
+                    aria-pressed={selected}
+                    onClick={() => {
+                      selectRoute(route.id);
+                      document.getElementById("route-stop-list")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+                    }}
                   >
                     {selected ? "Selected route" : "Select route"}
                     <ArrowRight className="h-4 w-4" />
@@ -170,13 +175,13 @@ export default function RoutesPage() {
       )}
 
       {state.routes.length > 0 && (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div id="route-stop-list" className="grid grid-cols-1 scroll-mt-20 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <Card>
             <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
               <div>
                 <CardTitle>Ordered stops · {snapshot.route.code}</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">
-                  Select a stop to use it for the ETA on the dashboard and live map.
+                  The listed pickup times are from 2025–26, not live arrival times. Select a stop for its simulated ETA.
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
@@ -192,12 +197,13 @@ export default function RoutesPage() {
                 className="mb-4 h-48"
               />
               <ol className="space-y-2">
-                {snapshot.stopEtas.map((item, index) => {
+                {snapshot.stopEtas.map((item) => {
                   const selected = item.isSelected;
                   return (
                     <li key={item.stop.id}>
                       <button
                         type="button"
+                        aria-pressed={selected}
                         onClick={() => selectStop(item.stop.id)}
                         className={cn(
                           "flex min-h-[66px] w-full items-center gap-3 rounded-2xl border p-3 text-left transition",
@@ -215,21 +221,22 @@ export default function RoutesPage() {
                           {item.stop.order}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-bold text-navy-950">
+                          <span className="block break-words text-sm font-bold text-navy-950">
                             {item.stop.name}
                           </span>
-                          <span className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                            <span>{item.stop.landmark ?? `Stop ${index + 1}`}</span>
-                            <span>·</span>
-                            <span>{formatDistance(item.distanceMeters)} away</span>
+                          <span className="mt-0.5 block text-[11px] text-slate-500">
+                            {snapshot.route.scheduleYear ?? "Schedule"}{" "}
+                            {item.stop.order === snapshot.route.stops.length && item.stop.name === "Lords College" ? "arrival" : "pickup"}: {formatScheduledTime(item.stop.scheduledTime)}
+                            {item.stop.lat == null ? " · Location pending" : " · Approx. map location"}
                           </span>
+                          {item.stop.note && <span className="mt-0.5 block text-[11px] text-amber-700">{item.stop.note}</span>}
                         </span>
                         <span className="text-right">
                           <span className="block text-sm font-extrabold text-navy-950">
                             {item.status === "departed" ? "Passed" : formatEta(item.etaSeconds)}
                           </span>
                           <span className="block text-[10px] text-slate-400">
-                            {item.status === "departed" ? "Departed" : formatClock(item.etaAt)}
+                            {item.status === "unmapped" ? "No map position" : item.status === "departed" ? "Departed" : `Simulated · ${formatClock(item.etaAt)}`}
                           </span>
                         </span>
                       </button>
@@ -255,9 +262,10 @@ export default function RoutesPage() {
                   <div className="flex items-start gap-2.5">
                     <BusFront className="mt-0.5 h-4 w-4 text-brand-600" aria-hidden="true" />
                     <div>
-                      <p className="font-bold text-navy-950">Assigned bus</p>
+                      <p className="font-bold text-navy-950">{snapshot.bus?.number.startsWith("SIM-") ? "Simulation vehicle" : "Vehicle"}</p>
                       <p className="text-slate-600">
-                        {snapshot.bus?.number ?? "Not assigned"} · {snapshot.bus?.capacity ?? "—"} seats
+                        {snapshot.bus?.number ?? "Not assigned"}
+                        {snapshot.bus?.capacity != null ? ` · ${snapshot.bus.capacity} seats` : " · Capacity not provided"}
                       </p>
                     </div>
                   </div>
@@ -271,9 +279,9 @@ export default function RoutesPage() {
                   <div className="flex items-start gap-2.5">
                     <Timer className="mt-0.5 h-4 w-4 text-brand-600" aria-hidden="true" />
                     <div>
-                      <p className="font-bold text-navy-950">Estimated journey</p>
+                      <p className="font-bold text-navy-950">2025–26 timetable span</p>
                       <p className="text-slate-600">
-                        {snapshot.route.estimatedDurationMinutes} min at {snapshot.route.averageSpeedKmh} km/h demo speed
+                        {snapshot.route.scheduledDurationMinutes == null ? "Not listed" : `${snapshot.route.scheduledDurationMinutes} min between first pickup and college`}
                       </p>
                     </div>
                   </div>
@@ -292,9 +300,8 @@ export default function RoutesPage() {
                 </ButtonLink>
               </CardContent>
             </Card>
-            <Alert tone="warning" title="Coordinates are approximate">
-              The polyline follows selected landmarks, not a routing-engine road graph. Straight-line distance is not
-              equivalent to road distance, so all arrival times are estimates.
+            <Alert tone="warning" title="Map accuracy">
+              <RouteAccuracyNote route={snapshot.route} />
             </Alert>
           </div>
         </div>

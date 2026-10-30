@@ -26,6 +26,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { RouteSelector } from "@/components/route-selector";
 import { LiveMap } from "@/components/maps/live-map";
+import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ export default function BusDetailsPage() {
   const canViewDriverContact =
     state.user?.role === "admin" || state.user?.role === "driver";
   const nearestStop = snapshot.route.stops.reduce((closest, stop) => {
+    if (stop.lat == null || stop.lng == null) return closest;
     const distance = haversineMeters(snapshot.busPosition, { lat: stop.lat, lng: stop.lng });
     return distance < closest.distance ? { stop, distance } : closest;
   }, {
@@ -61,9 +63,9 @@ export default function BusDetailsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
-            All contact details on this page are placeholders. No real college phone numbers or driver identities are used.
+            Transport-office contact details are placeholders. Driver contacts require authorized configuration and should be verified before use.
           </span>
-          <SimulatedTag label="Prototype data" />
+          <SimulatedTag label="Placeholder contacts" />
         </div>
       </Alert>
 
@@ -97,12 +99,12 @@ export default function BusDetailsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
             <Card>
               <CardHeader>
                 <CardTitle>Last reported location</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">
-                  {snapshot.isStale ? "Last known position — updates have stopped." : "Current generated position."}
+                  {snapshot.isStale ? "Last known position — updates have stopped." : snapshot.isLiveData ? "Current device GPS position." : "Current simulated position."}
                 </p>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -119,7 +121,8 @@ export default function BusDetailsPage() {
                   showControls={false}
                   className="h-[300px] md:h-[350px]"
                 />
-                <div className="grid gap-2.5 sm:grid-cols-2">
+                <RouteAccuracyNote route={snapshot.route} />
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                       <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> Coordinates
@@ -130,7 +133,7 @@ export default function BusDetailsPage() {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
-                      <Radio className="h-3.5 w-3.5" aria-hidden="true" /> Nearest demo stop
+                      <Radio className="h-3.5 w-3.5" aria-hidden="true" /> Nearest mapped stop (approx.)
                     </p>
                     <p className="mt-1 text-sm font-bold text-navy-950">{nearestStop.stop.name}</p>
                   </div>
@@ -182,7 +185,7 @@ export default function BusDetailsPage() {
                   <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
                     <span className="text-slate-500">Capacity / model</span>
                     <span className="font-bold text-navy-950">
-                      {snapshot.bus.capacity} seats · {snapshot.bus.model}
+                      {snapshot.bus.capacity == null ? "Capacity not provided" : `${snapshot.bus.capacity} seats`} · {snapshot.bus.model}
                     </span>
                   </div>
                   <div className="rounded-xl border border-slate-100 p-3">

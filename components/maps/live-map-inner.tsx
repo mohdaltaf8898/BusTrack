@@ -229,6 +229,7 @@ export function LiveMapInner({
     if (!mapReady || !layers) return;
     layers.stops.clearLayers();
     route.stops.forEach((stop, index) => {
+      if (stop.lat == null || stop.lng == null) return;
       const marker = L.marker([stop.lat, stop.lng], {
         icon: stopIcon(index, stop.id === selectedStopId),
         zIndexOffset: stop.id === selectedStopId ? 700 : 400,
@@ -249,18 +250,15 @@ export function LiveMapInner({
     layers.bus.setIcon(
       busIcon(busPosition.bearing, busStatus === "offline", busStatus === "delayed"),
     );
-    layers.bus.setTooltipContent(
-      `<strong>${escapeHtml(route.busNumber)} · ${escapeHtml(route.code)}</strong><br/>${
-        busStatus === "offline" ? "Last known position" : "Current position"
-      } (${isLiveData ? "device GPS" : "simulated"})`,
-    );
-    if (!layers.bus.getTooltip()) {
-      layers.bus.bindTooltip(
-        `<strong>${escapeHtml(route.busNumber)}</strong><br/>Simulated bus position`,
-        { direction: "top", offset: [0, -22] },
-      );
+    const tooltip = `<strong>${escapeHtml(route.busNumber)} · ${escapeHtml(route.code)}</strong><br/>${
+      busStatus === "offline" ? "Last known position" : "Current position"
+    } (${isStale ? "last known position" : isLiveData ? "device GPS" : "simulated"})`;
+    if (layers.bus.getTooltip()) {
+      layers.bus.setTooltipContent(tooltip);
+    } else {
+      layers.bus.bindTooltip(tooltip, { direction: "top", offset: [0, -22] });
     }
-  }, [mapReady, busPosition.lat, busPosition.lng, busPosition.bearing, busStatus, isLiveData, route.busNumber, route.code]);
+  }, [mapReady, busPosition.lat, busPosition.lng, busPosition.bearing, busStatus, isLiveData, isStale, route.busNumber, route.code]);
 
   const centerOnBus = () => {
     const map = mapRef.current;

@@ -7,7 +7,8 @@ export type ArrivalStatus =
   | "arriving"
   | "approaching"
   | "upcoming"
-  | "completed";
+  | "completed"
+  | "unmapped";
 export type NotificationType =
   | "delay"
   | "approaching"
@@ -25,10 +26,16 @@ export interface Coordinates {
 export interface Stop {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
+  /** Null means the published stop has not been located reliably. */
+  lat: number | null;
+  lng: number | null;
   order: number;
   landmark?: string;
+  /** AM time in the historical 2025–26 timetable, not a live ETA. */
+  scheduledTime?: string | null;
+  locationSource?: string | null;
+  locationReference?: string | null;
+  note?: string | null;
 }
 
 export interface Route {
@@ -40,9 +47,12 @@ export interface Route {
   destination: string;
   description: string;
   stops: Stop[];
-  /** Ordered polyline. Each stop coordinate is included at stopIndices. */
+  /** Polyline and matching indices; -1 means that a stop has no mapped location. */
   shape: Coordinates[];
   stopIndices: number[];
+  geometrySource?: "straight" | "road" | "verified";
+  scheduleYear?: string | null;
+  scheduledDurationMinutes?: number | null;
   color: string;
   averageSpeedKmh: number;
   estimatedDurationMinutes: number;
@@ -54,7 +64,7 @@ export interface Bus {
   number: string;
   routeId: string;
   driverId: string | null;
-  capacity: number;
+  capacity: number | null;
   status: RouteStatus;
   model: string;
   serviceAvailability: string;
@@ -83,8 +93,8 @@ export interface RouteGeometry {
   points: Coordinates[];
   /** Cumulative metres at each shape point. */
   cumulative: number[];
-  /** Cumulative metres at each stop. */
-  stopDistances: number[];
+  /** Cumulative metres at each mapped stop; null for an unmapped stop. */
+  stopDistances: Array<number | null>;
   totalDistanceMeters: number;
   bounds: {
     minLat: number;
@@ -144,9 +154,9 @@ export interface SimulationEvent {
 
 export interface StopEta {
   stop: Stop;
-  etaSeconds: number;
-  etaAt: number;
-  distanceMeters: number;
+  etaSeconds: number | null;
+  etaAt: number | null;
+  distanceMeters: number | null;
   status: ArrivalStatus;
   isSelected: boolean;
 }

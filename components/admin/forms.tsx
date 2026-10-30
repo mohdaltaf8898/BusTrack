@@ -37,7 +37,7 @@ function zodErrors(error: unknown): { errors: Errors; message: string } {
     const flattened = zodError.flatten().fieldErrors;
     const errors: Errors = {};
     for (const [key, value] of Object.entries(flattened)) {
-      errors[key] = value?.[0];
+      errors[key] = Array.isArray(value) && typeof value[0] === "string" ? value[0] : undefined;
     }
     return { errors, message: firstZodError(zodError) };
   }
@@ -75,11 +75,10 @@ export function BusFormDialog({
     number: editing?.number ?? "",
     routeId: editing?.routeId ?? routes[0]?.id ?? "",
     driverId: editing?.driverId ?? "",
-    capacity: String(editing?.capacity ?? 45),
-    status: editing?.status ?? "active",
-    model: editing?.model ?? "College coach · demo",
-    serviceAvailability:
-      editing?.serviceAvailability ?? "Weekdays · morning and afternoon trips (sample)",
+    capacity: editing?.capacity == null ? "" : String(editing.capacity),
+    status: editing?.status ?? "scheduled",
+    model: editing?.model ?? "Not specified",
+    serviceAvailability: editing?.serviceAvailability ?? "",
   });
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<Errors>({});
@@ -177,7 +176,7 @@ export function BusFormDialog({
             <FieldError message={errors.driverId} />
           </div>
           <div>
-            <Label htmlFor="bus-capacity">Capacity</Label>
+            <Label htmlFor="bus-capacity">Capacity (optional)</Label>
             <Input
               id="bus-capacity"
               type="number"
@@ -462,8 +461,8 @@ export function StopFormDialog({
   const initial = () => ({
     routeId: editing?.routeId ?? defaultRouteId,
     name: editing?.stop.name ?? "",
-    lat: String(editing?.stop.lat ?? "17.3418"),
-    lng: String(editing?.stop.lng ?? "78.3680"),
+    lat: editing?.stop.lat == null ? "" : String(editing.stop.lat),
+    lng: editing?.stop.lng == null ? "" : String(editing.stop.lng),
     order: String(editing?.stop.order ?? (routes.find((route) => route.id === defaultRouteId)?.stops.length ?? 0) + 1),
   });
   const [values, setValues] = useState(initial);

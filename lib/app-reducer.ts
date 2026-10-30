@@ -1,6 +1,7 @@
 import { sampleBuses, sampleDrivers, sampleRoutes, demoUsers } from "@/data/routes";
 import { backendConfig, isSupabaseConfigured } from "@/lib/config";
 import { buildRouteGeometry } from "@/lib/geo";
+import { routeCoordinateKey, type RoadGeometry } from "@/lib/road-routing";
 import { advanceSimulation, type SimulationUpdate } from "@/lib/simulation";
 import type {
   AppState,
@@ -23,7 +24,8 @@ import type {
 } from "@/lib/validation-types";
 import { makeId } from "@/lib/utils";
 
-export const APP_STORAGE_KEY = "bustrack:demo-state:v1";
+// Keep the earlier demo catalog untouched in v1 while loading the 2025–26 routes.
+export const APP_STORAGE_KEY = "bustrack:demo-state:v2";
 const MAX_NOTIFICATIONS = 80;
 const MAX_EVENT_KEYS = 400;
 
@@ -34,31 +36,31 @@ function initialNotifications(now: number): NotificationItem[] {
       type: "system",
       title: "Welcome to BusTrack",
       message:
-        "DEMO MODE: routes, bus positions, ETAs and alerts are generated locally. No real college bus data is used.",
+        "The stop lists come from the 2025–26 timetable. Bus positions, ETAs and alerts are simulated; confirm current service with the transport office.",
       createdAt: now - 1000 * 60 * 3,
       readAt: null,
       simulated: true,
     },
     {
-      id: "route-a-trip-demo",
+      id: "route-01-trip-demo",
       type: "trip_started",
-      title: "BT-01 started its trip",
-      message: "Route R-A is sharing a simulated position from LIET Main Gate.",
+      title: "SIM-01 started its trip",
+      message: "Route 01 is sharing a simulated position from Asif Nagar.",
       createdAt: now - 1000 * 60 * 2,
       readAt: now - 1000 * 60,
-      routeId: "route-a",
-      busId: "bus-bt01",
+      routeId: "route-01",
+      busId: "bus-sim01",
       simulated: true,
     },
     {
-      id: "route-b-delay-demo",
+      id: "route-02-delay-demo",
       type: "delay",
-      title: "Traffic update on R-B",
-      message: "A simulated 3-minute delay has been added to the Gachibowli corridor.",
+      title: "Traffic update on Route 02",
+      message: "A simulated 3-minute delay has been added to Route 02.",
       createdAt: now - 1000 * 60,
       readAt: null,
-      routeId: "route-b",
-      busId: "bus-bt02",
+      routeId: "route-02",
+      busId: "bus-sim02",
       simulated: true,
     },
   ];
@@ -129,11 +131,11 @@ export function createInitialState(now: number): AppState {
     backendTrips: [],
     delayReports: [
       {
-        id: "delay-sample-b",
-        routeId: "route-b",
-        busId: "bus-bt02",
+        id: "delay-sample-02",
+        routeId: "route-02",
+        busId: "bus-sim02",
         delaySeconds: 180,
-        reason: "Simulated traffic near Gachibowli",
+        reason: "Simulated Route 02 traffic",
         createdAt: now - 60_000,
         simulated: true,
       },
@@ -318,12 +320,13 @@ function normalizeRouteStops(route: Route): Route {
   const stops = [...route.stops]
     .sort((a, b) => a.order - b.order)
     .map((stop, index) => ({ ...stop, order: index + 1 }));
-  return {
-    ...route,
-    stops,
-    shape: stops.map((stop) => ({ lat: stop.lat, lng: stop.lng })),
-    stopIndices: stops.map((_, index) => index),
-  };
+  const shape: Route["shape"] = [];
+  const stopIndices = stops.map((stop) => {
+    if (stop.lat == null || stop.lng == null) return -1;
+    shape.push({ lat: stop.lat, lng: stop.lng });
+    return shape.length - 1;
+  });
+  return { ...route, stops, shape, stopIndices, geometrySource: "straight" };
 }
 
 function updateRouteById(
@@ -382,6 +385,7 @@ export type AppAction =
       message: string;
     }
   | { type: "SET_REMOTE_LOCATION"; location: AppState["remoteLocations"][string] }
+  | { type: "SET_ROAD_GEOMETRY"; routeId: string; geometry: RoadGeometry }
   | { type: "SELECT_ROUTE"; routeId: string }
   | { type: "SELECT_STOP"; stopId: string }
   | { type: "APPLY_SIMULATION_UPDATE"; routeId: string; update: SimulationUpdate }
@@ -411,7 +415,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const simulations = { ...state.simulations };
       for (const route of state.routes) {
         const simulation = simulations[route.id];
-        if (!simulation) continue;
+        if (!simulation || simulation.tripStatus !== "active" || !simulation.isRunning || !simulation.isSharing) continue;
         try {
           const geometry = buildRouteGeometry(route);
           const result = advanceSimulation(simulation, {
@@ -494,6 +498,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [action.location.routeId]: action.location,
         },
       };
+
+    case "SET_ROAD_GEOMETRY": {
+      const route = state.routes.find((item) => item.id === action.routeId);
+      if (!route || route.geometrySource === "verified" ||
+          routeCoordinateKey(route) !== action.geometry.coordinateKey ||
+          action.geometry.shape.length < 2 || action.geometry.stopIndices.length !== route.stops.length) return state;
+      const previousLength = buildRouteGeometry(route).totalDistanceMeters;
+      const updatedRoute: Route = {
+        ...route,
+        shape: action.geometry.shape,
+        stopIndices: action.geometry.stopIndices,
+        geometrySource: "road",
+      };
+      const newLength = buildRouteGeometry(updatedRoute).totalDistanceMeters;
+      const simulation = state.simulations[route.id];
+      const progress = previousLength > 0 && simulation
+        ? Math.min(1, Math.max(0, simulation.distanceMeters / previousLength)) : 0;
+      return {
+        ...state,
+        routes: state.routes.map((item) => item.id === route.id ? updatedRoute : item),
+        simulations: simulation ? {
+          ...state.simulations,
+          [route.id]: { ...simulation, distanceMeters: progress * newLength },
+        } : state.simulations,
+      };
+    }
 
     case "SELECT_ROUTE": {
       const route = state.routes.find((item) => item.id === action.routeId);
@@ -641,7 +671,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         destination: action.input.destination,
         description:
           action.input.description ||
-          "Prototype route using copied sample geometry. Replace shape points before production use.",
+          "New route uses copied geometry. Verify and replace the shape before use.",
         stops,
         shape: template.shape.map((point) => ({ ...point })),
         stopIndices: [...template.stopIndices],
@@ -670,12 +700,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const routes = updateRouteById(state, action.routeId, (route) => {
         const existing = route.stops.find((stop) => stop.id === action.id);
         const nextStop = {
+          ...existing,
           id: action.id,
           name: action.input.name,
           lat: action.input.lat,
           lng: action.input.lng,
           order: action.input.order,
-          landmark: existing?.landmark ?? "Demo stop",
+          locationSource: "Administrator supplied",
+          landmark: existing?.landmark ?? "Stop",
         };
         const stops = action.isNew
           ? [...route.stops, nextStop]
@@ -689,6 +721,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const route = state.routes.find((item) => item.id === action.routeId);
       if (!route || route.stops.length <= 2) {
         return { ...state, error: "A route must keep at least two stops." };
+      }
+      const mappedRemaining = route.stops.filter(
+        (stop) => stop.id !== action.id && stop.lat != null && stop.lng != null,
+      );
+      if (mappedRemaining.length < 2) {
+        return { ...state, error: "A route needs at least two mapped stop locations." };
       }
       const routes = updateRouteById(state, action.routeId, (item) =>
         normalizeRouteStops({

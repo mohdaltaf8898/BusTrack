@@ -77,7 +77,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <CardContent className="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
+        <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-5">
           <div className="rounded-2xl bg-slate-50 p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Institution</p>
             <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-navy-950">
@@ -98,7 +98,7 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="space-y-5">
           <Card>
             <CardHeader>
@@ -158,8 +158,7 @@ export default function ProfilePage() {
                 on Safari, use <strong>Share → Add to Home Screen</strong>.
               </p>
               <p className="text-xs leading-5">
-                Installation requires HTTPS (or localhost). This prototype does not register a service worker, so full
-                offline page caching is a future improvement.
+                Installation requires HTTPS (or localhost). Offline page caching is not currently enabled.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Badge tone="blue">
@@ -210,7 +209,7 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle>Local demo data</CardTitle>
               <p className="mt-1 text-xs text-slate-500">
-                Routes, notifications and simulation progress can be restored to a clean sample state.
+                Restore the historical route catalogue, notifications and simulation progress to their original state.
               </p>
             </CardHeader>
             <CardContent>
@@ -237,7 +236,7 @@ export default function ProfilePage() {
           }
         }}
         title="Reset local demo state?"
-        description="Routes, admin edits, notifications and saved simulation progress in this browser will be replaced with the original sample data."
+        description="Local route edits, notifications and simulation progress will be replaced with the original catalogue."
         confirmLabel="Reset and reload"
       />
     </div>

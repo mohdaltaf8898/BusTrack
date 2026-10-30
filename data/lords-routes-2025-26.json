@@ -1,0 +1,1439 @@
+[
+  {
+    "number": 1,
+    "stops": [
+      {
+        "name": "Asif Nagar",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.389948,
+          "lng": 78.451726,
+          "source": "TGSRTC nearby stop",
+          "reference": "Asifnagar"
+        }
+      },
+      {
+        "name": "Kings Restaurant",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.3936122,
+          "lng": 78.4427387,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/7244487791"
+        }
+      },
+      {
+        "name": "Humayun Nagar Police Station",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.39555,
+          "lng": 78.4422291,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2174747678"
+        }
+      },
+      {
+        "name": "Pillar No. 26",
+        "scheduledTime": "08:47",
+        "location": null
+      },
+      {
+        "name": "Pillar No. 100 - Karwan X Road",
+        "scheduledTime": "08:55",
+        "location": null
+      },
+      {
+        "name": "Pillar No. 125 - Attapur",
+        "scheduledTime": "08:58",
+        "location": {
+          "lat": 17.370231,
+          "lng": 78.429334,
+          "source": "TGSRTC nearby stop",
+          "reference": "Attapur"
+        }
+      },
+      {
+        "name": "Pillar No. 175 - Upperpally",
+        "scheduledTime": "09:00",
+        "location": {
+          "lat": 17.355845,
+          "lng": 78.422307,
+          "source": "TGSRTC nearby stop",
+          "reference": "Upperpally X Road"
+        }
+      },
+      {
+        "name": "Pillar No. 193",
+        "scheduledTime": "09:05",
+        "location": null
+      },
+      {
+        "name": "Dairy Farm",
+        "scheduledTime": "09:07",
+        "location": {
+          "lat": 17.345684,
+          "lng": 78.415906,
+          "source": "TGSRTC nearby stop",
+          "reference": "Dairy Farm Upperpally"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 2,
+    "stops": [
+      {
+        "name": "Falaknuma Bridge",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.3280538,
+          "lng": 78.4744017,
+          "source": "TGSRTC nearby stop",
+          "reference": "Falaknuma Rly Bridge"
+        }
+      },
+      {
+        "name": "Engine Bowli",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.335783,
+          "lng": 78.468475,
+          "source": "TGSRTC nearby stop",
+          "reference": "Engine Bowli"
+        }
+      },
+      {
+        "name": "Shamsher Gunj Balaji Sweets",
+        "scheduledTime": "08:28",
+        "location": {
+          "lat": 17.3408101,
+          "lng": 78.4683869,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/1118754617"
+        }
+      },
+      {
+        "name": "Goshala",
+        "scheduledTime": "08:32",
+        "location": null
+      },
+      {
+        "name": "Boys Town School",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.344186,
+          "lng": 78.461853,
+          "source": "TGSRTC nearby stop",
+          "reference": "Boystown"
+        }
+      },
+      {
+        "name": "Fatima Hospital",
+        "scheduledTime": "08:37",
+        "location": {
+          "lat": 17.3448357,
+          "lng": 78.4590373,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/6549133126"
+        }
+      },
+      {
+        "name": "Macca Function Hall",
+        "scheduledTime": "08:40",
+        "location": null
+      },
+      {
+        "name": "Kalapather Police Station",
+        "scheduledTime": "08:42",
+        "location": null
+      },
+      {
+        "name": "Tadbun X Road",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.345249,
+          "lng": 78.450771,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tadbund"
+        }
+      },
+      {
+        "name": "Idly Hotel",
+        "scheduledTime": "08:50",
+        "location": null
+      },
+      {
+        "name": "Asad Nagar",
+        "scheduledTime": "08:55",
+        "location": null
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 3,
+    "stops": [
+      {
+        "name": "ECIL",
+        "scheduledTime": "07:35",
+        "location": {
+          "lat": 17.47289,
+          "lng": 78.56992,
+          "source": "TGSRTC nearby stop",
+          "reference": "ECIL"
+        }
+      },
+      {
+        "name": "Anandbagh",
+        "scheduledTime": "07:40",
+        "location": {
+          "lat": 17.458663,
+          "lng": 78.536514,
+          "source": "TGSRTC nearby stop",
+          "reference": "Anandbagh"
+        }
+      },
+      {
+        "name": "Anu Tex - Malkajgiri",
+        "scheduledTime": "07:45",
+        "location": {
+          "lat": 17.450469,
+          "lng": 78.532741,
+          "source": "TGSRTC nearby stop",
+          "reference": "Anutex"
+        }
+      },
+      {
+        "name": "Lalaguda - Mettuguda",
+        "scheduledTime": "07:55",
+        "location": {
+          "lat": 17.435286,
+          "lng": 78.520702,
+          "source": "TGSRTC nearby stop",
+          "reference": "Mettuguda"
+        }
+      },
+      {
+        "name": "Chilakalaguda X Road",
+        "scheduledTime": "08:05",
+        "location": {
+          "lat": 17.4330621,
+          "lng": 78.506383,
+          "source": "TGSRTC nearby stop",
+          "reference": "Chilkalguda X Road"
+        }
+      },
+      {
+        "name": "Musheerabad",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.4191423,
+          "lng": 78.4985732,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2460279792"
+        }
+      },
+      {
+        "name": "RTC X Road",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.407795,
+          "lng": 78.497029,
+          "source": "TGSRTC nearby stop",
+          "reference": "RTC X Roads"
+        }
+      },
+      {
+        "name": "Himayat Nagar",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.401206,
+          "lng": 78.488883,
+          "source": "TGSRTC nearby stop",
+          "reference": "Himayat Nagar"
+        }
+      },
+      {
+        "name": "Lakdikapul",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.404896,
+          "lng": 78.464043,
+          "source": "TGSRTC nearby stop",
+          "reference": "Lakdikapool"
+        }
+      },
+      {
+        "name": "Mahaveer Hospital",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.402835,
+          "lng": 78.458443,
+          "source": "TGSRTC nearby stop",
+          "reference": "Mahavir Hospital"
+        }
+      },
+      {
+        "name": "Mehdipatnam - KFC",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.394709,
+          "lng": 78.440319,
+          "source": "TGSRTC nearby stop",
+          "reference": "Mehdipatnam"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 4,
+    "stops": [
+      {
+        "name": "Miyapur X Road",
+        "scheduledTime": "07:50",
+        "location": {
+          "lat": 17.497106,
+          "lng": 78.362731,
+          "source": "TGSRTC nearby stop",
+          "reference": "Miyapur X Road"
+        }
+      },
+      {
+        "name": "Alwyn X Road",
+        "scheduledTime": "07:55",
+        "location": {
+          "lat": 17.493761,
+          "lng": 78.352026,
+          "source": "TGSRTC nearby stop",
+          "reference": "Allwyn X Road"
+        }
+      },
+      {
+        "name": "Hafeezpet Flyover",
+        "scheduledTime": "08:00",
+        "location": {
+          "lat": 17.478903,
+          "lng": 78.361514,
+          "source": "TGSRTC nearby stop",
+          "reference": "Hafeezpet"
+        }
+      },
+      {
+        "name": "Kondapur",
+        "scheduledTime": "08:05",
+        "location": {
+          "lat": 17.463958,
+          "lng": 78.367127,
+          "source": "TGSRTC nearby stop",
+          "reference": "Kondapur"
+        }
+      },
+      {
+        "name": "Botanical Garden",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.4555018,
+          "lng": 78.3639955,
+          "source": "OpenStreetMap landmark",
+          "reference": "way/1349136360"
+        }
+      },
+      {
+        "name": "Gachibowli Chowrastha",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.438681,
+          "lng": 78.363759,
+          "source": "TGSRTC nearby stop",
+          "reference": "Gachibowli X Road"
+        }
+      },
+      {
+        "name": "Narayanamma College",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.410075,
+          "lng": 78.398258,
+          "source": "TGSRTC nearby stop",
+          "reference": "Narayanamma College"
+        }
+      },
+      {
+        "name": "Shaikpet Nala",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.407272,
+          "lng": 78.402088,
+          "source": "TGSRTC nearby stop",
+          "reference": "Shaikpetnala"
+        }
+      },
+      {
+        "name": "Galaxy Theater",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.4036256,
+          "lng": 78.409811,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/7243983823"
+        }
+      },
+      {
+        "name": "Tolichowki",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.399134,
+          "lng": 78.415691,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tolichowki"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 5,
+    "stops": [
+      {
+        "name": "Tolichowki",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.399134,
+          "lng": 78.415691,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tolichowki"
+        }
+      },
+      {
+        "name": "7 Tombs",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.3973758,
+          "lng": 78.400948,
+          "source": "TGSRTC nearby stop",
+          "reference": "7 Tombs"
+        }
+      },
+      {
+        "name": "Golconda",
+        "scheduledTime": "08:55",
+        "location": {
+          "lat": 17.3850111,
+          "lng": 78.4033844,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2461496897"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 6,
+    "stops": [
+      {
+        "name": "Gulzar Sweet House",
+        "scheduledTime": "08:05",
+        "location": null
+      },
+      {
+        "name": "Alija Kotla",
+        "scheduledTime": "08:07",
+        "location": {
+          "lat": 17.3605451,
+          "lng": 78.4801015,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2208159907"
+        }
+      },
+      {
+        "name": "Victoria Hotel",
+        "scheduledTime": "08:10",
+        "location": null
+      },
+      {
+        "name": "Shalibanda X Road",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.354719,
+          "lng": 78.473156,
+          "source": "TGSRTC nearby stop",
+          "reference": "Shalibanda"
+        }
+      },
+      {
+        "name": "Success School",
+        "scheduledTime": "08:16",
+        "location": null
+      },
+      {
+        "name": "Pathedarwaza",
+        "scheduledTime": "08:17",
+        "location": null
+      },
+      {
+        "name": "Kamatipura",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.3562361,
+          "lng": 78.4611412,
+          "source": "OpenStreetMap landmark",
+          "reference": "way/1139119411"
+        }
+      },
+      {
+        "name": "Bahadurpura X Road",
+        "scheduledTime": "08:22",
+        "location": {
+          "lat": 17.355804,
+          "lng": 78.454508,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bahadurpura"
+        }
+      },
+      {
+        "name": "Old RTO Office",
+        "scheduledTime": "08:25",
+        "location": null
+      },
+      {
+        "name": "Pillar No. 156",
+        "scheduledTime": "08:30",
+        "location": null
+      },
+      {
+        "name": "Hanuman Temple - Pillar No. 123",
+        "scheduledTime": "08:42",
+        "location": null
+      },
+      {
+        "name": "Bapughat New Bridge",
+        "scheduledTime": "08:47",
+        "location": {
+          "lat": 17.373982,
+          "lng": 78.417137,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bapu Ghat"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 7,
+    "stops": [
+      {
+        "name": "Tolichowki - Shalimar Sweet House",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.399134,
+          "lng": 78.415691,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tolichowki"
+        }
+      },
+      {
+        "name": "Shaikpet Hanuman Temple",
+        "scheduledTime": "08:32",
+        "location": null
+      },
+      {
+        "name": "7 Tombs",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.3973758,
+          "lng": 78.400948,
+          "source": "TGSRTC nearby stop",
+          "reference": "7 Tombs"
+        }
+      },
+      {
+        "name": "Banjari Darwaza",
+        "scheduledTime": "08:37",
+        "location": {
+          "lat": 17.392347,
+          "lng": 78.399813,
+          "source": "TGSRTC nearby stop",
+          "reference": "Banjari Darwaza"
+        }
+      },
+      {
+        "name": "Katora House",
+        "scheduledTime": "08:40",
+        "location": null
+      },
+      {
+        "name": "Golconda Kila",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.3850111,
+          "lng": 78.4033844,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2461496897"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 8,
+    "stops": [
+      {
+        "name": "Nalgonda X Road",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.375352,
+          "lng": 78.49825,
+          "source": "TGSRTC nearby stop",
+          "reference": "Nalgonda X Road"
+        }
+      },
+      {
+        "name": "Noble Talkies X Road",
+        "scheduledTime": "08:35",
+        "location": null
+      },
+      {
+        "name": "Asif Nagar Police Station",
+        "scheduledTime": null,
+        "location": null
+      },
+      {
+        "name": "Chennai Shopping Mall - Pillar No. 18",
+        "scheduledTime": "08:40",
+        "location": null
+      },
+      {
+        "name": "Langer House Bridge",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.3786758,
+          "lng": 78.4211253,
+          "source": "TGSRTC nearby stop",
+          "reference": "Langar House"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 9,
+    "stops": [
+      {
+        "name": "Uppal X Road",
+        "scheduledTime": "07:45",
+        "location": {
+          "lat": 17.401723,
+          "lng": 78.560144,
+          "source": "TGSRTC nearby stop",
+          "reference": "Uppal X Road"
+        }
+      },
+      {
+        "name": "Ramanthapur Public School",
+        "scheduledTime": "07:50",
+        "location": {
+          "lat": 17.39933,
+          "lng": 78.537017,
+          "source": "TGSRTC nearby stop",
+          "reference": "Ramanthapur Public School"
+        }
+      },
+      {
+        "name": "Ramanthapur Ayurvedic Hospital",
+        "scheduledTime": "07:55",
+        "location": null
+      },
+      {
+        "name": "Ramanthapur Kings Palace",
+        "scheduledTime": "08:00",
+        "location": null
+      },
+      {
+        "name": "Amberpet Gandhi Puthli",
+        "scheduledTime": "08:03",
+        "location": {
+          "lat": 17.391473,
+          "lng": 78.516537,
+          "source": "TGSRTC nearby stop",
+          "reference": "Amberpet"
+        }
+      },
+      {
+        "name": "Golnaka Chowrastha",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.390558,
+          "lng": 78.506363,
+          "source": "TGSRTC nearby stop",
+          "reference": "Golnaka"
+        }
+      },
+      {
+        "name": "Kachiguda Kamela",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.388026,
+          "lng": 78.503024,
+          "source": "TGSRTC nearby stop",
+          "reference": "Kachiguda Kamela"
+        }
+      },
+      {
+        "name": "Nampally Ek Minar",
+        "scheduledTime": "08:25",
+        "location": null
+      },
+      {
+        "name": "Subhan Bakery - Nampally Market",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.3922369,
+          "lng": 78.4651338,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/6195718085"
+        }
+      },
+      {
+        "name": "Bazarghat X Road",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.394244,
+          "lng": 78.462569,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bazar Ghat"
+        }
+      },
+      {
+        "name": "Goutham School Mehdipatnam",
+        "scheduledTime": "08:35",
+        "location": null
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 10,
+    "stops": [
+      {
+        "name": "LB Nagar X Road",
+        "scheduledTime": "08:00",
+        "location": {
+          "lat": 17.346876,
+          "lng": 78.550936,
+          "source": "TGSRTC nearby stop",
+          "reference": "Lb Nagar X Road"
+        }
+      },
+      {
+        "name": "Malakpet Super Bazar",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.372197,
+          "lng": 78.509516,
+          "source": "TGSRTC nearby stop",
+          "reference": "Super Bazar"
+        }
+      },
+      {
+        "name": "Malakpet Railway Station",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.3765035,
+          "lng": 78.4948263,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/307015337"
+        }
+      },
+      {
+        "name": "Bahadurpura X Road",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.355804,
+          "lng": 78.454508,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bahadurpura"
+        }
+      },
+      {
+        "name": "College",
+        "scheduledTime": "08:32",
+        "location": null,
+        "note": "The document lists “College” at 08:32 before later stops; this location is ambiguous and is not assumed to be the campus."
+      },
+      {
+        "name": "Tadbun X Road",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.345249,
+          "lng": 78.450771,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tadbund"
+        }
+      },
+      {
+        "name": "Danammchopidi - Sastripuram",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.336748,
+          "lng": 78.4493777,
+          "source": "TGSRTC nearby stop",
+          "reference": "Danamma Jhopdi"
+        }
+      },
+      {
+        "name": "Aramghar",
+        "scheduledTime": "08:50",
+        "location": {
+          "lat": 17.321841,
+          "lng": 78.432067,
+          "source": "TGSRTC nearby stop",
+          "reference": "Aramghar"
+        }
+      },
+      {
+        "name": "Pillar No. 245",
+        "scheduledTime": "08:55",
+        "location": null
+      },
+      {
+        "name": "Dairy Farm",
+        "scheduledTime": "09:00",
+        "location": {
+          "lat": 17.345684,
+          "lng": 78.415906,
+          "source": "TGSRTC nearby stop",
+          "reference": "Dairy Farm Upperpally"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 11,
+    "stops": [
+      {
+        "name": "Tolichowki",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.399134,
+          "lng": 78.415691,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tolichowki"
+        }
+      },
+      {
+        "name": "Nanal Nagar",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.395835,
+          "lng": 78.426923,
+          "source": "TGSRTC nearby stop",
+          "reference": "Nanal Nagar"
+        }
+      },
+      {
+        "name": "GM Garden",
+        "scheduledTime": "08:40",
+        "location": null
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        },
+        "note": "Destination inferred from the college transport page; no college time shown in the 2025–26 document."
+      }
+    ]
+  },
+  {
+    "number": 12,
+    "stops": [
+      {
+        "name": "Saidabad",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.359404,
+          "lng": 78.504768,
+          "source": "TGSRTC nearby stop",
+          "reference": "Saidabad"
+        }
+      },
+      {
+        "name": "Pisalbanda",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.34042,
+          "lng": 78.5021,
+          "source": "TGSRTC nearby stop",
+          "reference": "Pisalbanda"
+        }
+      },
+      {
+        "name": "Rakshapuram",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.3398864,
+          "lng": 78.4944313,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2949067357"
+        }
+      },
+      {
+        "name": "Baba Nagar",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.331938,
+          "lng": 78.490381,
+          "source": "TGSRTC nearby stop",
+          "reference": "Hafiz Baba Nagar"
+        }
+      },
+      {
+        "name": "Poolbagh",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.330076,
+          "lng": 78.485801,
+          "source": "TGSRTC nearby stop",
+          "reference": "Phoolbagh"
+        }
+      },
+      {
+        "name": "Chandrayangutta",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.326609,
+          "lng": 78.476548,
+          "source": "TGSRTC nearby stop",
+          "reference": "Chandrayangutta"
+        }
+      },
+      {
+        "name": "Mehfil",
+        "scheduledTime": "08:45",
+        "location": null
+      },
+      {
+        "name": "Aramghar",
+        "scheduledTime": "09:00",
+        "location": {
+          "lat": 17.321841,
+          "lng": 78.432067,
+          "source": "TGSRTC nearby stop",
+          "reference": "Aramghar"
+        }
+      },
+      {
+        "name": "NG Ranga Kaman",
+        "scheduledTime": "09:05",
+        "location": null
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 13,
+    "stops": [
+      {
+        "name": "IS Sadan",
+        "scheduledTime": "08:13",
+        "location": {
+          "lat": 17.351975,
+          "lng": 78.50746,
+          "source": "TGSRTC nearby stop",
+          "reference": "Is Sadan"
+        }
+      },
+      {
+        "name": "Yadagiri Talkies",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.346563,
+          "lng": 78.50821,
+          "source": "TGSRTC nearby stop",
+          "reference": "Yadagiri Theater"
+        }
+      },
+      {
+        "name": "Owaisi Hospital",
+        "scheduledTime": "08:17",
+        "location": {
+          "lat": 17.343449,
+          "lng": 78.506801,
+          "source": "TGSRTC nearby stop",
+          "reference": "Owaisi Hospital"
+        }
+      },
+      {
+        "name": "Chandrayangutta",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.326609,
+          "lng": 78.476548,
+          "source": "TGSRTC nearby stop",
+          "reference": "Chandrayangutta"
+        }
+      },
+      {
+        "name": "Bandlaguda - Rayalsee",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.31672,
+          "lng": 78.466358,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bandlaguda"
+        }
+      },
+      {
+        "name": "Mehfil Hotel",
+        "scheduledTime": "08:45",
+        "location": null
+      },
+      {
+        "name": "Durganagar X Road",
+        "scheduledTime": "08:50",
+        "location": {
+          "lat": 17.314449,
+          "lng": 78.44384,
+          "source": "TGSRTC nearby stop",
+          "reference": "Durganagar X Road"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 14,
+    "stops": [
+      {
+        "name": "JNTU",
+        "scheduledTime": "08:00",
+        "location": {
+          "lat": 17.496261,
+          "lng": 78.39441,
+          "source": "TGSRTC nearby stop",
+          "reference": "JNTU X Road"
+        }
+      },
+      {
+        "name": "Housing Board",
+        "scheduledTime": "08:03",
+        "location": {
+          "lat": 17.487512,
+          "lng": 78.391368,
+          "source": "TGSRTC nearby stop",
+          "reference": "KPHB Colony Mig"
+        }
+      },
+      {
+        "name": "Kukatpally",
+        "scheduledTime": "08:10",
+        "location": {
+          "lat": 17.483785,
+          "lng": 78.412671,
+          "source": "TGSRTC nearby stop",
+          "reference": "Kukatpally"
+        }
+      },
+      {
+        "name": "Moosapet Bus Stop",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.47176,
+          "lng": 78.426163,
+          "source": "TGSRTC nearby stop",
+          "reference": "Moosapet"
+        }
+      },
+      {
+        "name": "Erragadda",
+        "scheduledTime": "08:17",
+        "location": {
+          "lat": 17.454412,
+          "lng": 78.434858,
+          "source": "TGSRTC nearby stop",
+          "reference": "Erragadda"
+        }
+      },
+      {
+        "name": "Maitrivanam",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.438021,
+          "lng": 78.443413,
+          "source": "TGSRTC nearby stop",
+          "reference": "Maitrivanam"
+        }
+      },
+      {
+        "name": "Ameerpet Big Bazaar",
+        "scheduledTime": "08:22",
+        "location": {
+          "lat": 17.432495,
+          "lng": 78.447226,
+          "source": "TGSRTC nearby stop",
+          "reference": "Ameerpet"
+        }
+      },
+      {
+        "name": "Panjagutta X Road",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.426826,
+          "lng": 78.451939,
+          "source": "TGSRTC nearby stop",
+          "reference": "Panjaguta"
+        }
+      },
+      {
+        "name": "Sakshi Office",
+        "scheduledTime": "08:35",
+        "location": null
+      },
+      {
+        "name": "Virinchi Hospital",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.4080948,
+          "lng": 78.4514943,
+          "source": "OpenStreetMap landmark",
+          "reference": "way/116037991"
+        }
+      },
+      {
+        "name": "NMDC",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.398849,
+          "lng": 78.449509,
+          "source": "TGSRTC nearby stop",
+          "reference": "Nmdc"
+        }
+      },
+      {
+        "name": "Mehdipatnam",
+        "scheduledTime": "08:45",
+        "location": {
+          "lat": 17.394709,
+          "lng": 78.440319,
+          "source": "TGSRTC nearby stop",
+          "reference": "Mehdipatnam"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 15,
+    "stops": [
+      {
+        "name": "Chaderghat",
+        "scheduledTime": "08:20",
+        "location": {
+          "lat": 17.379882,
+          "lng": 78.493368,
+          "source": "TGSRTC nearby stop",
+          "reference": "Chadarghat"
+        }
+      },
+      {
+        "name": "Madina",
+        "scheduledTime": "08:25",
+        "location": {
+          "lat": 17.370374,
+          "lng": 78.4755916,
+          "source": "TGSRTC nearby stop",
+          "reference": "Madina"
+        }
+      },
+      {
+        "name": "Bahadurpura X Road",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.355804,
+          "lng": 78.454508,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bahadurpura"
+        }
+      },
+      {
+        "name": "Kishanbagh",
+        "scheduledTime": "08:35",
+        "location": {
+          "lat": 17.359178,
+          "lng": 78.443563,
+          "source": "TGSRTC nearby stop",
+          "reference": "Kishanbagh"
+        }
+      },
+      {
+        "name": "MM Pahadi - 9 No.",
+        "scheduledTime": "08:37",
+        "location": {
+          "lat": 17.351,
+          "lng": 78.429,
+          "source": "TGSRTC nearby stop",
+          "reference": "Mm Pahadi"
+        }
+      },
+      {
+        "name": "Chintalmet",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.35213,
+          "lng": 78.422105,
+          "source": "TGSRTC nearby stop",
+          "reference": "Chintalmet"
+        }
+      },
+      {
+        "name": "Pillar No. 202",
+        "scheduledTime": "08:45",
+        "location": null
+      },
+      {
+        "name": "Dairy Farm",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.345684,
+          "lng": 78.415906,
+          "source": "TGSRTC nearby stop",
+          "reference": "Dairy Farm Upperpally"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  },
+  {
+    "number": 16,
+    "stops": [
+      {
+        "name": "Chanchalguda",
+        "scheduledTime": "08:00",
+        "location": {
+          "lat": 17.3673732,
+          "lng": 78.4965799,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/2948168557"
+        }
+      },
+      {
+        "name": "Dabirpura",
+        "scheduledTime": "08:05",
+        "location": {
+          "lat": 17.3665277,
+          "lng": 78.4901244,
+          "source": "OpenStreetMap landmark",
+          "reference": "node/626897247"
+        }
+      },
+      {
+        "name": "Mallikapurnitue - Volta",
+        "scheduledTime": "08:10",
+        "location": null
+      },
+      {
+        "name": "Haribowli",
+        "scheduledTime": "08:12",
+        "location": null
+      },
+      {
+        "name": "Shalibanda",
+        "scheduledTime": "08:15",
+        "location": {
+          "lat": 17.354719,
+          "lng": 78.473156,
+          "source": "TGSRTC nearby stop",
+          "reference": "Shalibanda"
+        }
+      },
+      {
+        "name": "Pathedarwaza",
+        "scheduledTime": "08:18",
+        "location": null
+      },
+      {
+        "name": "Vazir Ali Masjid",
+        "scheduledTime": "08:22",
+        "location": null
+      },
+      {
+        "name": "Bahadurpura X Road",
+        "scheduledTime": "08:30",
+        "location": {
+          "lat": 17.355804,
+          "lng": 78.454508,
+          "source": "TGSRTC nearby stop",
+          "reference": "Bahadurpura"
+        }
+      },
+      {
+        "name": "Tadbun X Road",
+        "scheduledTime": "08:40",
+        "location": {
+          "lat": 17.345249,
+          "lng": 78.450771,
+          "source": "TGSRTC nearby stop",
+          "reference": "Tadbund"
+        }
+      },
+      {
+        "name": "Baba Kanta",
+        "scheduledTime": "08:45",
+        "location": null
+      },
+      {
+        "name": "Aramghar",
+        "scheduledTime": null,
+        "location": {
+          "lat": 17.321841,
+          "lng": 78.432067,
+          "source": "TGSRTC nearby stop",
+          "reference": "Aramghar"
+        }
+      },
+      {
+        "name": "Lords College",
+        "scheduledTime": "09:15",
+        "location": {
+          "lat": 17.3418,
+          "lng": 78.368,
+          "source": "campus centroid",
+          "reference": "https://latitudeandlongitude.net/en/place/india/telangana/lords-institute-of-engineering-technology/W776658792"
+        }
+      }
+    ]
+  }
+]

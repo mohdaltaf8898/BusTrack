@@ -22,6 +22,7 @@ import { useApp } from "@/state/app-provider";
 import { PageHeader } from "@/components/page-header";
 import { SimulationControls } from "@/components/dashboard/simulation-controls";
 import { LiveMap } from "@/components/maps/live-map";
+import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -298,7 +299,7 @@ export function DriverDashboard() {
         </Alert>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
@@ -354,7 +355,7 @@ export function DriverDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
             <div>
@@ -380,7 +381,8 @@ export function DriverDashboard() {
               onSelectStop={selectStop}
               className="h-[340px] md:h-[430px]"
             />
-            <div className="grid gap-2.5 sm:grid-cols-3">
+            <RouteAccuracyNote route={routeSnapshot.route} />
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-3">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Coordinates</p>
                 <p className="mt-1 font-mono text-xs font-bold text-navy-950">

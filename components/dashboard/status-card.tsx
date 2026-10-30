@@ -40,9 +40,9 @@ export function StatusCard() {
     isLiveData,
   } = snapshot;
   const offline = busStatus === "offline" || isStale;
-  const etaLabel = offline
-    ? "Paused"
-    : formatEta(selectedStopEta.etaSeconds);
+  const etaLabel = selectedStopEta.status === "unmapped"
+    ? "Unavailable"
+    : offline ? "Paused" : formatEta(selectedStopEta.etaSeconds);
 
   return (
     <Card className="relative overflow-hidden border-0 bg-navy-950 p-5 text-white shadow-float sm:p-6">
@@ -72,16 +72,16 @@ export function StatusCard() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-[1.15fr_0.85fr] sm:items-end">
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-[1.15fr_0.85fr] sm:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">
               Estimated arrival · {selectedStop.name}
             </p>
             <div className="mt-1 flex flex-wrap items-end gap-3">
-              <span className="text-[44px] font-extrabold leading-none tracking-tight sm:text-6xl">
+              <span className={selectedStopEta.status === "unmapped" ? "text-3xl font-extrabold leading-none tracking-tight sm:text-4xl" : "text-[44px] font-extrabold leading-none tracking-tight sm:text-6xl"}>
                 {etaLabel}
               </span>
-              {!offline && selectedStopEta.etaSeconds > 30 && (
+              {!offline && selectedStopEta.etaSeconds != null && selectedStopEta.etaSeconds > 30 && (
                 <span className="mb-1 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2 py-1 text-xs font-semibold text-white/80">
                   <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
                   around {formatClock(selectedStopEta.etaAt)} IST
@@ -89,7 +89,9 @@ export function StatusCard() {
               )}
             </div>
             <p className="mt-2 max-w-xl text-xs leading-5 text-white/60">
-              {describeEtaMethod(route, traffic)}
+              {selectedStopEta.status === "unmapped"
+                ? "This stop has no verified map location yet. Its published pickup time is available on the routes page."
+                : describeEtaMethod(route, traffic)}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2.5">
@@ -146,11 +148,11 @@ export function StatusCard() {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <SimulatedTag label={isLiveData ? "ETA estimated" : "Simulated location"} />
+          <SimulatedTag label={isLiveData ? "Simulated traffic ETA" : "Simulated location"} />
           <Badge tone="navy" className="bg-white/10 text-white/80 ring-white/10">
             {isStale ? "Last known position" : snapshot.sourceLabel}
           </Badge>
-          <span className="text-[11px] text-white/45">Not an official bus schedule.</span>
+          <span className="text-[11px] text-white/45">2025–26 pickup times; confirm current service.</span>
         </div>
 
         {(offline || isStale) && (

@@ -8,10 +8,11 @@ import { UpcomingStops } from "@/components/dashboard/upcoming-stops";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SimulationControls } from "@/components/dashboard/simulation-controls";
 import { LiveMap } from "@/components/maps/live-map";
+import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, EmptyState } from "@/components/ui/feedback";
-import { SimulatedTag, SourceLabel } from "@/components/ui/labels";
+import { SourceLabel } from "@/components/ui/labels";
 
 export default function DashboardPage() {
   const { state, snapshot, selectStop } = useApp();
@@ -42,7 +43,7 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <div className="min-w-0">
@@ -55,7 +56,6 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-1.5">
-              <SimulatedTag label={snapshot.isLiveData ? "ETA estimate" : "Simulated"} />
               <SourceLabel mode={snapshot.dataMode} />
             </div>
           </CardHeader>
@@ -73,10 +73,7 @@ export default function DashboardPage() {
               className="h-[330px] md:h-[420px]"
             />
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[11px] leading-5 text-slate-500">
-                OpenStreetMap tiles · approximate Hyderabad coordinates · generated vehicle position.
-                Tap a stop marker to change the selected ETA stop.
-              </p>
+              <RouteAccuracyNote route={snapshot.route} />
               <ButtonLink href="/track" variant="soft" size="sm">
                 Full tracking <ArrowUpRight className="h-4 w-4" />
               </ButtonLink>

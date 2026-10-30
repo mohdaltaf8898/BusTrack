@@ -16,6 +16,7 @@ next-env.d.ts
 
 # testing / tooling
 /coverage
+/.cache
 /.vitest
 *.tsbuildinfo
 .DS_Store

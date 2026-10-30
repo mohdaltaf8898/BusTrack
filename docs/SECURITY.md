@@ -34,7 +34,7 @@
 - Latitude/longitude bounds and a Hyderabad-area bounding box.
 - Maximum location age of 60 seconds and maximum future skew of 15 seconds.
 - Heading `0–360`, speed `0–160 km/h`, accuracy `0–1000 m`.
-- An 800m maximum off-route distance from the configured polyline.
+- An 800m maximum off-route distance from a staff-verified polyline.
 - Source fixed to `gps` by the server.
 
 `app/api/locations/route.ts` additionally checks:
@@ -42,14 +42,14 @@
 - Trip exists, is `active`, and has `sharing_enabled = true`.
 - Bus belongs to the trip and its assigned route matches.
 - Driver role is assigned to both the bus and trip; admin role may manage but cannot bypass trip/sharing state.
-- `recordedAt` is fresh and coordinates are inside the route corridor.
+- `recordedAt` is fresh, the route is explicitly marked `verified`, and coordinates are inside the route corridor. Inferred seed/OSRM geometry is rejected for GPS.
 - Inserts are written by the service-role client; direct client writes are revoked.
 
 ## Database RLS
 
 All tables have RLS enabled.
 
-- `profiles`: users read/update their own row; admins can manage profiles. A trigger prevents any non-admin from changing a role.
+- `profiles`: users read/update their own row; admins can manage profiles. A trigger blocks non-admin role changes while allowing the trusted database owner to bootstrap the first admin.
 - `routes`, `stops`, `buses`: publicly readable; only admins have write policies. API routes use the service role for validated mutations.
 - `trips`: authenticated users can read trip state; direct `INSERT/UPDATE/DELETE` grants are revoked from `anon`/`authenticated`. Writes use validated API routes or security-definer RPCs.
 - `bus_locations`: authenticated users can read only their own driver-trip locations, active-trip locations, recent completed-trip last-known locations (15 minutes), or all locations if admin. Direct write grants are revoked.
@@ -62,15 +62,9 @@ Foreign keys cascade only for trip-owned locations/notifications; route deletion
 
 ## Secure RPCs
 
-The migration includes security-definer functions that can be called directly by an authenticated driver device as a second validated path:
+Authenticated users can invoke the role/assignment-checked trip functions `start_driver_trip`, `end_driver_trip`, `set_trip_location_sharing`, and `mark_notification_read` as permitted by each function. Direct client writes to trips and locations remain revoked.
 
-- `start_driver_trip(bus_id, route_id)`
-- `end_driver_trip(trip_id)`
-- `set_trip_location_sharing(trip_id, enabled)`
-- `submit_bus_location(trip_id, lat, lng, heading, speed, accuracy, recorded_at)`
-- `mark_notification_read(notification_id)`
-
-Each function checks `auth.uid()`, role, assignment, trip state, timestamp freshness, coordinate bounds, and route-shape bounding box. Execution is revoked from `public` and granted only to `authenticated`.
+The original `submit_bus_location` RPC only checked a bounding box; the later migration revokes its execution from `public`, `anon`, and `authenticated`. The shipped driver UI submits GPS through the server API, which additionally requires a staff-verified corridor and applies the tighter 800 m polyline check. The API's catalog road-route endpoint accepts fixed route IDs only and proxies no arbitrary URLs or user coordinates.
 
 ## Secret handling
 
@@ -108,8 +102,8 @@ Each function checks `auth.uid()`, role, assignment, trip state, timestamp fresh
 
 ## Known prototype limitations
 
-- The service-role API is the main privileged path; direct RPCs are provided but not used by the shipped driver UI.
-- The route-corridor check uses polyline distance (API) and shape bounding box (RPC), not road snapping.
+- The service-role API is the privileged GPS path; trip RPCs exist separately, but the weaker GPS RPC is not executable by browser roles.
+- GPS checks use polyline distance from an operator-verified route, not map matching. Changing stop coordinates or order invalidates verification.
 - The in-memory rate limiter is per server instance.
 - Demo localStorage state can be modified by the browser and must never be treated as trusted server data.
 - No SMS/WhatsApp/push provider is configured; browser notification permission is optional.

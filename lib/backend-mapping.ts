@@ -23,15 +23,22 @@ export interface BackendRouteRow {
   color?: string | null;
   shape?: Coordinates[] | null;
   stop_indices?: number[] | null;
+  geometry_source?: Route["geometrySource"] | null;
+  schedule_year?: string | null;
+  scheduled_duration_minutes?: number | null;
 }
 
 export interface BackendStopRow {
   id: string;
   route_id: string;
   stop_name: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   stop_order: number;
+  scheduled_time?: string | null;
+  location_source?: string | null;
+  location_reference?: string | null;
+  note?: string | null;
 }
 
 export interface BackendBusRow {
@@ -111,21 +118,26 @@ export function mapBackendData(data: BackendData, now: number) {
       .map((stop) => ({
         id: stop.id,
         name: stop.stop_name,
-        lat: Number(stop.latitude),
-        lng: Number(stop.longitude),
+        lat: stop.latitude == null || stop.longitude == null ? null : Number(stop.latitude),
+        lng: stop.latitude == null || stop.longitude == null ? null : Number(stop.longitude),
         order: stop.stop_order,
-        landmark: "Configured stop",
+        scheduledTime: stop.scheduled_time?.slice(0, 5) ?? null,
+        locationSource: stop.location_source ?? null,
+        locationReference: stop.location_reference ?? null,
+        note: stop.note ?? null,
       }));
     if (stops.length < 2 || !Array.isArray(row.shape) || row.shape.length < 2) return [];
 
-    const shape = row.shape
-      .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
-    if (shape.length < 2) return [];
+    const shape = row.shape;
+    if (!shape.every((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng))) return [];
 
-    const stopIndices =
-      Array.isArray(row.stop_indices) && row.stop_indices.length === stops.length
-        ? row.stop_indices.map((index) => Math.max(0, Math.min(shape.length - 1, index)))
-        : stops.map((stop) => nearestShapeIndex({ lat: stop.lat, lng: stop.lng }, shape));
+    const stopIndices = stops.map((stop, index) => {
+      if (stop.lat == null || stop.lng == null) return -1;
+      const suppliedIndex = row.stop_indices?.[index];
+      return typeof suppliedIndex === "number" && Number.isInteger(suppliedIndex) && suppliedIndex >= 0 && suppliedIndex < shape.length
+        ? suppliedIndex
+        : nearestShapeIndex({ lat: stop.lat, lng: stop.lng }, shape);
+    });
 
     return [
       {
@@ -139,6 +151,9 @@ export function mapBackendData(data: BackendData, now: number) {
         stops,
         shape,
         stopIndices,
+        geometrySource: row.geometry_source === "verified" || row.geometry_source === "road" ? row.geometry_source : "straight",
+        scheduleYear: row.schedule_year ?? null,
+        scheduledDurationMinutes: row.scheduled_duration_minutes ?? null,
         color: row.color ?? "#2563eb",
         averageSpeedKmh: row.average_speed_kmh ?? 26,
         estimatedDurationMinutes: row.estimated_duration_minutes ?? 45,
@@ -152,7 +167,7 @@ export function mapBackendData(data: BackendData, now: number) {
     number: row.bus_number,
     routeId: row.assigned_route_id,
     driverId: row.driver_id ?? null,
-    capacity: row.capacity ?? 45,
+    capacity: row.capacity ?? null,
     status: normalizeStatus(row.status),
     model: row.model ?? "College coach",
     serviceAvailability:

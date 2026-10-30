@@ -324,8 +324,8 @@ export function advanceSimulation(
   });
 
   route.stops.forEach((stop, index) => {
-    const stopDistance = geometry.stopDistances[index] ?? 0;
-    if (index === 0) return;
+    const stopDistance = geometry.stopDistances[index];
+    if (index === 0 || stopDistance == null) return;
 
     const approachKey = `approach:${state.lap}:${stop.id}`;
     if (

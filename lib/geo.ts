@@ -58,7 +58,7 @@ export function buildRouteGeometry(route: Route): RouteGeometry {
   return {
     points,
     cumulative,
-    stopDistances: route.stopIndices.map((index) => cumulative[index] ?? 0),
+    stopDistances: route.stopIndices.map((index) => index < 0 ? null : (cumulative[index] ?? null)),
     totalDistanceMeters: cumulative[cumulative.length - 1] ?? 0,
     bounds: {
       minLat: Math.min(...lats),

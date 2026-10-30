@@ -7,16 +7,6 @@ create extension if not exists pgcrypto;
 -- ---------------------------------------------------------------------------
 -- Shared helpers
 -- ---------------------------------------------------------------------------
-create or replace function public.current_user_role()
-returns text
-language sql
-stable
-security definer
-set search_path = public, pg_temp
-as $$
-  select role from public.profiles where id = auth.uid();
-$$;
-
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -39,6 +29,18 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- The profiles table must exist before PostgreSQL validates this SQL function.
+create or replace function public.current_user_role()
+returns text
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select role from public.profiles where id = auth.uid();
+$$;
+
 
 create table if not exists public.routes (
   id text primary key,
