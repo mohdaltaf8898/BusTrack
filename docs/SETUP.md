@@ -15,6 +15,7 @@ The hosted BusTrack project has been provisioned with the schema and seed; the l
    - `supabase/migrations/20261030135413_bustrack_init.sql`
    - `supabase/migrations/20261030135426_bustrack_published_routes.sql`
    - `supabase/migrations/20261030140136_bustrack_function_grants.sql`
+   - `supabase/migrations/20261030144351_bustrack_guarded_gps.sql`
    - `supabase/seed.sql`
 3. The seed adds 16 historical routes and placeholder `SIM-*` buses without overwriting matching rows. It contains no real driver identities or contacts. An older installation may still contain old demo routes; review and remove/migrate them deliberately after backing up, rather than deleting real records automatically.
 4. Check **Database → Publications → supabase_realtime** includes `bus_locations` and `notifications`. The initial migration tries to add them. If a table is absent, add only the missing table in the dashboard or SQL editor.
@@ -78,7 +79,7 @@ There is currently no trace-import UI; the route shape must be provisioned by a 
 | Symptom | What to check |
 | --- | --- |
 | `503 DEMO_MODE` | URL, anon key and server-only service key are all present; restart/redeploy. |
-| Cannot promote first admin | Run the update in the trusted database-owner SQL editor after all three migrations; verify Auth user/profile exists. |
+| Cannot promote first admin | Run the update in the trusted database-owner SQL editor after all four migrations; verify Auth user/profile exists. |
 | Driver cannot start a trip | Driver role, bus assignment, route and vehicle status. |
 | `409 ROUTE_NOT_VERIFIED` | Staff must supply and review a real corridor; never mark an estimate verified just to bypass the gate. |
 | `422` GPS rejection | Timestamp may be stale or the coordinate outside Hyderabad/800 m corridor; check device and verified trace. |

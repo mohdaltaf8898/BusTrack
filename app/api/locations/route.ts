@@ -51,6 +51,20 @@ function publicLocation(row: LocationRow) {
 const LOCATION_FIELDS =
   "id,bus_id,route_id,trip_id,latitude,longitude,heading,speed_kmh,accuracy_meters,source,recorded_at";
 
+const GUARDED_WRITE_ERRORS: Record<string, { status: number; message: string }> = {
+  TRIP_NOT_FOUND: { status: 404, message: "The authorized trip was not found." },
+  BUS_MISMATCH: { status: 400, message: "The bus does not belong to this trip." },
+  SHARING_DISABLED: { status: 409, message: "Location sharing is no longer active for this trip." },
+  ROUTE_MISMATCH: { status: 409, message: "The bus and trip route assignments do not match." },
+  ROUTE_CHANGED: { status: 409, message: "The route changed during validation. Please retry." },
+  ROUTE_NOT_FOUND: { status: 404, message: "The configured route was not found." },
+  ROUTE_NOT_VERIFIED: { status: 409, message: "This route needs a verified GPS corridor before live location sharing can be used." },
+  NOT_ASSIGNED: { status: 403, message: "This driver is no longer assigned to the bus and trip." },
+  FORBIDDEN: { status: 403, message: "This account is no longer authorized to send GPS." },
+  OUT_OF_AREA: { status: 422, message: "Coordinates are outside the configured Hyderabad service area." },
+  STALE_LOCATION: { status: 422, message: "The location timestamp is stale or too far in the future." },
+};
+
 export async function POST(request: Request) {
   try {
     const auth = await requireApiUser(request, ["driver", "admin"]);
@@ -130,30 +144,29 @@ export async function POST(request: Request) {
       throw new ApiError(422, "OFF_ROUTE", gps.error ?? "The location is outside the route corridor.");
     }
 
+    // The RPC locks the trip until the insert commits and rechecks sharing,
+    // role, assignment and the exact route shape validated above. Pause/end
+    // updates use the same row lock, so they cannot be bypassed by a stale read.
     const { data: inserted, error: insertError } = await client
-      .from("bus_locations")
-      .insert({
-        bus_id: payload.busId,
-        route_id: trip.route_id,
-        trip_id: trip.id,
-        latitude: payload.latitude,
-        longitude: payload.longitude,
-        heading: payload.heading ?? null,
-        speed_kmh: payload.speedKmh ?? null,
-        accuracy_meters: payload.accuracyMeters ?? null,
-        source: "gps",
-        recorded_at: payload.recordedAt,
+      .rpc("insert_guarded_bus_location", {
+        p_trip_id: trip.id,
+        p_bus_id: payload.busId,
+        p_actor_id: auth.user.id,
+        p_expected_route_id: trip.route_id,
+        p_expected_shape: shape,
+        p_latitude: payload.latitude,
+        p_longitude: payload.longitude,
+        p_heading: payload.heading ?? null,
+        p_speed_kmh: payload.speedKmh ?? null,
+        p_accuracy_meters: payload.accuracyMeters ?? null,
+        p_recorded_at: payload.recordedAt,
       })
-      .select(LOCATION_FIELDS)
       .single();
     if (insertError || !inserted) {
+      const known = insertError?.code === "P0001" ? GUARDED_WRITE_ERRORS[insertError.message] : undefined;
+      if (known && insertError) throw new ApiError(known.status, insertError.message, known.message);
       throw new ApiError(500, "LOCATION_WRITE_FAILED", "The validated location could not be stored.");
     }
-
-    await client
-      .from("trips")
-      .update({ last_location_at: payload.recordedAt })
-      .eq("id", trip.id);
 
     return NextResponse.json(
       {

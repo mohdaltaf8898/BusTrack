@@ -60,7 +60,7 @@ export default function RoutesPage() {
           Pickup order and times are transcribed from the{" "}
           <a href={TIMETABLE_SOURCE_URL} target="_blank" rel="noreferrer" className="font-bold underline underline-offset-2">
             2025–26 route document
-          </a>. It is a historical schedule and may have changed; confirm current routes and times with the transport office.
+          </a>. The route list has been reported as unchanged, but the listed pickup times are from 2025–26 and have not been independently confirmed. Please check times and pickup points with the transport office.
           SIM-* vehicles are placeholders; positions are simulated unless marked as device GPS, and ETAs use simulated traffic.
         </span>
       </Alert>

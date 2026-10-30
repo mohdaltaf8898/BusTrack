@@ -116,7 +116,7 @@ export async function POST(request: Request) {
       if (trip.status !== "active") {
         throw new ApiError(409, "TRIP_NOT_ACTIVE", "Only an active trip can be ended.");
       }
-      const { data: updated, error } = await client
+      let update = client
         .from("trips")
         .update({
           status: "completed",
@@ -124,11 +124,13 @@ export async function POST(request: Request) {
           sharing_enabled: false,
         })
         .eq("id", trip.id)
+        .eq("status", "active");
+      if (auth.profile.role === "driver") update = update.eq("driver_id", auth.user.id);
+      const { data: updated, error } = await update
         .select("id,bus_id,route_id,driver_id,status,sharing_enabled,started_at,ended_at,last_location_at")
-        .single();
-      if (error || !updated) {
-        throw new ApiError(500, "TRIP_END_FAILED", "The trip could not be ended.");
-      }
+        .maybeSingle();
+      if (error) throw new ApiError(500, "TRIP_END_FAILED", "The trip could not be ended.");
+      if (!updated) throw new ApiError(409, "TRIP_CHANGED", "The trip or assignment changed. Refresh and try again.");
       return NextResponse.json({
         ok: true,
         message: "Trip ended. GPS updates are no longer accepted.",
@@ -144,15 +146,17 @@ export async function POST(request: Request) {
         "Location sharing can change only during an active trip.",
       );
     }
-    const { data: updated, error } = await client
+    let update = client
       .from("trips")
       .update({ sharing_enabled: payload.enabled })
       .eq("id", trip.id)
+      .eq("status", "active");
+    if (auth.profile.role === "driver") update = update.eq("driver_id", auth.user.id);
+    const { data: updated, error } = await update
       .select("id,bus_id,route_id,driver_id,status,sharing_enabled,started_at,ended_at,last_location_at")
-      .single();
-    if (error || !updated) {
-      throw new ApiError(500, "SHARING_UPDATE_FAILED", "Location sharing could not be updated.");
-    }
+      .maybeSingle();
+    if (error) throw new ApiError(500, "SHARING_UPDATE_FAILED", "Location sharing could not be updated.");
+    if (!updated) throw new ApiError(409, "TRIP_CHANGED", "The trip or assignment changed. Refresh and try again.");
     return NextResponse.json({
       ok: true,
       message: payload.enabled

@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sampleRoutes } from "@/data/routes";
 
-const server = vi.hoisted(() => ({ geometrySource: "straight", writes: 0 }));
+const server = vi.hoisted(() => ({
+  geometrySource: "straight",
+  writes: 0,
+  rpcError: null as null | { code: string; message: string },
+  rpcArgs: null as null | Record<string, unknown>,
+}));
 
 vi.mock("@/lib/server/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/server/auth")>();
@@ -22,12 +27,20 @@ vi.mock("@/lib/server/auth", async (importOriginal) => {
                 error: null,
               }) }) };
             },
-            insert(value: Record<string, unknown>) {
-              server.writes += 1;
-              return { select: () => ({ single: async () => ({ data: { id: 1, ...value }, error: null }) }) };
-            },
-            update() { return { eq: async () => ({ error: null }) }; },
           };
+        },
+        rpc(name: string, value: Record<string, unknown>) {
+          if (name !== "insert_guarded_bus_location") throw new Error("Unexpected GPS RPC");
+          server.rpcArgs = value;
+          return { single: async () => {
+            if (server.rpcError) return { data: null, error: server.rpcError };
+            server.writes += 1;
+            return { data: {
+              id: 1, bus_id: value.p_bus_id, route_id: value.p_expected_route_id, trip_id: value.p_trip_id,
+              latitude: value.p_latitude, longitude: value.p_longitude, recorded_at: value.p_recorded_at,
+              source: "gps", heading: null, speed_kmh: null, accuracy_meters: null,
+            }, error: null };
+          } };
         },
       };
       return { user: { id: "driver-1" }, profile: { role: "driver" }, client };
@@ -48,7 +61,12 @@ function locationRequest(latitude = sampleRoutes[0].shape[0].lat, longitude = sa
   });
 }
 
-beforeEach(() => { server.geometrySource = "straight"; server.writes = 0; });
+beforeEach(() => {
+  server.geometrySource = "straight";
+  server.writes = 0;
+  server.rpcError = null;
+  server.rpcArgs = null;
+});
 
 describe("real GPS corridor gate", () => {
   it("rejects straight and inferred road paths before writing GPS", async () => {
@@ -67,6 +85,30 @@ describe("real GPS corridor gate", () => {
     expect(result.status).toBe(201);
     expect((await result.json()).mode).toBe("gps");
     expect(server.writes).toBe(1);
+    expect(server.rpcArgs).toMatchObject({
+      p_actor_id: "driver-1", p_bus_id: "bus-sim01", p_expected_route_id: "route-01",
+      p_expected_shape: sampleRoutes[0].shape,
+    });
+  });
+
+  it.each([
+    ["SHARING_DISABLED", 409], ["ROUTE_CHANGED", 409], ["NOT_ASSIGNED", 403],
+    ["FORBIDDEN", 403], ["STALE_LOCATION", 422], ["ROUTE_NOT_VERIFIED", 409],
+  ])("safely maps a transactional %s rejection", async (code, status) => {
+    server.geometrySource = "verified";
+    server.rpcError = { code: "P0001", message: code };
+    const result = await locationPost(locationRequest());
+    expect(result.status).toBe(status);
+    expect((await result.json()).code).toBe(code);
+    expect(server.writes).toBe(0);
+  });
+
+  it("does not expose unexpected database errors", async () => {
+    server.geometrySource = "verified";
+    server.rpcError = { code: "XX000", message: "private database detail" };
+    const result = await locationPost(locationRequest());
+    expect(result.status).toBe(500);
+    expect(JSON.stringify(await result.json())).not.toContain("private database detail");
   });
 
   it("still rejects off-route points even for a verified route", async () => {

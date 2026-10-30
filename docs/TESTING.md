@@ -19,9 +19,20 @@ The Vitest suites cover:
 - Route/stop selection, displayed historical times and unknown locations, dashboard/driver/admin demo interactions, notifications, state persistence, and responsive navigation markup.
 - API role checks, GPS payload/age/bounds validation, unverified-corridor rejection and on/off-corridor behavior with mocked server authorization.
 - Mocked Realtime invalidation and authorized location reads, stale/in-flight response rejection, pause labels, identity changes and private backend-cache clearing.
-- All three SQL migrations and the seed in a local PGlite/PostgreSQL-compatible database with stubbed Supabase Auth: 16 routes, nulls, role-bootstrap/self-escalation protection, revoked GPS writes/RPC, idempotent seed and invalidation after stop edits.
+- All four SQL migrations and the seed in a local PGlite/PostgreSQL-compatible database with stubbed Supabase Auth: 16 routes, role protections, GPS grants and guarded writes, idempotent seed and invalidation after stop edits.
 
 The PGlite test is not a hosted Supabase test. It does not prove real Supabase RLS, Auth, Realtime, network access, or device GPS work in a project. Read [VERIFICATION.md](VERIFICATION.md) for the latest actual results.
+
+### Real PostgreSQL lock-race test
+
+For reproducible concurrent transaction checks, use a **fresh, disposable local PostgreSQL database** and a local superuser with permission to create test roles and the `pgcrypto` extension. Never point this test at Supabase or existing data. For example:
+
+```bash
+createdb -h 127.0.0.1 -U postgres bustrack_gps_test_run1
+PGHOST=127.0.0.1 PGUSER=postgres PGDATABASE=bustrack_gps_test_run1 npm run test:gps-locks
+```
+
+The script refuses remote hosts, database names without the `bustrack_gps_test_` prefix, and non-empty databases. It creates test Auth stubs, applies migrations/seed, and exercises competing insert/pause/end transactions using separate connections. Drop the disposable database afterward.
 
 ## Manual browser checklist
 
@@ -37,7 +48,7 @@ Test on iPhone Safari and Android Chrome, and at 320, 375, 390, 430, 768 and 144
 
 ## Configured backend checklist — requires a test project and driver device
 
-1. Apply all three migrations and seed; confirm Auth users, roles, RLS and Realtime publication as in [SETUP.md](SETUP.md).
+1. Apply all four migrations and seed to a separate test project; confirm Auth users, roles, RLS and Realtime publication as in [SETUP.md](SETUP.md). They are already applied to the existing BusTrack project.
 2. Without a verified corridor, confirm assigned driver GPS writes return `409 ROUTE_NOT_VERIFIED`. Obtain and review actual stop positions/trace; do not mark the estimated path verified.
 3. Set the reviewed corridor, replace simulated vehicles, assign a driver, start an authorized trip on HTTPS, enable sharing and grant device location permission.
 4. Verify the student view receives the real update, and that stale/future/off-route positions are rejected. Stop sharing/end the trip; confirm writes stop and privacy rules hold.

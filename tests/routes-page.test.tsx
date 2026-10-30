@@ -8,7 +8,8 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/routes" }));
 describe("historical routes and stops", () => {
   it("browses 16 routes, exposes historical times and identifies unmapped/ambiguous stops", async () => {
     render(<AppProvider><RoutesPage /></AppProvider>);
-    await screen.findByText(/historical schedule and may have changed/i);
+    await screen.findByText(/route list has been reported as unchanged/i);
+    expect(screen.getByText(/pickup times are from 2025–26 and have not been independently confirmed/i)).toBeInTheDocument();
     expect(screen.getByText(/2025–26 pickup: 8:47 AM/)).toBeInTheDocument();
     const unmapped = screen.getByText("Pillar No. 26").closest("button");
     expect(unmapped).not.toBeNull();

@@ -10,9 +10,9 @@ Driver browser (HTTPS)
   ├─ /api/trips POST start  -> active trip ID
   ├─ /api/trips POST share  -> sharing_enabled = true
   ├─ navigator.geolocation.watchPosition()
-  └─ /api/locations POST    -> validated, service-role insert
-          ├─ bus_locations table
-          ├─ trips.last_location_at
+  └─ /api/locations POST    -> validated, service-only guarded database RPC
+          ├─ row locks + authorization/route recheck
+          ├─ bus_locations + trips.last_location_at in one transaction
           └─ Supabase Realtime INSERT event
                   └─ authorized /api/locations read -> selected-bus dashboard
                      (also polled every 12 seconds)
@@ -105,7 +105,7 @@ For the selected bus, an INSERT event triggers an authenticated `GET /api/locati
 
 - A fresh remote location is displayed as **Live GPS** with its recorded timestamp.
 - After `NEXT_PUBLIC_STALE_LOCATION_SECONDS` (default 45), the UI shows a stale warning and keeps the last-known marker.
-- When a trip ends, sharing is disabled and subsequent GPS requests are rejected when their trip-state check observes the change. A request already in flight can race with that change; transactional coordination is required before a real pilot.
+- GPS writes and pause/end changes serialize on the same trip row. A write that acquires the lock first completes before pause/end; after the server confirms pause/end, subsequent writes are rejected. A failed pause request or browser unmount alone does not confirm server-side sharing is off.
 - For non-admin users, `GET /api/locations` does not return positions from trips ended more than 15 minutes ago; admins can inspect older positions.
 - If no remote location exists, the student dashboard continues to show the labelled simulated marker.
 
@@ -131,6 +131,6 @@ This checklist requires a configured Supabase project and a real device; it has 
 - Browser GPS accuracy depends on device, satellite visibility, and OS permissions.
 - The app does not guarantee background GPS while the screen is locked; a native mobile app is better for production.
 - The corridor must be a staff-verified trace; an OSRM estimate is not one. Off-route rejection uses polyline distance, not map matching or proof of the bus route.
-- Location insert and trip-sharing changes are not yet coordinated in one database transaction; an in-flight write can race a pause/end action. Resolve and test this before collecting real GPS.
+- Local PostgreSQL lock-race and hosted rollback checks passed, but actual signed-in Auth, Realtime delivery and driver-device GPS still need end-to-end testing before a pilot.
 - Rate limiting is in-memory and should be distributed for production.
 - SMS/WhatsApp/server push notification delivery is not implemented.

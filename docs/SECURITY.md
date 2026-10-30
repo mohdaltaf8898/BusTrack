@@ -43,7 +43,7 @@
 - Bus belongs to the trip and its assigned route matches.
 - Driver role is assigned to both the bus and trip; admin role may manage but cannot bypass trip/sharing state.
 - `recordedAt` is fresh, the route is explicitly marked `verified`, and coordinates are inside the route corridor. Inferred seed/OSRM geometry is rejected for GPS.
-- Inserts are written by the service-role client; direct client writes are revoked.
+- The service-only `insert_guarded_bus_location` RPC locks the trip, bus, route and actor profile, rechecks sharing/assignment/role and the exact corridor checked by the API, then inserts and updates `last_location_at` in the same transaction. Direct client writes are revoked; a table trigger also guards older service-role insert paths.
 
 ## Database RLS
 
@@ -83,7 +83,7 @@ The original `submit_bus_location` RPC only checked a bounding box; its executio
 
 - A student page never calls `navigator.geolocation` for driver tracking.
 - Driver device GPS starts only after: Supabase sign-in, assigned bus, server-authorized active trip ID, sharing enabled, and browser permission granted.
-- Turning sharing off or ending a trip stops the browser watch and causes later GPS requests to be rejected when they observe the new state. An already in-flight write can race the state change; transactional coordination must be added and tested before real deployment.
+- Turning sharing off or ending a trip stops the browser watch and requests a server state change. The GPS insert and pause/end contend for the same trip row lock: a write that wins the lock commits before pause/end; once the server has confirmed pause/end, later writes are rejected. If the state-change request fails or a browser unmounts, the server may still show sharing enabled and requires an explicit retry/end.
 - Last-known position is a bus position from an authorized active/recently completed trip, not an off-duty driver location.
 - Contact details are placeholders; no actual college phone numbers are included.
 
