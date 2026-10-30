@@ -83,7 +83,7 @@ The original `submit_bus_location` RPC only checked a bounding box; its executio
 
 - A student page never calls `navigator.geolocation` for driver tracking.
 - Driver device GPS starts only after: Supabase sign-in, assigned bus, server-authorized active trip ID, sharing enabled, and browser permission granted.
-- Turning sharing off or ending a trip stops the watch and prevents future accepted writes.
+- Turning sharing off or ending a trip stops the browser watch and causes later GPS requests to be rejected when they observe the new state. An already in-flight write can race the state change; transactional coordination must be added and tested before real deployment.
 - Last-known position is a bus position from an authorized active/recently completed trip, not an off-duty driver location.
 - Contact details are placeholders; no actual college phone numbers are included.
 

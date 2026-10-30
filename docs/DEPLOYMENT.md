@@ -97,7 +97,7 @@ Browser Geolocation requires a secure context. Vercel provides HTTPS by default.
 9. If Supabase is configured, sign in as an assigned driver and verify server-authorized start/share; test stale/off-route rejection.
 10. Test on iPhone Safari and Android Chrome at 375px and 430px widths; check no horizontal scrolling.
 
-For the existing `bustrack` project, Git auto-deployments are disabled; pushing a branch alone does not update production. An authorized operator must explicitly deploy the desired commit and confirm the production alias.
+For the existing `bustrack` project, pushes to the Arena feature branch create preview deployments but do not automatically update the production domain. An authorized operator must explicitly deploy the desired commit to production and confirm the alias.
 
 ## 7. Rollback
 

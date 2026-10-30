@@ -18,7 +18,8 @@ The Vitest suites cover:
 - OSRM payload validation, ordered snapped waypoints, fixed-catalogue routing, failure fallback, stale-response rejection, verified-route protection, and simulation progress when geometry changes.
 - Route/stop selection, displayed historical times and unknown locations, dashboard/driver/admin demo interactions, notifications, state persistence, and responsive navigation markup.
 - API role checks, GPS payload/age/bounds validation, unverified-corridor rejection and on/off-corridor behavior with mocked server authorization.
-- Both SQL migrations and the seed in a local PGlite/PostgreSQL-compatible database with stubbed Supabase Auth: 16 routes, nulls, role-bootstrap/self-escalation protection, revoked GPS writes/RPC, idempotent seed and invalidation after stop edits.
+- Mocked Realtime invalidation and authorized location reads, stale/in-flight response rejection, pause labels, identity changes and private backend-cache clearing.
+- All three SQL migrations and the seed in a local PGlite/PostgreSQL-compatible database with stubbed Supabase Auth: 16 routes, nulls, role-bootstrap/self-escalation protection, revoked GPS writes/RPC, idempotent seed and invalidation after stop edits.
 
 The PGlite test is not a hosted Supabase test. It does not prove real Supabase RLS, Auth, Realtime, network access, or device GPS work in a project. Read [VERIFICATION.md](VERIFICATION.md) for the latest actual results.
 

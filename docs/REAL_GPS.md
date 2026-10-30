@@ -14,8 +14,8 @@ Driver browser (HTTPS)
           ├─ bus_locations table
           ├─ trips.last_location_at
           └─ Supabase Realtime INSERT event
-                  ├─ student dashboard subscription
-                  └─ 5-second /api/locations polling fallback
+                  └─ authorized /api/locations read -> selected-bus dashboard
+                     (also polled every 12 seconds)
 ```
 
 Student pages never call `navigator.geolocation` for driver tracking. They receive authorized trip locations from the database/API.
@@ -34,7 +34,7 @@ Student pages never call `navigator.geolocation` for driver tracking. They recei
 5. Server returns a UUID `tripId`.
 6. `POST /api/trips { action: "share", tripId, enabled: true }` marks the active trip `sharing_enabled = true`.
 7. Only now does `components/driver/driver-dashboard.tsx` request browser Geolocation and start `watchPosition`.
-8. Sharing OFF, End Trip, or component unmount calls `clearWatch()` and cancels pending writes.
+8. Sharing OFF, End Trip, or component unmount calls `clearWatch()` to stop new browser readings. Sharing OFF and End Trip also request a server state change. Unmounting alone does not change server sharing state, and an already in-flight request is not cancelled.
 
 ## 3. Ingestion payload
 
@@ -99,14 +99,14 @@ The migration attempts to add `bus_locations` to `supabase_realtime`. The client
 - recently completed trips (15 minutes),
 - admins.
 
-The provider also polls `GET /api/locations?busId=...` every five seconds for the selected bus. This is a fallback, not a bypass: the same authorization checks apply.
+For the selected bus, an INSERT event triggers an authenticated `GET /api/locations?busId=...` read rather than trusting the event's potentially delayed trip state. The same read is polled every 12 seconds as a fallback; pause/end changes can therefore take approximately one polling interval to appear, longer when offline. Older in-flight reads and reads from a previous identity or selection are discarded.
 
 ## 6. Stale and last-known behavior
 
 - A fresh remote location is displayed as **Live GPS** with its recorded timestamp.
 - After `NEXT_PUBLIC_STALE_LOCATION_SECONDS` (default 45), the UI shows a stale warning and keeps the last-known marker.
-- When a trip ends, sharing stops and future GPS writes are rejected.
-- `GET /api/locations` does not return positions from trips ended more than 15 minutes ago; this avoids exposing off-duty driver locations.
+- When a trip ends, sharing is disabled and subsequent GPS requests are rejected when their trip-state check observes the change. A request already in flight can race with that change; transactional coordination is required before a real pilot.
+- For non-admin users, `GET /api/locations` does not return positions from trips ended more than 15 minutes ago; admins can inspect older positions.
 - If no remote location exists, the student dashboard continues to show the labelled simulated marker.
 
 ## 7. Device test checklist
@@ -131,5 +131,6 @@ This checklist requires a configured Supabase project and a real device; it has 
 - Browser GPS accuracy depends on device, satellite visibility, and OS permissions.
 - The app does not guarantee background GPS while the screen is locked; a native mobile app is better for production.
 - The corridor must be a staff-verified trace; an OSRM estimate is not one. Off-route rejection uses polyline distance, not map matching or proof of the bus route.
+- Location insert and trip-sharing changes are not yet coordinated in one database transaction; an in-flight write can race a pause/end action. Resolve and test this before collecting real GPS.
 - Rate limiting is in-memory and should be distributed for production.
-- SMS/WhatsApp/push notification delivery is not implemented.
+- SMS/WhatsApp/server push notification delivery is not implemented.

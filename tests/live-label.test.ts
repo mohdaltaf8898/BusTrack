@@ -39,10 +39,34 @@ describe("live and last-known GPS labels", () => {
     expect(snapshot.dataMode).toBe("simulation");
   });
 
-  it("clears cached locations on sign-out and explicit server expiry", () => {
+  it("clears cached locations on sign-out, role or provider change, and server expiry", () => {
     const state = stateWithRemote(location());
     expect(appReducer(state, { type: "SET_USER", user: null }).remoteLocations).toEqual({});
-    expect(appReducer(state, { type: "CLEAR_REMOTE_LOCATION", routeId: "route-01" }).remoteLocations).toEqual({});
+    expect(appReducer(state, { type: "SET_USER", user: { ...state.user!, role: "admin" } }).remoteLocations).toEqual({});
+    expect(appReducer(state, { type: "SET_USER", user: { ...state.user!, provider: "supabase" } }).remoteLocations).toEqual({});
+    const signedIn = { ...state, user: { ...state.user, provider: "supabase" as const } };
+    const context = { userId: signedIn.user.id, role: signedIn.user.role, routeId: "route-01", busId: "bus-sim01" };
+    expect(appReducer(signedIn, { type: "CLEAR_REMOTE_LOCATION", routeId: "route-01", context }).remoteLocations).toEqual({});
+    const signedOut = appReducer(signedIn, { type: "SET_USER", user: null });
+    expect(appReducer(signedOut, { type: "SET_REMOTE_LOCATION", location: location(), context })).toBe(signedOut);
+  });
+
+  it("clears private backend lists on identity changes while retaining demo alerts", () => {
+    const base = stateWithRemote(location());
+    const adminState = {
+      ...base,
+      user: { ...base.user, provider: "supabase" as const, role: "admin" as const },
+      drivers: base.drivers,
+      backendTrips: [{ id: "trip-1", busId: "bus-sim01", routeId: "route-01", driverId: "driver-1", startedAt: now, endedAt: null, status: "active" as const, sharingEnabled: true, lastLocationAt: now }],
+      notifications: [...base.notifications, { ...base.notifications[0], id: "private", simulated: false }],
+      delayReports: [...base.delayReports, { ...base.delayReports[0], id: "private", simulated: false }],
+    };
+    const signedOut = appReducer(adminState, { type: "SET_USER", user: null });
+    expect(signedOut.drivers).toEqual([]);
+    expect(signedOut.backendTrips).toEqual([]);
+    expect(signedOut.notifications.every((item) => item.simulated)).toBe(true);
+    expect(signedOut.delayReports.every((item) => item.simulated)).toBe(true);
+    expect(appReducer(base, { type: "SET_USER", user: { ...demoUsers.driver } }).drivers).toEqual(base.drivers);
   });
 
   it("does not fabricate backend drivers or buses when the database returns empty lists", () => {
@@ -51,7 +75,7 @@ describe("live and last-known GPS labels", () => {
     expect(mapped.drivers).toEqual([]);
     const updated = appReducer(stateWithRemote(location()), {
       type: "SET_BACKEND_DATA", routes: mapped.routes, buses: mapped.buses, drivers: mapped.drivers,
-      delayReports: [], backendTrips: [], message: "Loaded",
+      delayReports: [], backendTrips: [], message: "Loaded", identity: { userId: null, role: null },
     });
     expect(updated.buses).toEqual([]);
     expect(updated.drivers).toEqual([]);

@@ -24,6 +24,7 @@ import {
 } from "@/lib/app-reducer";
 import { mapBackendData, type BackendData } from "@/lib/backend-mapping";
 import { backendConfig, isSupabaseConfigured, publicSupabaseConfig } from "@/lib/config";
+import { createLocationSynchronizer } from "@/lib/location-sync";
 import { deriveRouteSnapshot, type RouteSnapshot } from "@/lib/selectors";
 import {
   endDemoTrip,
@@ -178,6 +179,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
   const lastPushRef = useRef(0);
+  const backendRequestRef = useRef(0);
 
   const getAccessToken = useCallback(async () => {
     if (!supabase) return null;
@@ -186,7 +188,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const parseLocationRow = useCallback(
-    (row: RealtimeLocationRow, sharingEnabled = true): RemoteBusLocation | null => {
+    (row: RealtimeLocationRow, sharingEnabled: boolean): RemoteBusLocation | null => {
       const buses = stateRef.current.buses;
       const bus = buses.find((item) => item.id === row.bus_id);
       const routeId = row.route_id ?? bus?.routeId;
@@ -418,13 +420,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshBackendData = useCallback(async () => {
     if (!isSupabaseConfigured) return;
+    const user = stateRef.current.user;
+    const userId = user?.provider === "supabase" ? user.id : null;
+    const role = user?.provider === "supabase" ? user.role : null;
+    const requestId = ++backendRequestRef.current;
+    const isCurrent = () => {
+      const current = stateRef.current.user;
+      return requestId === backendRequestRef.current &&
+        (current?.provider === "supabase" ? current.id : null) === userId &&
+        (current?.provider === "supabase" ? current.role : null) === role;
+    };
     try {
-      const token = await getAccessToken();
+      // A selected demo role must never reuse an existing privileged session.
+      const token = userId ? await getAccessToken() : null;
+      if (!isCurrent()) return;
       const response = await fetch("/api/admin", {
         cache: "no-store",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       const body = await readJsonSafely(response);
+      if (!isCurrent()) return;
       if (!response.ok) {
         throw new Error(
           typeof body.error === "string"
@@ -440,23 +455,62 @@ export function AppProvider({ children }: { children: ReactNode }) {
         drivers: mapped.drivers,
         delayReports: mapped.delayReports,
         backendTrips: mapped.trips,
+        identity: { userId, role },
         message:
           typeof body.message === "string"
             ? body.message
             : "Supabase data loaded. Simulated positions remain until an authorized driver sends GPS.",
       });
     } catch (error) {
-      dispatch({
-        type: "SET_ERROR",
-        error: error instanceof Error ? error.message : "Backend data could not be loaded.",
-      });
+      if (isCurrent()) {
+        dispatch({
+          type: "SET_ERROR",
+          error: error instanceof Error ? error.message : "Backend data could not be loaded.",
+        });
+      }
     }
   }, [getAccessToken]);
 
   useEffect(() => {
     if (!state.hydrated || !supabase) return;
     void refreshBackendData();
-  }, [state.hydrated, supabase, state.user?.id, refreshBackendData]);
+  }, [state.hydrated, supabase, state.user?.id, state.user?.role, state.user?.provider, refreshBackendData]);
+
+  const locationSync = useMemo(
+    () => createLocationSynchronizer({
+      getContext: () => {
+        const current = stateRef.current;
+        const bus = current.buses.find((item) => item.routeId === current.selectedRouteId);
+        if (current.user?.provider !== "supabase" || !bus) return null;
+        return {
+          userId: current.user.id,
+          role: current.user.role,
+          routeId: current.selectedRouteId,
+          busId: bus.id,
+        };
+      },
+      getAccessToken,
+      fetchLocation: (busId, token) => fetch(`/api/locations?busId=${encodeURIComponent(busId)}`, {
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      apply: (result) => {
+        if (result.kind === "clear") {
+          dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId: result.context.routeId, context: result.context });
+          return;
+        }
+        const row = result.row as unknown as RealtimeLocationRow;
+        // A bus can have older readings from a previous assignment.
+        if (row.bus_id !== result.context.busId || (row.route_id && row.route_id !== result.context.routeId)) {
+          dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId: result.context.routeId, context: result.context });
+          return;
+        }
+        const location = parseLocationRow(row, result.live);
+        if (location) dispatch({ type: "SET_REMOTE_LOCATION", location, context: result.context });
+      },
+    }),
+    [getAccessToken, parseLocationRow],
+  );
 
   useEffect(() => {
     if (!state.hydrated || !supabase || !isSupabaseConfigured) return;
@@ -467,8 +521,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "bus_locations" },
         (payload) => {
-          const location = parseLocationRow(payload.new as RealtimeLocationRow);
-          if (location) dispatch({ type: "SET_REMOTE_LOCATION", location });
+          // INSERT payloads cannot tell us whether sharing was subsequently
+          // paused or the trip ended. Re-read current state before displaying it.
+          const busId = (payload.new as Partial<RealtimeLocationRow>).bus_id;
+          if (typeof busId === "string") void locationSync.refresh(busId);
         },
       )
       .subscribe((status) => {
@@ -512,47 +568,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       void supabase.removeChannel(locationChannel);
       void supabase.removeChannel(notificationChannel);
     };
-  }, [state.hydrated, supabase, state.buses, parseLocationRow]);
+  }, [state.hydrated, supabase, locationSync]);
 
   useEffect(() => {
-    if (!state.hydrated || !isSupabaseConfigured) return;
-    let cancelled = false;
-    const poll = async () => {
-      const token = await getAccessToken();
-      if (!token || cancelled) return;
-      const routeId = stateRef.current.selectedRouteId;
-      const bus = stateRef.current.buses.find((item) => item.routeId === routeId);
-      if (!bus) return;
-      try {
-        const response = await fetch(`/api/locations?busId=${encodeURIComponent(bus.id)}`, {
-          cache: "no-store",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (cancelled) return;
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId });
-          return;
-        }
-        const body = await readJsonSafely(response);
-        if (cancelled) return;
-        const row = body.location as RealtimeLocationRow | null | undefined;
-        if (!row) {
-          dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId });
-          return;
-        }
-        const location = parseLocationRow(row, body.live === true);
-        if (location) dispatch({ type: "SET_REMOTE_LOCATION", location });
-      } catch {
-        // Polling is a fallback; Realtime may still be connected.
-      }
-    };
-    void poll();
-    const interval = window.setInterval(() => void poll(), 12_000);
+    if (!state.hydrated || !isSupabaseConfigured || state.user?.provider !== "supabase") return;
+    void locationSync.refresh();
+    const interval = window.setInterval(() => void locationSync.refresh(), 12_000);
     return () => {
-      cancelled = true;
       window.clearInterval(interval);
+      locationSync.invalidate();
     };
-  }, [state.hydrated, state.selectedRouteId, state.buses, getAccessToken, parseLocationRow]);
+  }, [state.hydrated, state.selectedRouteId, state.buses, state.user?.id, state.user?.role, state.user?.provider, locationSync]);
 
   useEffect(() => {
     if (!state.hydrated || typeof window === "undefined") return;
@@ -612,9 +638,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    locationSync.invalidate();
+    backendRequestRef.current += 1;
     if (supabase) await supabase.auth.signOut();
     dispatch({ type: "SET_USER", user: null });
-  }, [supabase]);
+  }, [supabase, locationSync]);
 
   const apiPost = useCallback(
     async (path: string, payload: unknown): Promise<Record<string, unknown>> => {
@@ -945,9 +973,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const setDemoRole = useCallback((role: UserRole) => {
+    locationSync.invalidate();
+    backendRequestRef.current += 1;
     dispatch({ type: "SET_USER", user: { ...demoUsers[role] } });
     dispatch({ type: "SET_ERROR", error: null });
-  }, []);
+  }, [locationSync]);
 
   const selectRoute = useCallback((routeId: string) => {
     dispatch({ type: "SELECT_ROUTE", routeId });

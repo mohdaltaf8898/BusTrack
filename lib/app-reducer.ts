@@ -1,6 +1,7 @@
 import { sampleBuses, sampleDrivers, sampleRoutes, demoUsers } from "@/data/routes";
 import { backendConfig, isSupabaseConfigured } from "@/lib/config";
 import { buildRouteGeometry } from "@/lib/geo";
+import type { LocationReadContext } from "@/lib/location-sync";
 import { routeCoordinateKey, type RoadGeometry } from "@/lib/road-routing";
 import { advanceSimulation, type SimulationUpdate } from "@/lib/simulation";
 import type {
@@ -383,9 +384,10 @@ export type AppAction =
       delayReports?: DelayReport[];
       backendTrips?: TripRecord[];
       message: string;
+      identity: { userId: string | null; role: AppUser["role"] | null };
     }
-  | { type: "SET_REMOTE_LOCATION"; location: AppState["remoteLocations"][string] }
-  | { type: "CLEAR_REMOTE_LOCATION"; routeId: string }
+  | { type: "SET_REMOTE_LOCATION"; location: AppState["remoteLocations"][string]; context: LocationReadContext }
+  | { type: "CLEAR_REMOTE_LOCATION"; routeId: string; context: LocationReadContext }
   | { type: "SET_ROAD_GEOMETRY"; routeId: string; geometry: RoadGeometry }
   | { type: "SELECT_ROUTE"; routeId: string }
   | { type: "SELECT_STOP"; stopId: string }
@@ -405,6 +407,12 @@ export type AppAction =
   | { type: "ASSIGN_DRIVER"; busId: string; driverId: string | null }
   | { type: "ADD_DELAY_REPORT"; report: DelayReport }
   | { type: "DELETE_DELAY_REPORT"; id: string };
+
+function matchesLocationContext(state: AppState, context: LocationReadContext) {
+  return state.user?.provider === "supabase" && state.user.id === context.userId &&
+    state.user.role === context.role && state.selectedRouteId === context.routeId &&
+    state.buses.some((bus) => bus.id === context.busId && bus.routeId === context.routeId);
+}
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -440,14 +448,23 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case "SET_USER":
+    case "SET_USER": {
+      const sameIdentity = state.user?.id === action.user?.id &&
+        state.user?.role === action.user?.role && state.user?.provider === action.user?.provider;
+      const backendIdentityChanged = !sameIdentity &&
+        (state.user?.provider === "supabase" || action.user?.provider === "supabase");
       return {
         ...state,
         user: action.user,
         authLoading: false,
-        // Do not keep privileged location data after sign-out or a role switch.
-        remoteLocations: state.user?.id === action.user?.id ? state.remoteLocations : {},
+        // Do not keep privileged backend data after an account/role switch.
+        remoteLocations: sameIdentity ? state.remoteLocations : {},
+        drivers: backendIdentityChanged ? [] : state.drivers,
+        backendTrips: backendIdentityChanged ? [] : state.backendTrips,
+        delayReports: backendIdentityChanged ? state.delayReports.filter((item) => item.simulated) : state.delayReports,
+        notifications: backendIdentityChanged ? state.notifications.filter((item) => item.simulated) : state.notifications,
       };
+    }
 
     case "SET_AUTH_LOADING":
       return { ...state, authLoading: action.value };
@@ -469,6 +486,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case "SET_BACKEND_DATA": {
+      const backendUser = state.user?.provider === "supabase" ? state.user : null;
+      if ((backendUser?.id ?? null) !== action.identity.userId ||
+          (backendUser?.role ?? null) !== action.identity.role) return state;
       const routes = action.routes.length > 0 ? action.routes : state.routes;
       const selectedRoute =
         routes.find((route) => route.id === state.selectedRouteId) ?? routes[0];
@@ -498,6 +518,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case "SET_REMOTE_LOCATION":
+      if (!matchesLocationContext(state, action.context) ||
+          action.location.routeId !== action.context.routeId || action.location.busId !== action.context.busId) return state;
       return {
         ...state,
         remoteLocations: {
@@ -507,7 +529,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case "CLEAR_REMOTE_LOCATION": {
-      if (!state.remoteLocations[action.routeId]) return state;
+      if (!matchesLocationContext(state, action.context) || action.routeId !== action.context.routeId ||
+          !state.remoteLocations[action.routeId]) return state;
       const remoteLocations = { ...state.remoteLocations };
       delete remoteLocations[action.routeId];
       return { ...state, remoteLocations };
