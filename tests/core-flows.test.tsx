@@ -122,6 +122,7 @@ describe("driver demo flow", () => {
 describe("login and admin flows", () => {
   it("switches local demo roles from the login page", async () => {
     renderWithProvider(<LoginPage />);
+    expect(await screen.findByText(/Apply all four migrations and the route seed/i)).toBeInTheDocument();
     const driverRole = await screen.findByRole("button", { name: /Driver/i });
     fireEvent.click(driverRole);
     await waitFor(() => {
