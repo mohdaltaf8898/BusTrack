@@ -1,4 +1,4 @@
-import { sampleBuses, sampleDrivers, sampleRoutes } from "@/data/routes";
+import { sampleRoutes } from "@/data/routes";
 import type {
   Bus,
   Coordinates,
@@ -206,8 +206,10 @@ export function mapBackendData(data: BackendData, now: number) {
 
   return {
     routes: routes.length > 0 ? routes : sampleRoutes,
-    buses: buses.length > 0 ? buses : sampleBuses,
-    drivers: drivers.length > 0 ? drivers : sampleDrivers,
+    // Empty backend lists mean there are no configured vehicles or drivers;
+    // never substitute fictional demo people into a real admin view.
+    buses,
+    drivers,
     delayReports,
     trips,
     health: data.health ?? [],

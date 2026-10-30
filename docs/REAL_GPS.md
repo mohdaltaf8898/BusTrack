@@ -1,6 +1,6 @@
 # Optional real GPS design
 
-**Status:** implemented in code and documented, but **not configured or end-to-end tested with live Supabase credentials or a driver device in this repository**. The default app uses simulation and clearly labels generated positions/timings.
+**Status:** the hosted Supabase schema is configured, but **no routes are verified and real driver-device GPS has not been enabled or end-to-end tested**. The app uses simulation and clearly labels generated positions/timings until an authorized driver shares GPS on a verified route.
 
 ## 1. Architecture
 

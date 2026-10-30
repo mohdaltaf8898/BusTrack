@@ -6,14 +6,15 @@ Install Node 22 (or supported Node 20.9+/24), then run `npm ci` and `npm run dev
 
 ## Optional Supabase project
 
-This repository/deployment has **not** been connected to a Supabase project. Only configure an authorized test project; creating a project and enabling services may have account/tier limits or costs. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
+The hosted BusTrack project has been provisioned with the schema and seed; the local checkout has no credentials. Only configure an authorized project; creating projects and enabling services may have account/tier limits or costs. The hosted project has public sign-ups disabled: create authorized accounts in Supabase Auth. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
 
 ### 1. Create project and apply SQL
 
 1. Create a project in the Supabase dashboard and wait for it to finish provisioning.
 2. Open **SQL Editor**, paste and run the complete contents of these repository files, in this order:
-   - `supabase/migrations/20261027000000_init.sql`
-   - `supabase/migrations/20261030000000_published_routes.sql`
+   - `supabase/migrations/20261030135413_bustrack_init.sql`
+   - `supabase/migrations/20261030135426_bustrack_published_routes.sql`
+   - `supabase/migrations/20261030140136_bustrack_function_grants.sql`
    - `supabase/seed.sql`
 3. The seed adds 16 historical routes and placeholder `SIM-*` buses without overwriting matching rows. It contains no real driver identities or contacts. An older installation may still contain old demo routes; review and remove/migrate them deliberately after backing up, rather than deleting real records automatically.
 4. Check **Database → Publications → supabase_realtime** includes `bus_locations` and `notifications`. The initial migration tries to add them. If a table is absent, add only the missing table in the dashboard or SQL editor.
@@ -30,7 +31,7 @@ The migrations create the schema, RLS policies, trip functions, nullable stop po
    update public.profiles set role = 'driver' where id = '<DRIVER_AUTH_USER_UUID>';
    ```
 
-   The trigger allows trusted database-owner bootstrap and blocks a normal student from promoting themself. Later role changes should be restricted to authorized admins. Confirm the updates affect the expected rows.
+   The trigger allows trusted database-owner bootstrap and blocks a normal student from promoting themself. Later role changes should be restricted to authorized admins. Confirm the updates affect the expected rows. The hosted project currently has no Auth users; create the appropriate accounts before assigning roles. Do not share passwords in chat.
 3. Replace the `SIM-*` placeholder vehicle details with approved real records. Assign one authorized driver to the intended bus (replace both values):
 
    ```sql
@@ -77,7 +78,7 @@ There is currently no trace-import UI; the route shape must be provisioned by a 
 | Symptom | What to check |
 | --- | --- |
 | `503 DEMO_MODE` | URL, anon key and server-only service key are all present; restart/redeploy. |
-| Cannot promote first admin | Run the update in the trusted database-owner SQL editor after both migrations; verify Auth user/profile exists. |
+| Cannot promote first admin | Run the update in the trusted database-owner SQL editor after all three migrations; verify Auth user/profile exists. |
 | Driver cannot start a trip | Driver role, bus assignment, route and vehicle status. |
 | `409 ROUTE_NOT_VERIFIED` | Staff must supply and review a real corridor; never mark an estimate verified just to bypass the gate. |
 | `422` GPS rejection | Timestamp may be stale or the coordinate outside Hyderabad/800 m corridor; check device and verified trace. |

@@ -632,8 +632,8 @@ $$;
 
 revoke all on function public.current_user_role() from public;
 grant execute on function public.current_user_role() to authenticated;
-revoke all on function public.submit_bus_location(uuid, double precision, double precision, numeric, numeric, numeric, timestamptz) from public;
-grant execute on function public.submit_bus_location(uuid, double precision, double precision, numeric, numeric, numeric, timestamptz) to authenticated;
+-- The weaker legacy GPS RPC is never available to browser roles, even between migrations.
+revoke all on function public.submit_bus_location(uuid, double precision, double precision, numeric, numeric, numeric, timestamptz) from public, anon, authenticated;
 revoke all on function public.start_driver_trip(text, text) from public;
 grant execute on function public.start_driver_trip(text, text) to authenticated;
 revoke all on function public.end_driver_trip(uuid) from public;

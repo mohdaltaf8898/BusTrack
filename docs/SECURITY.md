@@ -52,7 +52,7 @@ All tables have RLS enabled.
 - `profiles`: users read/update their own row; admins can manage profiles. A trigger blocks non-admin role changes while allowing the trusted database owner to bootstrap the first admin.
 - `routes`, `stops`, `buses`: publicly readable; only admins have write policies. API routes use the service role for validated mutations.
 - `trips`: authenticated users can read trip state; direct `INSERT/UPDATE/DELETE` grants are revoked from `anon`/`authenticated`. Writes use validated API routes or security-definer RPCs.
-- `bus_locations`: authenticated users can read only their own driver-trip locations, active-trip locations, recent completed-trip last-known locations (15 minutes), or all locations if admin. Direct write grants are revoked.
+- `bus_locations`: authenticated users can read only their own driver-trip locations, recent active-trip locations, recent completed-trip last-known locations (15 minutes), or all locations if admin. Direct write grants are revoked. The service-role-backed location API independently enforces the 15-minute non-admin read limit; a stopped-sharing trip is labelled last-known rather than live.
 - `notifications`: users read broadcasts or their own notifications; admins can insert/delete; broadcasts use `notification_reads` for per-user read state.
 - `notification_reads`: users access only their own rows.
 - `delay_reports`: readable by authenticated users; admin-only writes.
@@ -64,7 +64,7 @@ Foreign keys cascade only for trip-owned locations/notifications; route deletion
 
 Authenticated users can invoke the role/assignment-checked trip functions `start_driver_trip`, `end_driver_trip`, `set_trip_location_sharing`, and `mark_notification_read` as permitted by each function. Direct client writes to trips and locations remain revoked.
 
-The original `submit_bus_location` RPC only checked a bounding box; the later migration revokes its execution from `public`, `anon`, and `authenticated`. The shipped driver UI submits GPS through the server API, which additionally requires a staff-verified corridor and applies the tighter 800 m polyline check. The API's catalog road-route endpoint accepts fixed route IDs only and proxies no arbitrary URLs or user coordinates.
+The original `submit_bus_location` RPC only checked a bounding box; its execution is revoked from `public`, `anon`, and `authenticated`. Supabase's explicit anonymous grants are also revoked for trip RPCs, and browser roles cannot execute trigger-only functions directly. The shipped driver UI submits GPS through the server API, which additionally requires a staff-verified corridor and applies the tighter 800 m polyline check. The API's catalog road-route endpoint accepts fixed route IDs only and proxies no arbitrary URLs or user coordinates.
 
 ## Secret handling
 

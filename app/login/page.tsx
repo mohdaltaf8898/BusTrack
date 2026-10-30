@@ -200,7 +200,7 @@ export default function LoginPage() {
                     <li>Copy <code>.env.example</code> to <code>.env.local</code>.</li>
                     <li>Set <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.</li>
                     <li>Set server-only <code>SUPABASE_SERVICE_ROLE_KEY</code> for API authorization.</li>
-                    <li>Apply both migrations and the route seed; create profiles through Supabase Auth.</li>
+                    <li>Apply all three migrations and the route seed; create profiles through Supabase Auth.</li>
                   </ol>
                 </div>
               </div>

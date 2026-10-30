@@ -22,8 +22,10 @@ beforeAll(async () => {
     grant usage on schema auth to anon, authenticated;
     grant execute on function auth.uid() to anon, authenticated;
     alter default privileges in schema public grant select, insert, update, delete on tables to anon, authenticated;
+    -- Supabase also grants EXECUTE directly to these roles for new functions.
+    alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
   `);
-  for (const path of ["20261027000000_init.sql", "20261030000000_published_routes.sql"]) {
+  for (const path of ["20261030135413_bustrack_init.sql", "20261030135426_bustrack_published_routes.sql", "20261030140136_bustrack_function_grants.sql"]) {
     await db.exec(await readFile(new URL(`../supabase/migrations/${path}`, import.meta.url), "utf8"));
   }
   seed = await readFile(new URL("../supabase/seed.sql", import.meta.url), "utf8");
@@ -59,11 +61,16 @@ describe("PostgreSQL migrations and 2025–26 seed", () => {
     await db.exec("reset role; select set_config('request.jwt.claim.sub', '', false);");
   });
 
-  it("revokes direct client GPS writes and the less strict legacy GPS RPC", async () => {
-    const result = await db.query<{ direct_write: boolean; rpc_execute: boolean }>(`select
+  it("revokes direct GPS writes, the legacy GPS RPC, and anonymous access to privileged functions", async () => {
+    const result = await db.query<{
+      direct_write: boolean; rpc_execute: boolean; anon_trip: boolean; auth_trip: boolean; anon_trigger: boolean;
+    }>(`select
       has_table_privilege('authenticated', 'public.bus_locations', 'INSERT') direct_write,
-      has_function_privilege('authenticated', 'public.submit_bus_location(uuid,double precision,double precision,numeric,numeric,numeric,timestamptz)', 'EXECUTE') rpc_execute`);
-    expect(result.rows[0]).toEqual({ direct_write: false, rpc_execute: false });
+      has_function_privilege('authenticated', 'public.submit_bus_location(uuid,double precision,double precision,numeric,numeric,numeric,timestamptz)', 'EXECUTE') rpc_execute,
+      has_function_privilege('anon', 'public.start_driver_trip(text,text)', 'EXECUTE') anon_trip,
+      has_function_privilege('authenticated', 'public.start_driver_trip(text,text)', 'EXECUTE') auth_trip,
+      has_function_privilege('anon', 'public.handle_new_user()', 'EXECUTE') anon_trigger`);
+    expect(result.rows[0]).toEqual({ direct_write: false, rpc_execute: false, anon_trip: false, auth_trip: true, anon_trigger: false });
   });
 
   it("does not overwrite operator data on reseeding and invalidates changed stop geometry", async () => {

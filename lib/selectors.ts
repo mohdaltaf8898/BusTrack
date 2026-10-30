@@ -64,13 +64,19 @@ export function deriveRouteSnapshot(
   const geometry = safeGeometry(route);
   const simulation =
     state.simulations[route.id] ?? createSimulationState(route.id, state.currentTime);
-  const remoteLocation = state.remoteLocations[route.id];
   const now = state.currentTime;
+  const candidate = state.remoteLocations[route.id];
+  const age = candidate ? now - candidate.recordedAt : Infinity;
+  // A disconnected client must not keep displaying a non-admin's last-known
+  // location indefinitely after the server's 15-minute visibility window.
+  const remoteLocation = candidate && Number.isFinite(age) && age >= -15_000 &&
+    (state.user?.role === "admin" || age < 15 * 60 * 1000) ? candidate : undefined;
   const staleMs = backendConfig.staleLocationSeconds * 1000;
   const isLiveData = Boolean(
     backendConfig.publicConfigured &&
       remoteLocation?.source === "gps" &&
-      now - remoteLocation.recordedAt <= staleMs,
+      remoteLocation.sharingEnabled &&
+      age <= staleMs,
   );
   const isStale = remoteLocation
     ? now - remoteLocation.recordedAt > staleMs

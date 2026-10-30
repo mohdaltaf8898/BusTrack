@@ -33,14 +33,17 @@ npm run build
 
 The app is mobile-first: `/` is the dashboard; `/track`, `/routes`, `/notifications`, `/bus-details`, `/driver`, `/admin`, `/login` and `/profile` provide the other flows. In demo mode, login offers local role switching solely for testing. It is **not** authorization.
 
-## Optional Supabase setup
+## Supabase setup
 
-A Supabase project is **not configured** in this checkout or the current deployment. Connecting it does not automatically make the historical timetable current or create live GPS. Obtain authorization and follow the full [setup guide](docs/SETUP.md):
+The hosted BusTrack project has the schema and historical seed installed. The Vercel production environment is configured for it; local development remains credential-free unless you supply your own environment variables. Connecting Supabase does not make the timetable current or create live GPS. Public sign-ups are disabled; authorized users must be created in Supabase Auth.
+
+To set up a separate authorized project, follow the full [setup guide](docs/SETUP.md):
 
 1. Create a Supabase project and open its SQL editor. Run these files **in order**:
-   1. `supabase/migrations/20261027000000_init.sql`
-   2. `supabase/migrations/20261030000000_published_routes.sql`
-   3. `supabase/seed.sql`
+   1. `supabase/migrations/20261030135413_bustrack_init.sql`
+   2. `supabase/migrations/20261030135426_bustrack_published_routes.sql`
+   3. `supabase/migrations/20261030140136_bustrack_function_grants.sql`
+   4. `supabase/seed.sql`
 2. The seed inserts the historical routes and `SIM-*` placeholder vehicles without overwriting existing rows. Replace placeholders and verify the current timetable, stop locations and route corridor with transport staff. Existing older demo rows are not automatically deleted.
 3. Create Auth users in Supabase. The trigger creates student profiles; use the trusted SQL editor to promote the first admin and drivers and assign real vehicles as explained in [SETUP.md](docs/SETUP.md).
 4. Copy `.env.example` to `.env.local` and set the project URL, public anon key and **server-only** service-role key. Never paste secret keys into chat, commit them, or prefix them with `NEXT_PUBLIC_`.

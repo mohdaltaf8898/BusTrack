@@ -204,6 +204,8 @@ export interface RemoteBusLocation {
   speedKmh: number | null;
   recordedAt: number;
   source: "gps" | "simulation";
+  /** False when the trip has ended or its driver has stopped sharing. */
+  sharingEnabled: boolean;
   accuracyMeters?: number | null;
 }
 

@@ -70,8 +70,8 @@ Set the same values for Production and Preview environments as needed. Keep `SUP
 
 ## 4. Supabase configuration for the deployed domain
 
-1. Apply `supabase/migrations/20261027000000_init.sql`, then `supabase/migrations/20261030000000_published_routes.sql`.
-2. Apply `supabase/seed.sql`.
+1. Apply `supabase/migrations/20261030135413_bustrack_init.sql`, then `supabase/migrations/20261030135426_bustrack_published_routes.sql`, then `supabase/migrations/20261030140136_bustrack_function_grants.sql`.
+2. Apply `supabase/seed.sql`. These are already applied to the hosted BusTrack project; use this sequence for a separate project.
 3. Add the Vercel domain to **Authentication → URL Configuration**:
    - Site URL: `https://YOUR_VERCEL_DOMAIN`
    - Redirect URLs: `https://YOUR_VERCEL_DOMAIN/**`

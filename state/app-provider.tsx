@@ -186,11 +186,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const parseLocationRow = useCallback(
-    (row: RealtimeLocationRow): RemoteBusLocation | null => {
+    (row: RealtimeLocationRow, sharingEnabled = true): RemoteBusLocation | null => {
       const buses = stateRef.current.buses;
       const bus = buses.find((item) => item.id === row.bus_id);
       const routeId = row.route_id ?? bus?.routeId;
-      if (!routeId || !Number.isFinite(row.latitude) || !Number.isFinite(row.longitude)) {
+      const recordedAt = new Date(row.recorded_at).getTime();
+      if (!routeId || !Number.isFinite(row.latitude) || !Number.isFinite(row.longitude) || !Number.isFinite(recordedAt)) {
         return null;
       }
       return {
@@ -202,8 +203,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         speedKmh: typeof row.speed_kmh === "number" ? row.speed_kmh : null,
         accuracyMeters:
           typeof row.accuracy_meters === "number" ? row.accuracy_meters : null,
-        recordedAt: new Date(row.recorded_at).getTime(),
+        recordedAt,
         source: row.source === "gps" ? "gps" : "simulation",
+        sharingEnabled,
       };
     },
     [],
@@ -518,20 +520,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const poll = async () => {
       const token = await getAccessToken();
       if (!token || cancelled) return;
-      const bus = stateRef.current.buses.find(
-        (item) => item.routeId === stateRef.current.selectedRouteId,
-      );
+      const routeId = stateRef.current.selectedRouteId;
+      const bus = stateRef.current.buses.find((item) => item.routeId === routeId);
       if (!bus) return;
       try {
         const response = await fetch(`/api/locations?busId=${encodeURIComponent(bus.id)}`, {
           cache: "no-store",
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) return;
+        if (cancelled) return;
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId });
+          return;
+        }
         const body = await readJsonSafely(response);
-        const row = body.location as RealtimeLocationRow | undefined;
-        if (!row) return;
-        const location = parseLocationRow(row);
+        if (cancelled) return;
+        const row = body.location as RealtimeLocationRow | null | undefined;
+        if (!row) {
+          dispatch({ type: "CLEAR_REMOTE_LOCATION", routeId });
+          return;
+        }
+        const location = parseLocationRow(row, body.live === true);
         if (location) dispatch({ type: "SET_REMOTE_LOCATION", location });
       } catch {
         // Polling is a fallback; Realtime may still be connected.

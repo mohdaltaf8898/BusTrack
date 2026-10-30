@@ -385,6 +385,7 @@ export type AppAction =
       message: string;
     }
   | { type: "SET_REMOTE_LOCATION"; location: AppState["remoteLocations"][string] }
+  | { type: "CLEAR_REMOTE_LOCATION"; routeId: string }
   | { type: "SET_ROAD_GEOMETRY"; routeId: string; geometry: RoadGeometry }
   | { type: "SELECT_ROUTE"; routeId: string }
   | { type: "SELECT_STOP"; stopId: string }
@@ -440,7 +441,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case "SET_USER":
-      return { ...state, user: action.user, authLoading: false };
+      return {
+        ...state,
+        user: action.user,
+        authLoading: false,
+        // Do not keep privileged location data after sign-out or a role switch.
+        remoteLocations: state.user?.id === action.user?.id ? state.remoteLocations : {},
+      };
 
     case "SET_AUTH_LOADING":
       return { ...state, authLoading: action.value };
@@ -477,8 +484,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         routes,
-        buses: action.buses.length > 0 ? action.buses : state.buses,
-        drivers: action.drivers.length > 0 ? action.drivers : state.drivers,
+        buses: action.buses,
+        drivers: action.drivers,
         delayReports: action.delayReports ?? state.delayReports,
         backendTrips: action.backendTrips ?? state.backendTrips,
         simulations,
@@ -498,6 +505,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [action.location.routeId]: action.location,
         },
       };
+
+    case "CLEAR_REMOTE_LOCATION": {
+      if (!state.remoteLocations[action.routeId]) return state;
+      const remoteLocations = { ...state.remoteLocations };
+      delete remoteLocations[action.routeId];
+      return { ...state, remoteLocations };
+    }
 
     case "SET_ROAD_GEOMETRY": {
       const route = state.routes.find((item) => item.id === action.routeId);

@@ -1,5 +1,5 @@
 -- Preserve unknown pickup locations and the provenance of the historical timetable.
--- Run after 20261027000000_init.sql. Do not mark an inferred route as verified.
+-- Run after 20261030135413_bustrack_init.sql. Do not mark an inferred route as verified.
 
 alter table public.routes
   add column if not exists geometry_source text not null default 'straight'

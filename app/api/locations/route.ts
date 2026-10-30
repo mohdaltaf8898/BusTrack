@@ -197,23 +197,20 @@ export async function GET(request: Request) {
       .select("id,status,sharing_enabled,ended_at")
       .eq("id", location.trip_id ?? "")
       .maybeSingle();
-    const recentlyCompleted =
-      trip?.status === "completed" &&
-      trip.ended_at &&
-      Date.now() - new Date(trip.ended_at).getTime() < 15 * 60 * 1000;
-    const allowed =
-      auth.profile.role === "admin" ||
-      trip?.status === "active" ||
-      Boolean(recentlyCompleted);
+    const now = Date.now();
+    const locationAge = now - new Date(location.recorded_at).getTime();
+    const endedAge = trip?.ended_at ? now - new Date(trip.ended_at).getTime() : Infinity;
+    const recentlyRecorded = Number.isFinite(locationAge) && locationAge >= -15_000 && locationAge < 15 * 60 * 1000;
+    const recentlyCompleted = trip?.status === "completed" && endedAge >= 0 && endedAge < 15 * 60 * 1000;
+    const allowed = auth.profile.role === "admin" ||
+      (recentlyRecorded && (trip?.status === "active" || recentlyCompleted));
+    // The service-role client bypasses RLS. Enforce the same 15-minute
+    // visibility limit explicitly rather than returning an old bus position.
     if (!allowed) {
-      throw new ApiError(
-        403,
-        "PRIVATE_LOCATION",
-        "No off-duty driver location is available for this bus.",
-      );
+      return NextResponse.json({ location: null, live: false }, { headers: { "Cache-Control": "no-store" } });
     }
     return NextResponse.json(
-      { location: publicLocation(location) },
+      { location: publicLocation(location), live: trip?.status === "active" && Boolean(trip.sharing_enabled) },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {

@@ -36,7 +36,7 @@ Test on iPhone Safari and Android Chrome, and at 320, 375, 390, 430, 768 and 144
 
 ## Configured backend checklist — requires a test project and driver device
 
-1. Apply both migrations and seed; confirm Auth users, roles, RLS and Realtime publication as in [SETUP.md](SETUP.md).
+1. Apply all three migrations and seed; confirm Auth users, roles, RLS and Realtime publication as in [SETUP.md](SETUP.md).
 2. Without a verified corridor, confirm assigned driver GPS writes return `409 ROUTE_NOT_VERIFIED`. Obtain and review actual stop positions/trace; do not mark the estimated path verified.
 3. Set the reviewed corridor, replace simulated vehicles, assign a driver, start an authorized trip on HTTPS, enable sharing and grant device location permission.
 4. Verify the student view receives the real update, and that stale/future/off-route positions are rejected. Stop sharing/end the trip; confirm writes stop and privacy rules hold.
