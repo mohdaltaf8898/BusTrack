@@ -35,7 +35,7 @@ The app is mobile-first: `/` is the dashboard; `/track`, `/routes`, `/notificati
 
 ## Supabase setup
 
-The hosted BusTrack project has the schema and historical seed installed. The Vercel production environment is configured for it; local development remains credential-free unless you supply your own environment variables. Connecting Supabase does not make the timetable current or create live GPS. Public sign-ups are disabled; authorized users must be created in Supabase Auth.
+The hosted BusTrack project has the schema and historical seed installed. The Vercel production environment is configured for it; local development remains credential-free unless you supply your own environment variables. Connecting Supabase does not make the timetable current or create live GPS. The login page supports student sign-up, sign-in and password reset, subject to the project's Auth settings and email-delivery configuration. Only a trusted administrator can authorize driver/admin roles.
 
 To set up a separate authorized project, follow the full [setup guide](docs/SETUP.md):
 
@@ -46,7 +46,7 @@ To set up a separate authorized project, follow the full [setup guide](docs/SETU
    4. `supabase/migrations/20261030144351_bustrack_guarded_gps.sql`
    5. `supabase/seed.sql`
 2. The seed inserts the historical routes and `SIM-*` placeholder vehicles without overwriting existing rows. Replace placeholders and verify the current timetable, stop locations and route corridor with transport staff. Existing older demo rows are not automatically deleted.
-3. Create Auth users in Supabase. The trigger creates student profiles; use the trusted SQL editor to promote the first admin and drivers and assign real vehicles as explained in [SETUP.md](docs/SETUP.md).
+3. Create accounts through the student sign-up screen (after configuring custom SMTP) or create authorized staff users in Supabase Auth. The trigger creates student profiles; use the trusted SQL editor to promote the first admin and drivers and assign real vehicles as explained in [SETUP.md](docs/SETUP.md).
 4. Copy `.env.example` to `.env.local` and set the project URL, public anon key and **server-only** service-role key. Never paste secret keys into chat, commit them, or prefix them with `NEXT_PUBLIC_`.
 5. Restart the app. For Vercel, set the same variables in Project Settings → Environment Variables and redeploy; configure the HTTPS site URL in Supabase Auth.
 6. Test roles, RLS, Realtime, assigned driver sharing and the live GPS path with a test project/device before a pilot. The location API refuses real GPS until an operator supplies a **verified** route corridor. Inferred OSRM paths cannot be used to authorize GPS.

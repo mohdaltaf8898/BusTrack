@@ -6,7 +6,7 @@ Install Node 22 (or supported Node 20.9+/24), then run `npm ci` and `npm run dev
 
 ## Optional Supabase project
 
-The hosted BusTrack project has been provisioned with the schema and seed; the local checkout has no credentials. Only configure an authorized project; creating projects and enabling services may have account/tier limits or costs. The hosted project has public sign-ups disabled: create authorized accounts in Supabase Auth. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
+The hosted BusTrack project has been provisioned with the schema and seed; the local checkout has no credentials. Only configure an authorized project; creating projects and enabling services may have account/tier limits or costs. Student sign-up can be enabled in Supabase Auth, but confirmation and reset email delivery to non-team addresses requires custom SMTP. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
 
 ### 1. Create project and apply SQL
 
@@ -24,7 +24,7 @@ The migrations create the schema, RLS policies, trip functions, nullable stop po
 
 ### 2. Create accounts and assign roles
 
-1. In **Authentication → Users**, create test accounts for an admin, drivers and students. The `handle_new_user` trigger creates their `public.profiles` rows as students.
+1. For public student registration, turn on **Authentication → Providers → Email** and allow sign-ups while retaining **Confirm email**. Configure custom SMTP under **Authentication → SMTP** first: the default Supabase sender delivers only to project-team addresses (currently 2 emails/hour), so it cannot reliably confirm student addresses or send password resets. Add the deployed `https://bustrack-eight.vercel.app/login` and `https://bustrack-eight.vercel.app/auth/set-password` to **Authentication → URL Configuration** redirect allowlist, or your own site equivalents. Students use **Login → Sign up**; new profiles default to `student` regardless of client-provided metadata. For staff, create users in **Authentication → Users**, or invite them after SMTP and the password-setting screen have been deployed. Dashboard-created users with passwords can sign in directly; check confirmation status. Neither route elevates a role on its own. The `handle_new_user` trigger creates their `public.profiles` rows as students.
 2. In the trusted project SQL editor (database owner), use the UUIDs shown in Auth to promote the first admin and intended drivers. Replace the angle-bracket values locally; they are not real IDs:
 
    ```sql
@@ -32,7 +32,7 @@ The migrations create the schema, RLS policies, trip functions, nullable stop po
    update public.profiles set role = 'driver' where id = '<DRIVER_AUTH_USER_UUID>';
    ```
 
-   The trigger allows trusted database-owner bootstrap and blocks a normal student from promoting themself. Later role changes should be restricted to authorized admins. Confirm the updates affect the expected rows. The hosted project currently has no Auth users; create the appropriate accounts before assigning roles. Do not share passwords in chat.
+   The trigger allows trusted database-owner bootstrap and blocks a normal student from promoting themself. Later role changes should be restricted to authorized admins. Confirm the updates affect the expected rows. The hosted project already has an authorized admin and driver; do not recreate or re-promote them without checking the existing rows. Do not share passwords in chat.
 3. Replace the `SIM-*` placeholder vehicle details with approved real records. Assign one authorized driver to the intended bus (replace both values):
 
    ```sql
@@ -55,7 +55,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 The first two values are public and rely on RLS. The service-role key bypasses RLS and must be kept **server-side only**; never use `NEXT_PUBLIC_` for it, commit it, share it in chat or put it in a browser. Restart the server after changing variables. `/api/config` can confirm that variables are present, not that integrations are operational.
 
-For Vercel, add these values to the correct environment in Project Settings → Environment Variables and redeploy. In Supabase **Authentication → URL Configuration**, set the deployed HTTPS site URL and approved redirect URLs. Do not reuse production secrets in untrusted preview environments.
+For Vercel, add these values to the correct environment in Project Settings → Environment Variables and redeploy. In Supabase **Authentication → URL Configuration**, set the deployed HTTPS site URL and approved redirect URLs for `/login` and `/auth/set-password`. Signup confirmation returns to `/login`; reset links and dashboard invitations open the password-setting screen. Supabase's email sender restrictions still apply until you configure your own SMTP. Do not reuse production secrets in untrusted preview environments.
 
 ### 4. Verify actual routes before GPS
 

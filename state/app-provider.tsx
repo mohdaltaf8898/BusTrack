@@ -24,6 +24,7 @@ import {
 } from "@/lib/app-reducer";
 import { mapBackendData, type BackendData } from "@/lib/backend-mapping";
 import { backendConfig, isSupabaseConfigured, publicSupabaseConfig } from "@/lib/config";
+import { authRedirect, inspectPasswordCallback, PASSWORD_PAGE, updatePasswordForToken, type PasswordLinkStatus } from "@/lib/auth-flow";
 import { createLocationSynchronizer } from "@/lib/location-sync";
 import { deriveRouteSnapshot, type RouteSnapshot } from "@/lib/selectors";
 import {
@@ -86,6 +87,10 @@ interface AppContextValue {
   selectStop: (stopId: string) => void;
   setDemoRole: (role: UserRole) => void;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string) => Promise<{ signedIn: boolean }>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  passwordLink: PasswordLinkStatus;
   signOut: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
   requestPushPermission: () => Promise<PushPermissionState>;
@@ -175,9 +180,17 @@ function initialsFromName(name: string) {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, 0, (now) => createInitialState(now));
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [passwordLink, setPasswordLink] = useState<PasswordLinkStatus>({ status: "none" });
   const [pushPermission, setPushPermission] = useState<PushPermissionState>("default");
   const stateRef = useRef(state);
   stateRef.current = state;
+  const passwordLinkRef = useRef(passwordLink);
+  passwordLinkRef.current = passwordLink;
+  const authClientRef = useRef<SupabaseClient | null>(null);
+  const authCallbackRef = useRef<(Pick<ReturnType<typeof inspectPasswordCallback>, "kind" | "incoming" | "malformed"> & { accessToken: string | null }) | null>(null);
+  const authSyncRef = useRef(0);
+  const authEventRef = useRef(0);
+  const passwordFlowRef = useRef(0);
   const lastPushRef = useRef(0);
   const backendRequestRef = useRef(0);
 
@@ -332,11 +345,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.hydrated]);
 
   const syncSupabaseUser = useCallback(async (client: SupabaseClient, user: User) => {
+    const syncId = ++authSyncRef.current;
     const { data: profile, error } = await client
       .from("profiles")
       .select("id,name,role")
       .eq("id", user.id)
       .maybeSingle();
+    if (syncId !== authSyncRef.current) return;
     if (error || !profile) {
       dispatch({ type: "SET_USER", user: null });
       dispatch({
@@ -359,6 +374,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       assignedBusId = bus?.id ?? undefined;
       assignedRouteId = bus?.assigned_route_id ?? undefined;
     }
+    if (syncId !== authSyncRef.current) return;
 
     const name = typeof profile.name === "string" && profile.name
       ? profile.name
@@ -383,39 +399,108 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "SET_AUTH_LOADING", value: false });
       return;
     }
-    const client = createClient(publicSupabaseConfig.url, publicSupabaseConfig.anonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-      realtime: { params: { eventsPerSecond: 5 } },
-    });
-    setSupabase(client);
 
-    let authSubscription: { unsubscribe: () => void } | undefined;
-    void (async () => {
-      const { data, error } = await client.auth.getSession();
-      if (error) {
-        dispatch({ type: "SET_ERROR", error: error.message });
-      }
-      if (data.session?.user) {
-        await syncSupabaseUser(client, data.session.user);
+    const incoming = inspectPasswordCallback(window.location.href);
+    if (incoming.redirect) {
+      // Dashboard invitations use the site URL by default. Preserve the
+      // fragment only for this same-origin navigation, before Supabase reads it.
+      window.location.replace(incoming.redirect);
+      return;
+    }
+    if (!authCallbackRef.current) {
+      authCallbackRef.current = {
+        kind: incoming.kind,
+        incoming: incoming.incoming,
+        malformed: incoming.malformed,
+        // Kept only while the link is being verified; never stored in React
+        // state, a request URL, logs, or persistent application storage.
+        accessToken: incoming.kind && !incoming.malformed
+          ? new URLSearchParams(window.location.hash.slice(1)).get("access_token")
+          : null,
+      };
+    }
+    const callback = authCallbackRef.current;
+    const flowId = ++passwordFlowRef.current;
+    const initialEvent = authEventRef.current;
+    if (callback.incoming) {
+      setPasswordLink(callback.kind && !callback.malformed
+        ? { status: "verifying", kind: callback.kind }
+        : { status: "invalid" });
+    }
+
+    if (!authClientRef.current) {
+      authClientRef.current = createClient(publicSupabaseConfig.url, publicSupabaseConfig.anonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+        realtime: { params: { eventsPerSecond: 5 } },
+      });
+    }
+    const client = authClientRef.current;
+    setSupabase(client);
+    let cancelled = false;
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      authEventRef.current += 1;
+      // A demo role must not silently switch back to a saved privileged
+      // session because of an initial-session or token-refresh event.
+      if (stateRef.current.user?.provider === "demo" && event !== "SIGNED_IN" && event !== "PASSWORD_RECOVERY") return;
+      if (session?.user) {
+        void syncSupabaseUser(client, session.user);
       } else {
+        authSyncRef.current += 1;
         dispatch({ type: "SET_USER", user: null });
       }
-      dispatch({ type: "SET_AUTH_LOADING", value: false });
-      const listener = client.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          void syncSupabaseUser(client, session.user);
-        } else {
-          dispatch({ type: "SET_USER", user: null });
+    });
+
+    void (async () => {
+      try {
+        const initialized = await client.auth.initialize();
+        // Verify the user in the original link as well as the active session.
+        // An account switch during initialization must not bind the link to a
+        // different user who happens to be signed in in another tab.
+        const linkUser = callback.accessToken && !initialized.error
+          ? await client.auth.getUser(callback.accessToken)
+          : null;
+        const { data, error } = await client.auth.getSession();
+        if (cancelled) return;
+        callback.accessToken = null;
+        if (callback.kind && !callback.malformed && flowId === passwordFlowRef.current) {
+          const user = linkUser?.data.user;
+          const valid = !initialized.error && !error && !linkUser?.error && user && data.session?.user.id === user.id;
+          setPasswordLink(valid && user
+            ? { status: "ready", kind: callback.kind, userId: user.id, email: user.email ?? null }
+            : { status: "invalid" });
+        } else if (!callback.incoming && (initialized.error || error)) {
+          dispatch({ type: "SET_ERROR", error: "The sign-in link is invalid or expired. Please try again." });
         }
-      });
-      authSubscription = listener.data.subscription;
+        // A newer auth event wins over this possibly delayed initial read.
+        if (authEventRef.current === initialEvent && stateRef.current.user?.provider !== "demo") {
+          if (data.session?.user) {
+            await syncSupabaseUser(client, data.session.user);
+          } else {
+            authSyncRef.current += 1;
+            dispatch({ type: "SET_USER", user: null });
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          callback.accessToken = null;
+          if (callback.incoming && flowId === passwordFlowRef.current) setPasswordLink({ status: "invalid" });
+          dispatch({ type: "SET_ERROR", error: "Could not initialize authentication. Please try again." });
+        }
+      } finally {
+        if (!cancelled) dispatch({ type: "SET_AUTH_LOADING", value: false });
+      }
     })();
 
-    return () => authSubscription?.unsubscribe();
+    return () => {
+      cancelled = true;
+      authSyncRef.current += 1;
+      subscription.unsubscribe();
+    };
   }, [state.hydrated, syncSupabaseUser]);
 
   const refreshBackendData = useCallback(async () => {
@@ -621,25 +706,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string) => {
       if (!supabase) {
-        throw new Error(
-          "Supabase Auth is not configured. Use a demo role on this screen instead.",
-        );
+        throw new Error("Supabase Auth is not configured. Use a demo role instead.");
       }
       dispatch({ type: "SET_AUTH_LOADING", value: true });
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(error.message);
+        setPasswordLink({ status: "none" });
+        if (data.user) await syncSupabaseUser(supabase, data.user);
+      } finally {
         dispatch({ type: "SET_AUTH_LOADING", value: false });
-        throw new Error(error.message);
       }
-      if (data.user) await syncSupabaseUser(supabase, data.user);
-      dispatch({ type: "SET_AUTH_LOADING", value: false });
     },
     [supabase, syncSupabaseUser],
   );
 
+  const signUp = useCallback(async (name: string, email: string, password: string) => {
+    if (!supabase) throw new Error("Account creation is not configured in demo mode.");
+    const { data: current, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw new Error("Could not check the current session. Please try again.");
+    if (current.session) throw new Error("Sign out of your current account before creating another one.");
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+        emailRedirectTo: authRedirect(window.location.origin, "/login"),
+      },
+    });
+    if (error) throw new Error(error.message);
+    if (data.session?.user) await syncSupabaseUser(supabase, data.session.user);
+    return { signedIn: Boolean(data.session) };
+  }, [supabase, syncSupabaseUser]);
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    if (!supabase) throw new Error("Password recovery is not configured in demo mode.");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: authRedirect(window.location.origin, PASSWORD_PAGE),
+    });
+    if (error) throw new Error(error.message);
+  }, [supabase]);
+
+  const updatePassword = useCallback(async (password: string) => {
+    if (!supabase) throw new Error("Password changes are not configured in demo mode.");
+    const link = passwordLinkRef.current;
+    if (link.status === "invalid" || link.status === "verifying") {
+      throw new Error("This link cannot be used. Request a new password link.");
+    }
+    const user = stateRef.current.user;
+    const expectedId = link.status === "ready"
+      ? link.userId
+      : user?.provider === "supabase" ? user.id : null;
+    if (!expectedId) throw new Error("Sign in or open a valid password link first.");
+
+    const { data, error } = await supabase.auth.getSession();
+    const session = data.session;
+    if (error || !session || session.user.id !== expectedId) {
+      throw new Error("The account changed or the session expired. Please sign in again.");
+    }
+    // The verified access token is captured before the request, so an account
+    // switch in another tab cannot send this password to the wrong user.
+    const verified = await supabase.auth.getUser(session.access_token);
+    if (verified.error || verified.data.user?.id !== expectedId) {
+      throw new Error("The account could not be verified. Please sign in again.");
+    }
+    const currentLink = passwordLinkRef.current;
+    const currentUser = stateRef.current.user;
+    if (link.status === "ready"
+      ? currentLink.status !== "ready" || currentLink.userId !== expectedId
+      : currentUser?.provider !== "supabase" || currentUser.id !== expectedId) {
+      throw new Error("The account changed. Please try again.");
+    }
+    await updatePasswordForToken(publicSupabaseConfig.url, publicSupabaseConfig.anonKey, session.access_token, password);
+    setPasswordLink({ status: "none" });
+  }, [supabase]);
+
   const signOut = useCallback(async () => {
     locationSync.invalidate();
     backendRequestRef.current += 1;
+    authSyncRef.current += 1;
+    setPasswordLink({ status: "none" });
     if (supabase) await supabase.auth.signOut();
     dispatch({ type: "SET_USER", user: null });
   }, [supabase, locationSync]);
@@ -975,6 +1121,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setDemoRole = useCallback((role: UserRole) => {
     locationSync.invalidate();
     backendRequestRef.current += 1;
+    authSyncRef.current += 1;
+    setPasswordLink({ status: "none" });
     dispatch({ type: "SET_USER", user: { ...demoUsers[role] } });
     dispatch({ type: "SET_ERROR", error: null });
   }, [locationSync]);
@@ -1050,6 +1198,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     selectStop,
     setDemoRole,
     signIn,
+    signUp,
+    requestPasswordReset,
+    updatePassword,
+    passwordLink,
     signOut,
     getAccessToken,
     requestPushPermission,

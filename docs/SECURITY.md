@@ -94,6 +94,8 @@ The original `submit_bus_location` RPC only checked a bounding box; its executio
 - Add device attestation or short-lived driver tokens for high-risk deployments.
 - Add velocity/jump detection and route snapping using road-network geometry.
 - Rotate the service role key if it is ever exposed; keep it in a Vercel encrypted environment variable.
+- Configure custom SMTP and verify sign-up confirmation, invitation and password-recovery links for non-team addresses before advertising public registration. Keep email confirmation enabled and use approved exact redirect URLs.
+- Add abuse protection (CAPTCHA and rate limiting) before high-volume public sign-up; never allow users to choose elevated roles in sign-up metadata.
 - Review Supabase Auth redirect URLs, email templates, MFA, and password policy.
 - Review RLS with `supabase test db` or equivalent policy tests after any schema change.
 - Add CSP, HSTS, and security headers at the edge.

@@ -18,6 +18,7 @@ vi.mock("@/lib/config", () => ({
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     auth: {
+      initialize: async () => ({ error: null }),
       getSession: async () => ({ data: { session: { access_token: "test-token", user: { id: "student-1", email: "student@example.edu" } } }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     },

@@ -59,6 +59,7 @@ const titles: Record<string, string> = {
   "/admin": "Admin Dashboard",
   "/profile": "Profile",
   "/login": "Login",
+  "/auth/set-password": "Set password",
 };
 
 function isActive(pathname: string, item: NavItem) {
