@@ -20,7 +20,6 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Alert, EmptyState } from "@/components/ui/feedback";
-import { DemoModeBadge } from "@/components/ui/labels";
 
 export default function ProfilePage() {
   const {
@@ -53,25 +52,24 @@ export default function ProfilePage() {
     <div className="mx-auto w-full max-w-5xl space-y-5">
       <PageHeader
         eyebrow="Profile"
-        title="Your BusTrack profile"
-        description="Account role, route preference, notification settings and local demo controls."
-        actions={<DemoModeBadge />}
+        title="Account & preferences"
+        description="Review your access, selected route and notification settings."
       />
 
       <Card className="overflow-hidden">
-        <div className="bg-navy-950 p-5 text-white sm:p-6">
+        <div className="border-b border-slate-100 p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 text-2xl font-extrabold text-brand-200">
+            <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-slate-100 text-2xl font-semibold text-navy-950">
               {state.user.avatarInitials}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Signed in as</p>
-              <h2 className="truncate text-2xl font-extrabold">{state.user.name}</h2>
-              <p className="truncate text-sm text-white/65">{state.user.email}</p>
+              <p className="text-xs font-medium text-slate-500">Signed in as</p>
+              <h2 className="truncate text-2xl font-semibold text-navy-950">{state.user.name}</h2>
+              <p className="truncate text-sm text-slate-600">{state.user.email}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge tone="blue">{state.user.role}</Badge>
-              <Badge tone="navy" className="bg-white/10 text-white ring-white/10">
+              <Badge tone="neutral">{state.user.role}</Badge>
+              <Badge tone="neutral">
                 {state.user.provider}
               </Badge>
             </div>
@@ -79,20 +77,20 @@ export default function ProfilePage() {
         </div>
         <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-5">
           <div className="rounded-2xl bg-slate-50 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Institution</p>
+            <p className="text-xs font-medium text-slate-600">Institution</p>
             <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-navy-950">
               <GraduationCap className="h-4 w-4 text-brand-600" aria-hidden="true" />
               LIET Hyderabad
             </p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Selected route</p>
+            <p className="text-xs font-medium text-slate-600">Selected route</p>
             <p className="mt-1 text-sm font-bold text-navy-950">
               {snapshot.route.code} · {snapshot.route.busNumber}
             </p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Unread alerts</p>
+            <p className="text-xs font-medium text-slate-600">Unread alerts</p>
             <p className="mt-1 text-sm font-bold text-navy-950">{unreadCount}</p>
           </div>
         </CardContent>
@@ -181,7 +179,7 @@ export default function ProfilePage() {
             <CardContent className="space-y-3 text-sm text-slate-600">
               <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3">
                 <span>Role</span>
-                <Badge tone="blue">{state.user.role}</Badge>
+                <Badge tone="neutral">{state.user.role}</Badge>
               </div>
               <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3">
                 <span>Backend</span>

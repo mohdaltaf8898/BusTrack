@@ -14,7 +14,7 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl bg-slate-100 after:absolute after:inset-0 after:-translate-x-full after:animate-shimmer after:bg-gradient-to-r after:from-transparent after:via-white/70 after:to-transparent",
+        "relative overflow-hidden rounded-xl bg-slate-100",
         className,
       )}
     />
@@ -64,11 +64,11 @@ export function Alert({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={cn("flex items-start gap-3 rounded-2xl border p-3.5 text-sm", classes, className)}
+      className={cn("flex items-start gap-3 rounded-xl border p-4 text-sm", classes, className)}
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
-        {title && <p className="font-bold">{title}</p>}
+        {title && <p className="font-semibold">{title}</p>}
         <div className={cn(title && "mt-0.5", "leading-6")}>{children}</div>
       </div>
       {onDismiss && (
@@ -108,7 +108,7 @@ export function EmptyState({
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm">
         {icon ?? <Inbox className="h-6 w-6" />}
       </div>
-      <h3 className="text-base font-bold text-navy-950">{title}</h3>
+      <h3 className="text-base font-medium text-navy-950">{title}</h3>
       <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">{description}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -148,7 +148,7 @@ export function ProgressBar({
       aria-valuenow={Math.round(Math.max(0, Math.min(100, value)))}
     >
       <div
-        className={cn("h-full rounded-full bg-brand-400 transition-all duration-500", indicatorClassName)}
+        className={cn("h-full rounded-full bg-brand-400", indicatorClassName)}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
       />
     </div>

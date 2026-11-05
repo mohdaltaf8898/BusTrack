@@ -48,12 +48,7 @@ a {
   .no-scrollbar {
     scrollbar-width: none;
   }
-  .map-grid {
-    background-image:
-      linear-gradient(rgb(var(--color-navy-300) / 0.18) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(var(--color-navy-300) / 0.18) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
+
 }
 
 /* Leaflet theming and inline vector markers (no external image assets). */

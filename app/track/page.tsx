@@ -39,9 +39,9 @@ export default function TrackPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Live tracking"
-        title="Follow your bus"
-        description="Watch the bus move along its route, change your ETA stop, and test delay or offline scenarios."
+        eyebrow="Route position"
+        title="Bus position & stop ETA"
+        description="Choose a stop for an estimated arrival. Position is simulated unless explicitly marked as device GPS."
         actions={
           <div className="w-full min-w-0 sm:w-64">
             <RouteSelector />
@@ -132,7 +132,7 @@ export default function TrackPage() {
                   </div>
 
                   <div className="border-y border-slate-200 py-5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">Estimated arrival</p>
+                    <p className="text-sm font-medium text-slate-600">Estimated arrival</p>
                     <p className="mt-2 text-5xl font-semibold tracking-[-0.06em] text-navy-950">
                       {snapshot.selectedStopEta.status === "unmapped" ? "Unavailable" : snapshot.busStatus === "offline" ? "Paused" : formatEta(snapshot.selectedStopEta.etaSeconds)}
                     </p>

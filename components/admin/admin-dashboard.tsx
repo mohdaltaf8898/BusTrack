@@ -3,13 +3,10 @@
 import { useState } from "react";
 import {
   Activity,
-  BusFront,
   Database,
   Gauge,
-  MapPin,
   Plus,
   RefreshCw,
-  Route as RouteIcon,
   ShieldCheck,
   Timer,
   TriangleAlert,
@@ -30,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Alert, EmptyState, ProgressBar } from "@/components/ui/feedback";
 import { Tabs, type TabItem } from "@/components/ui/tabs";
-import { DemoModeBadge, SimulatedTag, StatusPill } from "@/components/ui/labels";
+import { SimulatedTag, StatusPill } from "@/components/ui/labels";
 import {
   formatDateTime,
   formatRelativeTime,
@@ -245,20 +242,15 @@ export function AdminDashboard() {
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Routes", value: state.routes.length, Icon: RouteIcon, tone: "bg-brand-50 text-brand-700" },
-          { label: "Buses", value: state.buses.length, Icon: BusFront, tone: "bg-emerald-50 text-emerald-700" },
-          { label: "Stops", value: totalStops, Icon: MapPin, tone: "bg-violet-50 text-violet-700" },
-          { label: "Active trips", value: activeTrips, Icon: Activity, tone: "bg-amber-50 text-amber-700" },
+          { label: "Routes", value: state.routes.length },
+          { label: "Buses", value: state.buses.length },
+          { label: "Stops", value: totalStops },
+          { label: "Active trips", value: activeTrips },
         ].map((item) => (
           <Card key={item.label}>
-            <CardContent className="flex items-center gap-3 p-4">
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.tone}`}>
-                <item.Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-xs text-slate-500">{item.label}</p>
-                <p className="text-2xl font-extrabold text-navy-950">{item.value}</p>
-              </div>
+            <CardContent className="p-5">
+              <p className="text-xs text-slate-600">{item.label}</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-navy-950">{item.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -270,16 +262,16 @@ export function AdminDashboard() {
             <div>
               <CardTitle>Route health snapshot</CardTitle>
               <p className="mt-1 text-xs text-slate-500">
-                Generated from the same simulation state used on student maps.
+                {isBackendAdmin ? "Route snapshots; check each row’s location source." : "Local simulation values from student routes."}
               </p>
             </div>
-            <SimulatedTag label="Demo telemetry" />
+            {!isBackendAdmin && <SimulatedTag label="Demo telemetry" />}
           </CardHeader>
           <CardContent className="space-y-4">
             {routeSnapshots.length === 0 ? (
               <EmptyState title="No routes" description="Add a route to see health metrics." />
             ) : (
-              routeSnapshots.map((snapshot) => (
+              routeSnapshots.slice(0, 6).map((snapshot) => (
                 <div key={snapshot.route.id} className="rounded-2xl border border-slate-100 p-3.5">
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
@@ -292,13 +284,22 @@ export function AdminDashboard() {
                     </div>
                     <StatusPill status={snapshot.busStatus} />
                   </div>
-                  <ProgressBar value={snapshot.progressPercent} className="bg-slate-100" />
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{Math.round(snapshot.progressPercent)}% complete</span>
-                    <span>{snapshot.traffic.label} simulated traffic</span>
-                  </div>
+                  {(snapshot.isLiveData || snapshot.simulation.tripStatus === "active") && (
+                    <ProgressBar value={snapshot.progressPercent} className="bg-slate-100" />
+                  )}
+                  <p className="mt-2 text-xs text-slate-600">
+                    {snapshot.isLiveData || snapshot.simulation.tripStatus === "active"
+                      ? `${Math.round(snapshot.progressPercent)}% of route estimate`
+                      : "Trip not active"}
+                    {snapshot.dataMode === "simulation" ? " · Simulated" : ` · ${snapshot.sourceLabel}`}
+                  </p>
                 </div>
               ))
+            )}
+            {routeSnapshots.length > 6 && (
+              <Button variant="outline" size="sm" onClick={() => { setTab("health"); window.scrollTo(0, 0); }}>
+                View all {routeSnapshots.length} routes in Health
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -389,7 +390,7 @@ export function AdminDashboard() {
         key: "number",
         header: "Bus",
         cell: (bus) => (
-          <span className="font-extrabold text-navy-950">{bus.number}</span>
+          <span className="font-semibold text-navy-950">{bus.number}</span>
         ),
       },
       {
@@ -540,7 +541,7 @@ export function AdminDashboard() {
         key: "order",
         header: "Order",
         cell: (stop) => (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-extrabold text-brand-700">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700">
             {stop.order}
           </span>
         ),
@@ -953,13 +954,13 @@ export function AdminDashboard() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              { label: "Fresh", value: healthRows.filter((row) => row.condition === "Fresh").length, tone: "bg-emerald-50 text-emerald-700" },
-              { label: "Stale", value: healthRows.filter((row) => row.condition === "Stale").length, tone: "bg-amber-50 text-amber-700" },
+              { label: "Fresh", value: healthRows.filter((row) => row.condition === "Fresh").length, tone: "bg-slate-50 text-slate-600" },
+              { label: "Stale", value: healthRows.filter((row) => row.condition === "Stale").length, tone: "bg-slate-50 text-slate-600" },
               { label: "Offline", value: healthRows.filter((row) => row.condition === "Offline").length, tone: "bg-slate-100 text-slate-600" },
             ].map((item) => (
               <div key={item.label} className={`rounded-2xl p-4 ${item.tone}`}>
                 <p className="text-xs font-semibold">{item.label} updates</p>
-                <p className="mt-1 text-2xl font-extrabold">{item.value}</p>
+                <p className="mt-1 text-2xl font-semibold">{item.value}</p>
               </div>
             ))}
           </div>
@@ -1038,15 +1039,11 @@ export function AdminDashboard() {
       <PageHeader
         eyebrow="Administration"
         title="Transport operations"
-        description="Manage the catalog, assignments, trip state, delay reports and location-update health from one workspace."
+        description="Routes, buses and assignments in one workspace. Demo telemetry is not operational GPS."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            {isBackendAdmin ? (
-              <Badge tone="green" dot>Supabase admin</Badge>
-            ) : (
-              <DemoModeBadge />
-            )}
-            <Button
+            {isBackendAdmin && <Badge tone="neutral">Supabase admin</Badge>}
+            {isBackendAdmin && <Button
               variant="outline"
               size="sm"
               onClick={() => void runAction(refreshBackendData, "Data refreshed.")}
@@ -1054,7 +1051,7 @@ export function AdminDashboard() {
               loading={actionLoading}
             >
               <RefreshCw className="h-4 w-4" /> Refresh
-            </Button>
+            </Button>}
           </div>
         }
       />

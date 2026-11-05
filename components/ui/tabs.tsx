@@ -24,7 +24,7 @@ export function Tabs<T extends string>({
   return (
     <div
       className={cn(
-        "no-scrollbar flex gap-1 overflow-x-auto rounded-2xl bg-slate-100 p-1",
+        "no-scrollbar flex gap-4 overflow-x-auto border-b border-slate-200",
         className,
       )}
       role="tablist"
@@ -39,10 +39,10 @@ export function Tabs<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(item.id)}
             className={cn(
-              "inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 text-xs font-bold transition",
+              "inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
               selected
-                ? "bg-white text-navy-950 shadow-sm"
-                : "text-slate-500 hover:text-navy-800",
+                ? "border-brand-600 text-navy-950"
+                : "border-transparent text-slate-600 hover:text-navy-800",
             )}
           >
             {item.icon}
@@ -50,8 +50,8 @@ export function Tabs<T extends string>({
             {typeof item.count === "number" && item.count > 0 && (
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-0.5 text-[10px]",
-                  selected ? "bg-brand-50 text-brand-700" : "bg-white text-slate-500",
+                  "text-xs tabular-nums",
+                  selected ? "text-brand-700" : "text-slate-500",
                 )}
               >
                 {item.count}

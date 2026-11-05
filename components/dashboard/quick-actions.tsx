@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const actionClass = "group flex min-h-16 items-center gap-3 rounded-xl px-3 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500";
+const actionClass = "group flex min-h-16 items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500";
 
 export function QuickActions() {
   const { snapshot, unreadCount, selectStop } = useApp();
@@ -63,7 +63,7 @@ export function QuickActions() {
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                  "flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                   selected ? "border-brand-200 bg-brand-50" : "border-slate-100 hover:bg-slate-50",
                 )}
               >

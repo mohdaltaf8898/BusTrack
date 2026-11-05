@@ -79,7 +79,7 @@ export function SimulationControls({
         <div className="grid grid-cols-3 gap-3 border-y border-slate-100 py-4">
           <div className="min-w-0 border-l border-slate-200 pl-3">
             <p className="text-xs text-slate-500">Trip status</p>
-            <p className="mt-1 text-sm font-extrabold capitalize text-navy-950">
+            <p className="mt-1 text-sm font-semibold capitalize text-navy-950">
               {simulation.tripStatus}
             </p>
           </div>

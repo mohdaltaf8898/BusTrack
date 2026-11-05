@@ -16,7 +16,7 @@ const tones: Record<BadgeTone, string> = {
   green: "bg-emerald-50 text-emerald-700 ring-emerald-100",
   amber: "bg-amber-50 text-amber-800 ring-amber-100",
   rose: "bg-rose-50 text-rose-700 ring-rose-100",
-  violet: "bg-violet-50 text-violet-700 ring-violet-100",
+  violet: "bg-slate-100 text-slate-700 ring-slate-200",
   navy: "bg-navy-900 text-white ring-navy-800",
 };
 
@@ -29,7 +29,7 @@ export function Badge({ className, tone = "neutral", dot, children, ...props }: 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ring-1 ring-inset",
+        "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
         tones[tone],
         className,
       )}

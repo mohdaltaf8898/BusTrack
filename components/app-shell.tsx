@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
-import { DemoModeBadge } from "@/components/ui/labels";
+import { DemoModeBadge, SourceLabel } from "@/components/ui/labels";
 import { Logo } from "@/components/brand";
 import { RouteSelector } from "@/components/route-selector";
 import { Alert, LoadingScreen, OfflineNotice } from "@/components/ui/feedback";
@@ -36,7 +36,7 @@ interface NavItem {
 
 const mainNav: NavItem[] = [
   { href: "/", label: "Dashboard", icon: Home, match: "exact" },
-  { href: "/track", label: "Live Tracking", icon: MapPinned },
+  { href: "/track", label: "Track bus", icon: MapPinned },
   { href: "/routes", label: "Routes & Stops", icon: RouteIcon },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/bus-details", label: "Bus Details", icon: BusFront },
@@ -51,7 +51,7 @@ const workspaceNav: NavItem[] = [
 
 const titles: Record<string, string> = {
   "/": "Student Dashboard",
-  "/track": "Live Bus Tracking",
+  "/track": "Bus tracking",
   "/routes": "Routes & Stops",
   "/notifications": "Notifications",
   "/bus-details": "Bus Details",
@@ -87,7 +87,7 @@ function NavLink({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
+        "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
         active
           ? "bg-brand-50 text-brand-700"
           : "text-slate-600 hover:bg-slate-50 hover:text-navy-950",
@@ -107,7 +107,7 @@ function Sidebar({ pathname }: { pathname: string }) {
         <Logo />
       </div>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        <p className="px-3 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <p className="px-3 pb-2 pt-2 text-xs font-medium text-slate-600">
           Student
         </p>
         <nav className="space-y-1" aria-label="Student navigation">
@@ -115,7 +115,7 @@ function Sidebar({ pathname }: { pathname: string }) {
             <NavLink key={item.href} item={item} pathname={pathname} />
           ))}
         </nav>
-        <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <p className="px-3 pb-2 pt-6 text-xs font-medium text-slate-600">
           Workspace
         </p>
         <nav className="space-y-1" aria-label="Workspace navigation">
@@ -144,7 +144,7 @@ function BottomNav({
   const { unreadCount } = useApp();
   const items: Array<NavItem & { badge?: number }> = [
     { href: "/", label: "Home", icon: Home, match: "exact" },
-    { href: "/track", label: "Live", icon: MapPinned },
+    { href: "/track", label: "Track", icon: MapPinned },
     { href: "/routes", label: "Routes", icon: RouteIcon },
     { href: "/notifications", label: "Alerts", icon: Bell, badge: unreadCount },
   ];
@@ -163,14 +163,14 @@ function BottomNav({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                 active ? "text-brand-700" : "text-slate-600 hover:bg-slate-50",
               )}
             >
               <span className="relative">
                 <Icon className="h-5 w-5" aria-hidden="true" />
                 {!!item.badge && item.badge > 0 && (
-                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-extrabold text-white">
+                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}
@@ -257,7 +257,7 @@ function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-  const { state, unreadCount, clearError } = useApp();
+  const { state, snapshot, unreadCount, clearError } = useApp();
   const pageTitle = titles[pathname] ?? "BusTrack";
 
   useEffect(() => {
@@ -284,11 +284,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <RouteSelector showLabel={false} compact />
             </div>
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-              <DemoModeBadge compact />
+              {snapshot.dataMode === "simulation" ? <DemoModeBadge compact /> : <SourceLabel mode={snapshot.dataMode} />}
               <Link
                 href="/notifications"
                 aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}
-                className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 <Bell className="h-5 w-5" aria-hidden="true" />
                 {unreadCount > 0 && (
@@ -298,7 +298,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 href={state.user ? "/profile" : "/login"}
                 aria-label={state.user ? "Open profile" : "Sign in"}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-navy-950 text-xs font-extrabold text-white transition hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-navy-950 text-xs font-semibold text-white transition-colors hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 {state.user?.avatarInitials ?? <UserRound className="h-5 w-5" aria-hidden="true" />}
               </Link>

@@ -35,7 +35,7 @@ export function RoleGuard({
           <Badge tone="amber" className="mb-3">
             Restricted area
           </Badge>
-          <h1 className="text-2xl font-extrabold">{title}</h1>
+          <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">{description}</p>
         </div>
         <CardContent className="space-y-5 p-6">

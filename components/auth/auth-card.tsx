@@ -160,7 +160,7 @@ export function AuthCard() {
             <span className="mt-1 block text-xs">Apply all four migrations and the route seed before creating users.</span>
           </Alert>
         )}
-        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1" role="tablist" aria-label="Account action">
+        <div className="grid grid-cols-2 gap-4 border-b border-slate-200" role="tablist" aria-label="Account action">
           {([
             { value: "signin" as const, label: "Sign in" },
             { value: "signup" as const, label: "Sign up" },
@@ -171,7 +171,7 @@ export function AuthCard() {
               role="tab"
               aria-selected={mode === tab.value}
               onClick={() => chooseMode(tab.value)}
-              className={cn("min-h-10 rounded-lg px-3 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "bg-white text-navy-950 shadow-sm" : "text-slate-600 hover:text-navy-900")}
+              className={cn("min-h-11 border-b-2 border-transparent px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "border-brand-600 text-navy-950" : "text-slate-600 hover:text-navy-900")}
             >
               {tab.label}
             </button>

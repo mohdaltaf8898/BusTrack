@@ -20,7 +20,7 @@ describe("responsive navigation", () => {
     const mobileNav = screen.getByLabelText("Mobile primary navigation");
     expect(mobileNav).toBeInTheDocument();
     expect(mobileNav.className).toContain("md:hidden");
-    expect(screen.getAllByRole("link", { name: /live/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /track/i }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: /routes/i }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: /open more navigation/i })).toBeInTheDocument();
 

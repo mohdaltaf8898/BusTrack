@@ -50,8 +50,8 @@ export default function BusDetailsPage() {
     <div className="space-y-5">
       <PageHeader
         eyebrow="Bus details"
-        title="Vehicle & service information"
-        description="Assigned route, trip state, last reported position and placeholder transport contacts."
+        title="Bus & service details"
+        description="Trip state, location source and contact availability for the selected route."
         actions={
           <div className="w-full sm:w-64">
             <RouteSelector />
@@ -77,21 +77,21 @@ export default function BusDetailsPage() {
         />
       ) : (
         <>
-          <Card className="overflow-hidden border-0 bg-navy-950 text-white">
+          <Card className="overflow-hidden">
             <CardContent className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div className="flex items-center gap-4">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-brand-200">
+                <span className="flex h-14 w-14 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-navy-950">
                   <BusFront className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Bus number</p>
-                  <p className="text-3xl font-extrabold">{snapshot.bus.number}</p>
-                  <p className="mt-1 text-sm text-white/65">{snapshot.route.name}</p>
+                  <p className="text-xs font-medium text-slate-500">Bus number</p>
+                  <p className="text-3xl font-semibold text-navy-950">{snapshot.bus.number}</p>
+                  <p className="mt-1 text-sm text-slate-600">{snapshot.route.name}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusPill status={snapshot.busStatus} />
-                <Badge tone="navy" className="bg-white/10 text-white ring-white/10">
+                <Badge tone="neutral">
                   {snapshot.route.code}
                 </Badge>
                 <SourceLabel mode={snapshot.dataMode} />

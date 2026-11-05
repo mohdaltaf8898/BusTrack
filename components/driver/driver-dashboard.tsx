@@ -4,17 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   BusFront,
+  ChevronDown,
   CirclePause,
   CirclePlay,
   Compass,
   KeyRound,
   LocateFixed,
   MapPin,
-  Navigation,
-  Radio,
   RefreshCw,
   ShieldCheck,
-  Signal,
   Smartphone,
   WifiOff,
 } from "lucide-react";
@@ -28,7 +26,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, EmptyState } from "@/components/ui/feedback";
 import { Label, Select } from "@/components/ui/form";
-import { DemoModeBadge, SimulatedTag, SourceLabel } from "@/components/ui/labels";
+import { SimulatedTag, SourceLabel } from "@/components/ui/labels";
 import { Switch } from "@/components/ui/switch";
 import { formatCoordinates, formatDateTime, formatRelativeTime } from "@/lib/format";
 import { bearingToCompass } from "@/lib/geo";
@@ -256,17 +254,9 @@ export function DriverDashboard() {
     <div className="space-y-5">
       <PageHeader
         eyebrow="Driver workspace"
-        title={`Welcome, ${state.user?.name.split(" ")[0] ?? "driver"}`}
-        description="This is the driver-side device screen. Opening a student dashboard never accesses your location."
-        actions={
-          isRealMode ? (
-            <Badge tone="green" dot>
-              Supabase Auth
-            </Badge>
-          ) : (
-            <DemoModeBadge />
-          )
-        }
+        title="Trip & location sharing"
+        description={`Assigned to ${state.user?.name ?? "driver"}. Only this authorized driver screen can request device location; opening a student page never does.`}
+        actions={isRealMode ? <Badge tone="neutral">Authorized driver</Badge> : undefined}
       />
 
       {!isRealMode && (
@@ -299,60 +289,29 @@ export function DriverDashboard() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-              <BusFront className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs text-slate-500">Assigned bus</p>
-              <p className="truncate text-base font-extrabold text-navy-950">{assignedBus.number}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-              <Navigation className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs text-slate-500">Assigned route</p>
-              <p className="truncate text-base font-extrabold text-navy-950">
-                {routeSnapshot.route.code} · {routeSnapshot.route.name}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-              <Signal className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs text-slate-500">Connection status</p>
-              <p className="truncate text-base font-extrabold text-navy-950">
-                {state.isOnline ? (state.realtimeStatus === "connected" ? "Realtime connected" : "Online") : "Offline"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-              <Radio className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs text-slate-500">Last update</p>
-              <p className="truncate text-base font-extrabold text-navy-950">
-                {formatRelativeTime(
-                  isRealMode && lastSentAt ? lastSentAt : routeSnapshot.lastUpdateAt,
-                  state.currentTime,
-                )}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <Card><CardContent className="p-4 sm:p-5">
+          <p className="text-xs text-slate-600">Assigned bus</p>
+          <p className="mt-1 truncate text-lg font-semibold text-navy-950">{assignedBus.number}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4 sm:p-5">
+          <p className="text-xs text-slate-600">Assigned route</p>
+          <p className="mt-1 truncate text-sm font-semibold text-navy-950" title={routeSnapshot.route.name}>
+            {routeSnapshot.route.code} · {routeSnapshot.route.name}
+          </p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4 sm:p-5">
+          <p className="text-xs text-slate-600">Connection</p>
+          <p className="mt-1 truncate text-sm font-semibold text-navy-950">
+            {state.isOnline ? (state.realtimeStatus === "connected" ? "Realtime connected" : "Online") : "Offline"}
+          </p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4 sm:p-5">
+          <p className="text-xs text-slate-600">Last update</p>
+          <p className="mt-1 truncate text-sm font-semibold text-navy-950">
+            {formatRelativeTime(isRealMode && lastSentAt ? lastSentAt : routeSnapshot.lastUpdateAt, state.currentTime)}
+          </p>
+        </CardContent></Card>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
@@ -384,20 +343,20 @@ export function DriverDashboard() {
             <RouteAccuracyNote route={routeSnapshot.route} />
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Coordinates</p>
+                <p className="text-xs font-medium text-slate-600">Coordinates</p>
                 <p className="mt-1 font-mono text-xs font-bold text-navy-950">
                   {formatCoordinates(routeSnapshot.busPosition.lat, routeSnapshot.busPosition.lng)}
                 </p>
               </div>
               <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Direction</p>
+                <p className="text-xs font-medium text-slate-600">Direction</p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-navy-950">
                   <Compass className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
                   {bearingToCompass(routeSnapshot.busPosition.bearing)} · {Math.round(routeSnapshot.busPosition.bearing)}°
                 </p>
               </div>
               <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Reported at</p>
+                <p className="text-xs font-medium text-slate-600">Reported at</p>
                 <p className="mt-1 text-xs font-bold text-navy-950">
                   {formatDateTime(isRealMode && lastSentAt ? lastSentAt : routeSnapshot.lastUpdateAt)} IST
                 </p>
@@ -570,7 +529,7 @@ export function DriverDashboard() {
                   "End Trip at the destination to stop all location sharing.",
                 ].map((item, index) => (
                   <li key={item} className="flex gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-extrabold text-brand-700">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-semibold text-brand-700">
                       {index + 1}
                     </span>
                     <span className="leading-6">{item}</span>
@@ -582,7 +541,16 @@ export function DriverDashboard() {
         </div>
       </div>
 
-      {!isRealMode && <SimulationControls routeId={routeId} />}
+      {!isRealMode && (
+        <details className="group rounded-2xl border border-slate-200 bg-white">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-semibold text-navy-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">
+            Demo scenarios <ChevronDown className="h-4 w-4 text-slate-600 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="border-t border-slate-100 p-4">
+            <SimulationControls routeId={routeId} className="border-0 shadow-none" />
+          </div>
+        </details>
+      )}
     </div>
   );
 }

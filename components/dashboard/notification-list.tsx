@@ -36,10 +36,10 @@ const notificationMeta: Record<
   { label: string; tone: "blue" | "amber" | "rose" | "green" | "violet" | "neutral"; Icon: typeof BellRing }
 > = {
   delay: { label: "Delay", tone: "amber", Icon: TriangleAlert },
-  approaching: { label: "Approaching", tone: "violet", Icon: MapPin },
-  arrival: { label: "Arrival", tone: "blue", Icon: BusFront },
-  trip_started: { label: "Trip started", tone: "green", Icon: Megaphone },
-  trip_completed: { label: "Trip completed", tone: "green", Icon: Check },
+  approaching: { label: "Approaching", tone: "neutral", Icon: MapPin },
+  arrival: { label: "Arrival", tone: "neutral", Icon: BusFront },
+  trip_started: { label: "Trip started", tone: "neutral", Icon: Megaphone },
+  trip_completed: { label: "Trip completed", tone: "neutral", Icon: Check },
   location_unavailable: { label: "Location", tone: "rose", Icon: WifiOff },
   system: { label: "System", tone: "neutral", Icon: ShieldAlert },
 };
@@ -133,7 +133,7 @@ export function NotificationList() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-2.5">
               <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
-              <div className="text-xs leading-5 text-amber-900">
+              <div className="text-xs leading-5 text-slate-700">
                 <p className="font-bold">Browser alerts are optional</p>
                 <p>
                   {pushPermission === "granted"
@@ -195,7 +195,7 @@ export function NotificationList() {
                 <li
                   key={item.id}
                   className={cn(
-                    "rounded-2xl border p-3.5 transition",
+                    "rounded-xl border p-4 transition-colors",
                     unread
                       ? "border-brand-100 bg-brand-50/40"
                       : "border-slate-100 bg-white",
@@ -204,8 +204,7 @@ export function NotificationList() {
                   <div className="flex items-start gap-3">
                     <span
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                        unread ? "bg-white text-brand-600 shadow-sm" : "bg-slate-50 text-slate-500",
+                        "mt-1 flex h-7 w-7 shrink-0 items-center justify-center text-slate-600",
                       )}
                     >
                       <Icon className="h-5 w-5" aria-hidden="true" />

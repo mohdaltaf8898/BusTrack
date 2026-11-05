@@ -135,7 +135,7 @@ export default function RoutesPage() {
               <div>
                 <CardTitle>Ordered stops · {snapshot.route.code}</CardTitle>
                 <p className="mt-1 text-xs text-slate-500">
-                  The listed pickup times are from 2025–26, not live arrival times. Select a stop for its simulated ETA.
+                  The line shows pickup order, not a verified driving path. Times are from 2025–26; select a stop for a simulated ETA.
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
@@ -150,7 +150,7 @@ export default function RoutesPage() {
                 selectedStopId={snapshot.selectedStop.id}
                 className="mb-4 h-48"
               />
-              <ol className="space-y-2">
+              <ol className="relative space-y-2 before:pointer-events-none before:absolute before:bottom-8 before:left-[28px] before:top-8 before:z-10 before:w-px before:bg-brand-300">
                 {snapshot.stopEtas.map((item) => {
                   const selected = item.isSelected;
                   return (
@@ -160,16 +160,16 @@ export default function RoutesPage() {
                         aria-pressed={selected}
                         onClick={() => selectStop(item.stop.id)}
                         className={cn(
-                          "flex min-h-[66px] w-full items-center gap-3 rounded-2xl border p-3 text-left transition",
+                          "flex min-h-[66px] w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                           selected
                             ? "border-brand-200 bg-brand-50"
-                            : "border-slate-100 hover:bg-slate-50",
+                            : "border-slate-200 hover:bg-slate-50",
                         )}
                       >
                         <span
                           className={cn(
-                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-extrabold",
-                            selected ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600",
+                            "relative z-20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                            selected ? "border-brand-600 bg-brand-600 text-white" : "border-brand-300 bg-white text-brand-700",
                           )}
                         >
                           {item.stop.order}
@@ -186,7 +186,7 @@ export default function RoutesPage() {
                           {item.stop.note && <span className="mt-0.5 block text-[11px] text-amber-700">{item.stop.note}</span>}
                         </span>
                         <span className="text-right">
-                          <span className="block text-sm font-extrabold text-navy-950">
+                          <span className="block text-sm font-semibold text-navy-950">
                             {item.status === "departed" ? "Passed" : formatEta(item.etaSeconds)}
                           </span>
                           <span className="block text-[10px] text-slate-400">
@@ -209,7 +209,7 @@ export default function RoutesPage() {
               <CardContent className="space-y-4">
                 <div className="rounded-2xl bg-navy-950 p-4 text-white">
                   <p className="text-xs text-white/55">Route ID · {snapshot.route.code}</p>
-                  <p className="mt-1 text-lg font-extrabold">{snapshot.route.name}</p>
+                  <p className="mt-1 text-lg font-semibold">{snapshot.route.name}</p>
                   <p className="mt-2 text-xs leading-5 text-white/65">{snapshot.route.description}</p>
                 </div>
                 <div className="space-y-3 text-sm">

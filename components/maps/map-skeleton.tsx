@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/ui/feedback";
 import { cn } from "@/lib/utils";
 
 export function MapSkeleton({ className }: { className?: string }) {
@@ -11,10 +10,7 @@ export function MapSkeleton({ className }: { className?: string }) {
       aria-busy="true"
       aria-label="Loading route map"
     >
-      <div className="map-grid absolute inset-0 opacity-30" />
-      <Skeleton className="absolute left-[16%] top-[30%] h-2 w-[62%] rotate-[-12deg] rounded-full" />
-      <Skeleton className="absolute left-[20%] top-[52%] h-2 w-[50%] rotate-[14deg] rounded-full" />
-      <div className="relative rounded-2xl bg-white/90 px-4 py-2 text-xs font-semibold text-navy-700 shadow-card">
+      <div className="relative rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-navy-700">
         Preparing route map…
       </div>
     </div>

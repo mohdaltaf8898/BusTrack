@@ -34,7 +34,7 @@ export function UpcomingStops({ limit = 5 }: { limit?: number }) {
                 onClick={() => selectStop(item.stop.id)}
                 aria-pressed={item.isSelected}
                 className={cn(
-                  "flex min-h-[72px] w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                  "flex min-h-[72px] w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                   item.isSelected ? "bg-brand-50/70" : "hover:bg-slate-50",
                 )}
               >

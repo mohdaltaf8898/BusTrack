@@ -103,7 +103,7 @@ export function DataTable<T extends { id: string }>({
         <>
           <div className="hidden overflow-x-auto rounded-2xl border border-slate-100 md:block">
             <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              <thead className="bg-slate-50 text-xs font-medium text-slate-600">
                 <tr>
                   {columns.map((column) => (
                     <th key={column.key} className={cn("px-3 py-3", column.className)}>
@@ -166,7 +166,7 @@ export function DataTable<T extends { id: string }>({
                 <div className="space-y-2">
                   {columns.map((column) => (
                     <div key={column.key} className="flex items-start justify-between gap-3 text-xs">
-                      <span className="font-bold uppercase tracking-wide text-slate-400">
+                      <span className="font-medium text-slate-600">
                         {column.header}
                       </span>
                       <span className="min-w-0 text-right text-slate-700">{column.cell(row)}</span>

@@ -6,12 +6,11 @@ export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-950 text-white",
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-navy-950",
         className,
       )}
     >
       <BusFront className="h-5 w-5" aria-hidden="true" />
-      <span className="absolute ml-6 mt-6 h-2 w-2 rounded-full bg-brand-400 ring-2 ring-navy-950" aria-hidden="true" />
     </span>
   );
 }
@@ -35,7 +34,7 @@ export function Logo({
           <span className="block text-[17px] font-semibold tracking-tight text-navy-950">
             BusTrack
           </span>
-          <span className="block text-[10px] font-medium tracking-wide text-slate-500">
+          <span className="block text-xs font-normal text-slate-600">
             Know before you go
           </span>
         </span>

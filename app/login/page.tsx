@@ -17,7 +17,6 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/feedback";
 import { AuthCard } from "@/components/auth/auth-card";
-import { DemoModeBadge } from "@/components/ui/labels";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
 
@@ -35,7 +34,7 @@ const demoRoles: Array<{
     description: "Track buses, ETAs, stops and alerts.",
     href: "/",
     Icon: GraduationCap,
-    tone: "bg-brand-50 text-brand-700",
+    tone: "border border-slate-200 bg-white text-navy-800",
   },
   {
     role: "driver",
@@ -43,7 +42,7 @@ const demoRoles: Array<{
     description: "Start a trip and control location sharing.",
     href: "/driver",
     Icon: Gauge,
-    tone: "bg-emerald-50 text-emerald-700",
+    tone: "border border-slate-200 bg-white text-navy-800",
   },
   {
     role: "admin",
@@ -51,7 +50,7 @@ const demoRoles: Array<{
     description: "Manage buses, routes, stops and assignments.",
     href: "/admin",
     Icon: ShieldCheck,
-    tone: "bg-violet-50 text-violet-700",
+    tone: "border border-slate-200 bg-white text-navy-800",
   },
 ];
 
@@ -70,9 +69,9 @@ export default function LoginPage() {
     <div className="mx-auto w-full max-w-5xl space-y-5">
       <PageHeader
         eyebrow="Account"
-        title="Login & role access"
-        description="Sign in when authentication is configured, or choose a local demo role."
-        actions={config.demoMode ? <DemoModeBadge /> : <Badge tone="green" dot>Supabase Auth</Badge>}
+        title="Sign in or explore the demo"
+        description="Student accounts use email confirmation when delivery is configured. Demo roles stay in this browser."
+        actions={!config.demoMode ? <Badge tone="neutral">Supabase Auth</Badge> : undefined}
       />
 
       {state.user && (
@@ -121,17 +120,17 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => chooseDemoRole(item.role, item.href)}
                   className={cn(
-                    "flex min-h-[74px] w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition",
+                    "flex min-h-[74px] w-full items-center gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                     active
-                      ? "border-brand-300 bg-brand-50"
-                      : "border-slate-100 hover:border-slate-200 hover:bg-slate-50",
+                      ? "border-brand-400 bg-brand-50/50"
+                      : "border-slate-200 hover:border-brand-300 hover:bg-slate-50",
                   )}
                 >
                   <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.tone)}>
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-sm font-extrabold text-navy-950">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-navy-950">
                       {item.title}
                       {active && <Badge tone="blue">Current</Badge>}
                     </span>

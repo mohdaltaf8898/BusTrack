@@ -25,8 +25,8 @@ export function StatusCard() {
       <div className="px-5 pt-5 sm:px-8 sm:pt-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-slate-500">Bus {bus?.number ?? route.busNumber} · {route.code}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-navy-950 sm:text-xl">{route.name}</h2>
+            <p className="text-xs font-medium text-slate-500">{route.code} · Bus {bus?.number ?? route.busNumber} · Stop {selectedStop.order}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-navy-950 sm:text-xl">{selectedStop.name}</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={busStatus} />
@@ -36,8 +36,8 @@ export function StatusCard() {
 
         <div className="grid gap-7 py-8 sm:gap-10 sm:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.35fr)] lg:items-end">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.11em] text-slate-600">
-              Estimated arrival at {selectedStop.name}
+            <p className="text-sm font-medium text-slate-600">
+              Estimated arrival
             </p>
             <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
               <span className={selectedStopEta.status === "unmapped"
@@ -73,7 +73,7 @@ export function StatusCard() {
       <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-8">
         <div className="mb-2 flex items-center justify-between gap-4 text-xs text-slate-600">
           <span className="min-w-0 truncate">{route.startLocation} → {route.destination}</span>
-          <span className="shrink-0">{Math.round(progressPercent)}% of demo route</span>
+          <span className="shrink-0">{Math.round(progressPercent)}% of route estimate</span>
         </div>
         <ProgressBar value={progressPercent} className="h-1 bg-slate-200" indicatorClassName="bg-brand-600" />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-slate-600">
