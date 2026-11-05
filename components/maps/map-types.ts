@@ -13,4 +13,9 @@ export interface LiveMapProps {
   className?: string;
   onSelectStop?: (stopId: string) => void;
   showControls?: boolean;
+  /**
+   * Space (px) to keep clear at the bottom of the map for overlays such as a
+   * bottom sheet: Leaflet controls and the heading badge move up by this much.
+   */
+  bottomInset?: number;
 }

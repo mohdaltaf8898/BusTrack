@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
@@ -16,15 +17,17 @@ import {
   Route as RouteIcon,
   ShieldCheck,
   UserRound,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
 import { SourceLabel } from "@/components/ui/labels";
 import { Logo } from "@/components/brand";
+import { PageTransition } from "@/components/motion/page-transition";
 import { RouteSelector } from "@/components/route-selector";
 import { Alert, LoadingScreen, OfflineNotice } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
+import { BottomSheet } from "@/components/ui/sheet";
+import { SPRING } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -85,15 +88,21 @@ function NavLink({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
-        active
-          ? "bg-brand-50 text-brand-700"
-          : "text-slate-600 hover:bg-slate-50 hover:text-navy-950",
+        "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
+        active ? "text-brand-700" : "text-slate-600 hover:bg-slate-50 hover:text-navy-950",
         compact && "min-h-12",
       )}
     >
-      <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-      <span className="truncate">{item.label}</span>
+      {active && (
+        <m.span
+          layoutId="sidebar-active"
+          className="absolute inset-0 rounded-xl bg-brand-50"
+          transition={SPRING.gentle}
+          aria-hidden="true"
+        />
+      )}
+      <Icon className="relative h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
+      <span className="relative truncate">{item.label}</span>
     </Link>
   );
 }
@@ -149,7 +158,7 @@ function BottomNav({
   return (
     <nav
       aria-label="Mobile primary navigation"
-      className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white px-1 pt-1.5 md:hidden"
+      className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-1 pt-1.5 backdrop-blur supports-[backdrop-filter]:bg-white/85 md:hidden"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around">
         {items.map((item) => {
@@ -162,30 +171,52 @@ function BottomNav({
               aria-current={active ? "page" : undefined}
               className={cn(
                 "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
-                active ? "text-brand-700" : "text-slate-600 hover:bg-slate-50",
+                active ? "text-brand-700" : "text-slate-600 active:bg-slate-50",
               )}
             >
-              <span className="relative">
+              {active && (
+                <m.span
+                  layoutId="bottom-nav-active"
+                  className="absolute inset-x-2 top-0.5 h-9 rounded-xl bg-brand-50"
+                  transition={SPRING.gentle}
+                  aria-hidden="true"
+                />
+              )}
+              <m.span
+                className="relative"
+                animate={{ scale: active ? 1.08 : 1, y: active ? -1 : 0 }}
+                transition={SPRING.gentle}
+              >
                 <Icon className="h-5 w-5" aria-hidden="true" />
-                {!!item.badge && item.badge > 0 && (
-                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white">
-                    {item.badge > 9 ? "9+" : item.badge}
-                  </span>
-                )}
-              </span>
-              {item.label}
+                <AnimatePresence>
+                  {!!item.badge && item.badge > 0 && (
+                    <m.span
+                      key="badge"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                      className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white"
+                    >
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </m.span>
+                  )}
+                </AnimatePresence>
+              </m.span>
+              <span className="relative">{item.label}</span>
             </Link>
           );
         })}
-        <button
+        <m.button
           type="button"
           onClick={onMore}
+          whileTap={{ scale: 0.92 }}
           aria-label="Open more navigation"
-          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold text-slate-600 active:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
           More
-        </button>
+        </m.button>
       </div>
     </nav>
   );
@@ -193,62 +224,56 @@ function BottomNav({
 
 function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => void; pathname: string }) {
   const { state, signOut } = useApp();
-  if (!open) return null;
+  const items = [{ href: "/bus-details", label: "Bus Details", icon: BusFront }, ...workspaceNav];
   return (
-    <div className="fixed inset-0 z-[70] md:hidden">
-      <button
-        type="button"
-        aria-label="Close navigation"
-        onClick={onClose}
-        className="absolute inset-0 bg-navy-950/45 backdrop-blur-[2px]"
-      />
-      <div className="safe-bottom absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-6 shadow-float animate-fade-in">
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-navy-950">More</p>
-            <p className="text-xs text-slate-500">BusTrack workspace</p>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-        <div className="grid gap-1.5">
-          {[{ href: "/bus-details", label: "Bus Details", icon: BusFront }, ...workspaceNav].map(
-            (item) => {
-              const Icon = item.icon;
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold",
-                    active ? "bg-brand-50 text-brand-700" : "text-navy-800 hover:bg-slate-50",
-                  )}
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  {item.label}
-                  <ChevronRight className="ml-auto h-4 w-4 text-slate-300" aria-hidden="true" />
-                </Link>
-              );
-            },
-          )}
-        </div>
-        {state.user && (
-          <Button
-            variant="outline"
-            className="mt-4 w-full"
-            onClick={() => {
-              void signOut().then(() => window.location.assign("/"));
-              onClose();
-            }}
-          >
-            <LogOut className="h-4 w-4" aria-hidden="true" /> Sign out
-          </Button>
-        )}
-      </div>
-    </div>
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      title="More"
+      description="BusTrack workspace"
+      closeLabel="Close navigation"
+      layerClassName="z-[70] md:hidden"
+    >
+      <m.div
+        className="grid gap-1.5"
+        initial="hidden"
+        animate="visible"
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.035, delayChildren: 0.08 } } }}
+      >
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = pathname === item.href;
+          return (
+            <m.div key={item.href} variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}>
+              <Link
+                href={item.href}
+                onClick={onClose}
+                className={cn(
+                  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors active:bg-brand-50",
+                  active ? "bg-brand-50 text-brand-700" : "text-navy-800 hover:bg-slate-50",
+                )}
+              >
+                <Icon className="h-5 w-5" aria-hidden="true" />
+                {item.label}
+                <ChevronRight className="ml-auto h-4 w-4 text-slate-300" aria-hidden="true" />
+              </Link>
+            </m.div>
+          );
+        })}
+      </m.div>
+      {state.user && (
+        <Button
+          variant="outline"
+          className="mt-4 w-full"
+          onClick={() => {
+            void signOut().then(() => window.location.assign("/"));
+            onClose();
+          }}
+        >
+          <LogOut className="h-4 w-4" aria-hidden="true" /> Sign out
+        </Button>
+      )}
+    </BottomSheet>
   );
 }
 
@@ -267,7 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Sidebar pathname={pathname} />
       <div className="md:pl-[240px]">
         {!state.isOnline && <OfflineNotice />}
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2 px-3 sm:px-5">
             <div className="md:hidden">
               <Logo compact />
@@ -289,9 +314,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               >
                 <Bell className="h-5 w-5" aria-hidden="true" />
-                {unreadCount > 0 && (
-                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
-                )}
+                <AnimatePresence>
+                  {unreadCount > 0 && (
+                    <m.span
+                      key="unread"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                      className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"
+                    />
+                  )}
+                </AnimatePresence>
               </Link>
               <Link
                 href={state.user ? "/profile" : "/login"}
@@ -311,7 +345,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         )}
         <main id="main-content" className="mx-auto w-full max-w-[1200px] px-4 pb-28 pt-6 sm:px-6 sm:pt-8 md:pb-16">
-          {state.hydrated ? children : <LoadingScreen />}
+          {state.hydrated ? <PageTransition>{children}</PageTransition> : <LoadingScreen />}
         </main>
       </div>
       <BottomNav pathname={pathname} onMore={() => setMoreOpen(true)} />

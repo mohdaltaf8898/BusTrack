@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { forwardRef, type ButtonHTMLAttributes, type ComponentProps } from "react";
+import { m, type HTMLMotionProps } from "motion/react";
+import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
+import { SPRING, TAP } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant =
@@ -14,7 +18,7 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 disabled:bg-brand-300 disabled:shadow-none",
+    "bg-brand-600 text-white shadow-action hover:bg-brand-700 active:bg-brand-800 disabled:bg-brand-300 disabled:shadow-none",
   secondary:
     "bg-navy-900 text-white shadow-sm hover:bg-navy-800 active:bg-navy-950 disabled:bg-navy-300",
   outline:
@@ -38,41 +42,53 @@ export function buttonClasses(options: {
   className?: string;
 }) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70",
+    "inline-flex shrink-0 touch-manipulation select-none items-center justify-center whitespace-nowrap font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70",
     variants[options.variant ?? "primary"],
     sizes[options.size ?? "md"],
     options.className,
   );
 }
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  children?: ReactNode;
 }
 
+/**
+ * Button with press feedback: a short spring scale on pointer/touch down that
+ * releases on up. Colour changes stay CSS transitions; the scale is skipped
+ * while disabled or loading and under reduced motion.
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { className, variant, size, loading, children, disabled, ...props },
   ref,
 ) {
+  const inert = Boolean(disabled || loading);
   return (
-    <button
+    <m.button
       ref={ref}
       className={buttonClasses({ variant, size, className })}
-      disabled={disabled || loading}
+      disabled={inert}
+      whileTap={inert ? undefined : TAP}
+      transition={SPRING.tap}
       {...props}
     >
       {loading && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}
       {children}
-    </button>
+    </m.button>
   );
 });
 
-export interface ButtonLinkProps extends ComponentProps<typeof Link> {
+const MotionLink = m.create(Link);
+
+export interface ButtonLinkProps extends ComponentProps<typeof MotionLink> {
   variant?: ButtonVariant;
   size?: ButtonSize;
 }
 
+/** Link styled as a button, with the same press feedback. */
 export function ButtonLink({
   className,
   variant,
@@ -81,8 +97,13 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   return (
-    <Link className={buttonClasses({ variant, size, className })} {...props}>
+    <MotionLink
+      className={buttonClasses({ variant, size, className })}
+      whileTap={TAP}
+      transition={SPRING.tap}
+      {...props}
+    >
       {children}
-    </Link>
+    </MotionLink>
   );
 }

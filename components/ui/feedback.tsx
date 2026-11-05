@@ -1,6 +1,10 @@
+"use client";
+
+import { AnimatePresence, m } from "motion/react";
 import type { ReactNode } from "react";
 import {
   AlertTriangle,
+  BusFront,
   CheckCircle2,
   Info,
   Inbox,
@@ -8,33 +12,87 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { DURATION, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
+/** Placeholder block with a slow opacity pulse (opacity only: cheap to paint, and reduced-motion safe). */
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl bg-slate-100",
+        "relative overflow-hidden rounded-xl bg-slate-100 animate-skeleton-pulse motion-reduce:animate-none",
         className,
       )}
+      aria-hidden="true"
     />
   );
 }
 
+/** A small bus on a moving dashed road: the loading mark for workspace screens. */
+export function BusLoader({ className, label = "Loading" }: { className?: string; label?: string }) {
+  return (
+    <div className={cn("flex flex-col items-center gap-3", className)} role="status" aria-label={label}>
+      <div className="relative h-12 w-28">
+        <m.span
+          className="absolute left-1/2 top-1 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-xl bg-brand-600 text-white shadow-glow"
+          animate={{ y: [0, -2, 0] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
+          aria-hidden="true"
+        >
+          <BusFront className="h-5 w-5" />
+        </m.span>
+        <svg className="absolute inset-x-0 bottom-0 h-2 w-full" viewBox="0 0 112 8" aria-hidden="true">
+          <line
+            x1="0"
+            y1="4"
+            x2="112"
+            y2="4"
+            stroke="rgb(188 218 255)"
+            strokeWidth="2"
+            strokeDasharray="10 14"
+            strokeLinecap="round"
+            className="animate-road-dash motion-reduce:animate-none"
+          />
+        </svg>
+      </div>
+      <span className="text-xs font-medium text-slate-500">{label}…</span>
+    </div>
+  );
+}
+
+const skeletonBlockVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: DURATION.base, ease: EASE_OUT } },
+};
+
 export function LoadingScreen() {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6" aria-busy="true" aria-label="Loading BusTrack">
-      <div className="flex items-center justify-between">
+    <m.div
+      className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6"
+      aria-busy="true"
+      aria-label="Loading BusTrack"
+      initial="hidden"
+      animate="visible"
+      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }}
+    >
+      <m.div variants={skeletonBlockVariants} className="flex items-center justify-between">
         <Skeleton className="h-10 w-40" />
         <Skeleton className="h-10 w-28" />
-      </div>
-      <Skeleton className="h-44 w-full rounded-3xl" />
-      <Skeleton className="h-[320px] w-full rounded-3xl" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      </m.div>
+      <m.div variants={skeletonBlockVariants} className="relative">
+        <Skeleton className="h-44 w-full rounded-3xl" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <BusLoader label="Loading your route" />
+        </div>
+      </m.div>
+      <m.div variants={skeletonBlockVariants}>
+        <Skeleton className="h-[320px] w-full rounded-3xl" />
+      </m.div>
+      <m.div variants={skeletonBlockVariants} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Skeleton className="h-64 rounded-3xl" />
         <Skeleton className="h-64 rounded-3xl" />
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -62,8 +120,11 @@ export function Alert({
 }) {
   const { classes, Icon } = alertConfig[tone];
   return (
-    <div
+    <m.div
       role={tone === "error" ? "alert" : "status"}
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DURATION.base, ease: EASE_OUT }}
       className={cn("flex items-start gap-3 rounded-xl border p-4 text-sm", classes, className)}
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -72,16 +133,17 @@ export function Alert({
         <div className={cn(title && "mt-0.5", "leading-6")}>{children}</div>
       </div>
       {onDismiss && (
-        <button
+        <m.button
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
+          whileTap={{ scale: 0.9 }}
           className="rounded-lg p-1 hover:bg-black/5"
         >
           <X className="h-4 w-4" />
-        </button>
+        </m.button>
       )}
-    </div>
+    </m.div>
   );
 }
 
@@ -99,19 +161,27 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div
+    <m.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DURATION.base, ease: EASE_OUT }}
       className={cn(
         "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-12 text-center",
         className,
       )}
     >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm">
+      <m.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.08 }}
+        className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm"
+      >
         {icon ?? <Inbox className="h-6 w-6" />}
-      </div>
+      </m.div>
       <h3 className="text-base font-medium text-navy-950">{title}</h3>
       <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">{description}</p>
       {action && <div className="mt-5">{action}</div>}
-    </div>
+    </m.div>
   );
 }
 
@@ -139,18 +209,40 @@ export function ProgressBar({
   className?: string;
   indicatorClassName?: string;
 }) {
+  const clamped = Math.max(0, Math.min(100, value));
   return (
     <div
       className={cn("h-2 w-full overflow-hidden rounded-full bg-white/20", className)}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(Math.max(0, Math.min(100, value)))}
+      aria-valuenow={Math.round(clamped)}
     >
-      <div
+      <m.div
         className={cn("h-full rounded-full bg-brand-400", indicatorClassName)}
-        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+        initial={false}
+        animate={{ width: `${clamped}%` }}
+        transition={{ type: "spring", stiffness: 140, damping: 26, mass: 0.8 }}
       />
     </div>
+  );
+}
+
+/** Fades a block in/out as `show` changes, without leaving layout gaps while hidden. */
+export function Collapsible({ show, children, className }: { show: boolean; children: ReactNode; className?: string }) {
+  return (
+    <AnimatePresence initial={false}>
+      {show && (
+        <m.div
+          key="collapsible"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1, transition: { height: { duration: DURATION.base, ease: EASE_OUT }, opacity: { duration: 0.2, delay: 0.05 } } }}
+          exit={{ height: 0, opacity: 0, transition: { height: { duration: 0.22 }, opacity: { duration: 0.12 } } }}
+          className={cn("overflow-hidden", className)}
+        >
+          {children}
+        </m.div>
+      )}
+    </AnimatePresence>
   );
 }

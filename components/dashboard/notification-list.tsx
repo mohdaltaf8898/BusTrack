@@ -17,9 +17,12 @@ import {
   WifiOff,
   XCircle,
 } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useApp } from "@/state/app-provider";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
-import { Alert, EmptyState } from "@/components/ui/feedback";
+import { DURATION, EASE_OUT, SPRING } from "@/lib/motion";
+import { SwipeRow } from "@/components/motion/swipe-row";
+import { Alert, Collapsible, EmptyState } from "@/components/ui/feedback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -169,11 +172,11 @@ export function NotificationList() {
           )}
         </div>
 
-        {notice && (
+        <Collapsible show={Boolean(notice)}>
           <Alert tone="success" onDismiss={() => setNotice(null)}>
             {notice}
           </Alert>
-        )}
+        </Collapsible>
 
         {filtered.length === 0 ? (
           <EmptyState
@@ -186,77 +189,109 @@ export function NotificationList() {
             }
           />
         ) : (
-          <ul className="space-y-2.5">
-            {filtered.map((item) => {
-              const meta = notificationMeta[item.type];
-              const Icon = meta.Icon;
-              const unread = !item.readAt;
-              return (
-                <li
-                  key={item.id}
-                  className={cn(
-                    "rounded-xl border p-4 transition-colors",
-                    unread
-                      ? "border-brand-100 bg-brand-50/40"
-                      : "border-slate-100 bg-white",
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        "mt-1 flex h-7 w-7 shrink-0 items-center justify-center text-slate-600",
-                      )}
+          <m.ul layout className="space-y-2.5">
+            <AnimatePresence initial={false} mode="popLayout">
+              {filtered.map((item) => {
+                const meta = notificationMeta[item.type];
+                const Icon = meta.Icon;
+                const unread = !item.readAt;
+                return (
+                  <m.li
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.16 } }}
+                    transition={{ duration: DURATION.base, ease: EASE_OUT, layout: SPRING.gentle }}
+                  >
+                    <SwipeRow
+                      swipeLeft={{
+                        label: "Delete",
+                        icon: <Trash2 className="h-4 w-4" />,
+                        className: "bg-rose-600 text-white",
+                        destructive: true,
+                        onCommit: () => deleteNotification(item.id),
+                      }}
+                      swipeRight={unread ? {
+                        label: "Mark read",
+                        icon: <Check className="h-4 w-4" />,
+                        className: "bg-brand-600 text-white",
+                        onCommit: () => markRead(item.id),
+                      } : undefined}
                     >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge tone={meta.tone}>{meta.label}</Badge>
-                        {unread && (
-                          <span className="h-2 w-2 rounded-full bg-brand-500" aria-label="Unread" />
+                      <div
+                        className={cn(
+                          "rounded-xl border p-4 transition-colors duration-300",
+                          unread
+                            ? "border-brand-100 bg-brand-50/40"
+                            : "border-slate-100 bg-white",
                         )}
-                        {item.simulated && <SimulatedTag label="Simulated" />}
-                      </div>
-                      <h3 className="mt-2 text-sm font-bold text-navy-950">{item.title}</h3>
-                      <p className="mt-1 text-xs leading-5 text-slate-600">{item.message}</p>
-                      <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                        <span className="inline-flex items-center gap-1">
-                          <Clock3 className="h-3 w-3" aria-hidden="true" />
-                          {formatRelativeTime(item.createdAt, state.currentTime)}
-                        </span>
-                        <span>·</span>
-                        <span>{formatDateTime(item.createdAt)} IST</span>
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col gap-1">
-                      {unread && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 text-slate-500"
-                          aria-label={`Mark ${item.title} as read`}
-                          title="Mark as read"
-                          onClick={() => markRead(item.id)}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 text-slate-400 hover:text-rose-600"
-                        aria-label={`Delete ${item.title}`}
-                        title="Delete"
-                        onClick={() => deleteNotification(item.id)}
                       >
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                        <div className="flex items-start gap-3">
+                          <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center text-slate-600">
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Badge tone={meta.tone}>{meta.label}</Badge>
+                              <AnimatePresence>
+                                {unread && (
+                                  <m.span
+                                    key="unread"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    transition={SPRING.snappy}
+                                    className="h-2 w-2 rounded-full bg-brand-500"
+                                    aria-label="Unread"
+                                  />
+                                )}
+                              </AnimatePresence>
+                              {item.simulated && <SimulatedTag label="Simulated" />}
+                            </div>
+                            <h3 className="mt-2 text-sm font-bold text-navy-950">{item.title}</h3>
+                            <p className="mt-1 text-xs leading-5 text-slate-600">{item.message}</p>
+                            <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                              <span className="inline-flex items-center gap-1">
+                                <Clock3 className="h-3 w-3" aria-hidden="true" />
+                                {formatRelativeTime(item.createdAt, state.currentTime)}
+                              </span>
+                              <span>·</span>
+                              <span>{formatDateTime(item.createdAt)} IST</span>
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-col gap-1">
+                            {unread && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-slate-500"
+                                aria-label={`Mark ${item.title} as read`}
+                                title="Mark as read"
+                                onClick={() => markRead(item.id)}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 text-slate-400 hover:text-rose-600"
+                              aria-label={`Delete ${item.title}`}
+                              title="Delete"
+                              onClick={() => deleteNotification(item.id)}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </SwipeRow>
+                  </m.li>
+                );
+              })}
+            </AnimatePresence>
+          </m.ul>
         )}
       </CardContent>
 

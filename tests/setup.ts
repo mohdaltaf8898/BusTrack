@@ -7,6 +7,39 @@ delete process.env.NEXT_PUBLIC_SUPABASE_URL;
 delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// jsdom has no IntersectionObserver. Motion's in-view features (scroll reveals,
+// count-ups) use it, so provide a stub that reports every observed element as
+// visible straight away: components take their "in view" branch in tests.
+if (!globalThis.IntersectionObserver) {
+  class ImmediateIntersectionObserver implements IntersectionObserver {
+    readonly root: Element | Document | null = null;
+    readonly rootMargin = "0px";
+    readonly thresholds: ReadonlyArray<number> = [0];
+    private readonly callback: IntersectionObserverCallback;
+    constructor(callback: IntersectionObserverCallback) {
+      this.callback = callback;
+    }
+    observe(target: Element) {
+      const entry = {
+        isIntersecting: true,
+        intersectionRatio: 1,
+        target,
+        time: Date.now(),
+        boundingClientRect: target.getBoundingClientRect(),
+        intersectionRect: target.getBoundingClientRect(),
+        rootBounds: null,
+      } as IntersectionObserverEntry;
+      this.callback([entry], this);
+    }
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  }
+  globalThis.IntersectionObserver = ImmediateIntersectionObserver as unknown as typeof IntersectionObserver;
+}
+
 if (!globalThis.ResizeObserver) {
   globalThis.ResizeObserver = class {
     observe() {}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Logo } from "@/components/brand";
+import { BusIllustration } from "@/components/motion/bus-illustration";
 
 /**
  * Shared chrome for the public account screens. They sit outside the workspace
@@ -36,7 +37,8 @@ export function AuthScreen({
 
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
-          <div className="order-2 lg:order-1">
+          {/* CSS entrances: these screens are server-rendered and must paint before hydration. */}
+          <div className="order-2 animate-rise motion-reduce:animate-none lg:order-1">
             <h1 className="text-3xl font-semibold tracking-[-0.04em] text-navy-950 sm:text-4xl">
               {title}
             </h1>
@@ -44,8 +46,16 @@ export function AuthScreen({
               {description}
             </p>
             {aside && <div className="mt-6 max-w-xl">{aside}</div>}
+            <div className="mt-10 hidden max-w-xl overflow-hidden rounded-3xl border border-brand-100 bg-gradient-hero p-6 lg:block">
+              <BusIllustration className="mx-auto max-w-sm" />
+              <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+                Estimated times are labelled as estimates. Live positions appear only when an authorized driver device shares them.
+              </p>
+            </div>
           </div>
-          <div className="order-1 w-full lg:order-2">{children}</div>
+          <div className="order-1 w-full animate-rise motion-reduce:animate-none lg:order-2" style={{ animationDelay: "0.08s" }}>
+            {children}
+          </div>
         </div>
       </main>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
+  ArrowRight,
   BellRing,
   BusFront,
   ClipboardList,
@@ -11,28 +12,17 @@ import {
   ShieldCheck,
   Timer,
 } from "lucide-react";
-import { sampleRoutes, transportOffice } from "@/data/routes";
+import { transportOffice } from "@/data/routes";
+import { Faq as FaqAccordion } from "@/components/home/faq";
+import { HOME_STATS } from "@/components/home/stats";
+import { BusIllustration } from "@/components/motion/bus-illustration";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { ButtonLink } from "@/components/ui/button";
 import { Logo } from "@/components/brand";
+import { HOVER_LIFT, SPRING } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
-const stopCount = sampleRoutes.reduce((total, route) => total + route.stops.length, 0);
-const locatedCount = sampleRoutes.reduce(
-  (total, route) => total + route.stops.filter((stop) => stop.lat !== null).length,
-  0,
-);
-const timedCount = sampleRoutes.reduce(
-  (total, route) => total + route.stops.filter((stop) => Boolean(stop.scheduledTime)).length,
-  0,
-);
-
-export const HOME_STATS = {
-  routes: sampleRoutes.length,
-  stops: stopCount,
-  located: locatedCount,
-  unlocated: stopCount - locatedCount,
-  timed: timedCount,
-  scheduleYear: sampleRoutes[0].scheduleYear ?? "2025–26",
-};
+export { HOME_STATS };
 
 export function Section({
   id,
@@ -51,27 +41,27 @@ export function Section({
 }) {
   const palette =
     tone === "navy"
-      ? "bg-navy-950 text-white"
+      ? "bg-gradient-navy text-white"
       : tone === "surface"
         ? "border-y border-slate-200 bg-white"
         : "bg-canvas";
   const heading = tone === "navy" ? "text-white" : "text-navy-950";
   const body = tone === "navy" ? "text-white/70" : "text-slate-600";
-  const label = tone === "navy" ? "text-brand-200" : "text-slate-500";
+  const label = tone === "navy" ? "text-brand-200" : "text-brand-700";
 
   return (
-    <section id={id} className={palette} aria-labelledby={id ? `${id}-title` : undefined}>
+    <section id={id} className={cn("scroll-mt-16", palette)} aria-labelledby={id ? `${id}-title` : undefined}>
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-        <div className="max-w-2xl">
-          {eyebrow && <p className={`text-xs font-medium ${label}`}>{eyebrow}</p>}
+        <Reveal className="max-w-2xl">
+          {eyebrow && <p className={`text-xs font-semibold uppercase tracking-[0.08em] ${label}`}>{eyebrow}</p>}
           <h2
             id={id ? `${id}-title` : undefined}
-            className={`mt-2 text-2xl font-semibold tracking-[-0.035em] sm:text-3xl ${heading}`}
+            className={`mt-2 text-balance text-2xl font-semibold tracking-[-0.035em] sm:text-3xl ${heading}`}
           >
             {title}
           </h2>
           {lede && <p className={`mt-3 text-sm leading-6 sm:text-base sm:leading-7 ${body}`}>{lede}</p>}
-        </div>
+        </Reveal>
         <div className="mt-10">{children}</div>
       </div>
     </section>
@@ -113,17 +103,25 @@ const FEATURES = [
 
 export function FeatureGrid() {
   return (
-    <ul className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+    <RevealGroup as="ul" stagger={0.06} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {FEATURES.map(({ Icon, title, body }) => (
-        <li key={title} className="flex gap-3.5">
-          <Icon className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" />
+        <RevealItem
+          as="li"
+          key={title}
+          whileHover={HOVER_LIFT}
+          transition={SPRING.gentle}
+          className="group flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition-shadow duration-300 hover:shadow-lift"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-navy-950">{title}</h3>
             <p className="mt-1 text-sm leading-6 text-slate-600">{body}</p>
           </div>
-        </li>
+        </RevealItem>
       ))}
-    </ul>
+    </RevealGroup>
   );
 }
 
@@ -147,17 +145,26 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {STEPS.map((item) => (
-        <li key={item.step} className="rounded-2xl border border-slate-200 bg-white p-6">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-200 text-sm font-semibold text-brand-700">
-            {item.step}
-          </span>
+    <RevealGroup as="ol" stagger={0.1} className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
+      {STEPS.map((item, index) => (
+        <RevealItem
+          as="li"
+          key={item.step}
+          className="relative rounded-2xl border border-slate-200 bg-gradient-surface p-6 shadow-card"
+        >
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-brand text-sm font-semibold text-white shadow-glow">
+              {item.step}
+            </span>
+            {index < STEPS.length - 1 && (
+              <span className="hidden h-px flex-1 bg-gradient-to-r from-brand-200 to-transparent md:block" aria-hidden="true" />
+            )}
+          </div>
           <h3 className="mt-4 text-base font-semibold text-navy-950">{item.title}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
-        </li>
+        </RevealItem>
       ))}
-    </ol>
+    </RevealGroup>
   );
 }
 
@@ -184,20 +191,28 @@ const ROLES = [
 
 export function RoleCards() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+    <RevealGroup stagger={0.08} className="grid grid-cols-1 gap-6 md:grid-cols-3">
       {ROLES.map(({ Icon, role, body, access }) => (
-        <article key={role} className="rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="flex items-center gap-2.5">
-            <Icon className="h-5 w-5 text-navy-800" aria-hidden="true" />
+        <RevealItem
+          as="article"
+          key={role}
+          whileHover={HOVER_LIFT}
+          transition={SPRING.gentle}
+          className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-card transition-shadow duration-300 hover:shadow-lift"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 text-navy-800">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
             <h3 className="text-base font-semibold text-navy-950">{role}</h3>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">{body}</p>
-          <p className="mt-4 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">
+          <p className="mt-4 flex-1 text-sm leading-6 text-slate-600">{body}</p>
+          <p className="mt-5 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">
             {access}
           </p>
-        </article>
+        </RevealItem>
       ))}
-    </div>
+    </RevealGroup>
   );
 }
 
@@ -222,14 +237,17 @@ const HONESTY = [
 
 export function DataHonestyPanel() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <RevealGroup stagger={0.08} className="grid grid-cols-1 gap-5 md:grid-cols-2">
       {HONESTY.map((item) => (
-        <div key={item.label} className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/10">
-          <p className="text-xs font-medium text-brand-200">{item.label}</p>
+        <RevealItem
+          key={item.label}
+          className="rounded-2xl bg-white/[0.06] p-6 ring-1 ring-inset ring-white/10 backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.09]"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-brand-200">{item.label}</p>
           <p className="mt-2 text-sm leading-6 text-white/75">{item.body}</p>
-        </div>
+        </RevealItem>
       ))}
-    </div>
+    </RevealGroup>
   );
 }
 
@@ -261,51 +279,48 @@ const QUESTIONS = [
 ];
 
 export function Faq() {
-  return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {QUESTIONS.map((item) => (
-        <details
-          key={item.q}
-          className="group rounded-2xl border border-slate-200 bg-white px-5 py-4 open:shadow-card"
-        >
-          <summary className="flex min-h-8 cursor-pointer list-none items-start justify-between gap-4 text-sm font-semibold text-navy-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">
-            {item.q}
-            <span
-              className="mt-0.5 shrink-0 text-slate-400 transition-transform group-open:rotate-45"
-              aria-hidden="true"
-            >
-              +
-            </span>
-          </summary>
-          <p className="mt-2.5 text-sm leading-6 text-slate-600">{item.a}</p>
-        </details>
-      ))}
-    </div>
-  );
+  return <FaqAccordion items={QUESTIONS} />;
 }
 
 export function CtaBand() {
   return (
-    <div className="mx-auto w-full max-w-3xl text-center">
-      <h2 className="text-2xl font-semibold tracking-[-0.035em] text-navy-950 sm:text-3xl">
-        Stop guessing at the gate
-      </h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
-        Create a student account, choose your pickup point, and keep an estimated arrival with you on
-        the way to college.
-      </p>
-      <div className="mt-7 flex flex-col justify-center gap-2.5 sm:flex-row">
-        <ButtonLink href="/signup" size="lg">
-          Create a student account
-        </ButtonLink>
-        <ButtonLink href="/login" variant="outline" size="lg">
-          I already have an account
-        </ButtonLink>
+    <Reveal className="relative overflow-hidden rounded-3xl bg-gradient-navy px-6 py-10 text-white shadow-float sm:px-10 sm:py-14">
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-500/25 blur-3xl"
+        aria-hidden="true"
+      />
+      <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <div className="min-w-0 text-center lg:text-left">
+          <h2 className="text-balance text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+            Stop guessing at the gate
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/70 sm:text-base sm:leading-7 lg:mx-0">
+            Create a student account, choose your pickup point, and keep an estimated arrival with you on
+            the way to college.
+          </p>
+          <div className="mt-7 flex flex-col justify-center gap-2.5 sm:flex-row lg:justify-start">
+            <ButtonLink href="/signup" size="lg" className="group bg-white text-navy-950 shadow-none hover:bg-brand-50">
+              Create a student account
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" aria-hidden="true" />
+            </ButtonLink>
+            <ButtonLink
+              href="/login"
+              variant="outline"
+              size="lg"
+              className="border-white/20 bg-white/5 text-white hover:border-white/40 hover:bg-white/10"
+            >
+              I already have an account
+            </ButtonLink>
+          </div>
+          <p className="mt-4 text-xs leading-5 text-white/55">
+            Free for students. Email confirmation is required, so use an address you can open.
+          </p>
+        </div>
+        <div className="mx-auto w-full max-w-xs lg:max-w-sm">
+          <BusIllustration className="drop-shadow-[0_18px_30px_rgba(0,0,0,0.35)]" />
+        </div>
       </div>
-      <p className="mt-4 text-xs leading-5 text-slate-500">
-        Free for students. Email confirmation is required, so use an address you can open.
-      </p>
-    </div>
+    </Reveal>
   );
 }
 
@@ -324,10 +339,10 @@ export function SiteFooter() {
         <nav aria-label="Footer" className="min-w-0">
           <h2 className="text-xs font-semibold text-navy-950">Product</h2>
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
-            <li><Link href="/#what-you-get" className="hover:text-navy-950">What you get</Link></li>
-            <li><Link href="/#how-it-works" className="hover:text-navy-950">How it works</Link></li>
-            <li><Link href="/#data-honesty" className="hover:text-navy-950">Data honesty</Link></li>
-            <li><Link href="/signup" className="hover:text-navy-950">Create an account</Link></li>
+            <li><Link href="/#what-you-get" className="transition-colors hover:text-navy-950">What you get</Link></li>
+            <li><Link href="/#how-it-works" className="transition-colors hover:text-navy-950">How it works</Link></li>
+            <li><Link href="/#data-honesty" className="transition-colors hover:text-navy-950">Data honesty</Link></li>
+            <li><Link href="/signup" className="transition-colors hover:text-navy-950">Create an account</Link></li>
           </ul>
         </nav>
 

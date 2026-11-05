@@ -1,6 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { m } from "motion/react";
+import { useId, type ReactNode } from "react";
+import { SPRING } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export interface TabItem<T extends string> {
@@ -10,6 +12,7 @@ export interface TabItem<T extends string> {
   icon?: ReactNode;
 }
 
+/** Underline tabs; the active indicator slides between tabs. */
 export function Tabs<T extends string>({
   items,
   value,
@@ -21,6 +24,7 @@ export function Tabs<T extends string>({
   onChange: (value: T) => void;
   className?: string;
 }) {
+  const layoutId = useId();
   return (
     <div
       className={cn(
@@ -32,17 +36,16 @@ export function Tabs<T extends string>({
       {items.map((item) => {
         const selected = item.id === value;
         return (
-          <button
+          <m.button
             key={item.id}
             type="button"
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(item.id)}
+            whileTap={{ scale: 0.96 }}
             className={cn(
-              "inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
-              selected
-                ? "border-brand-600 text-navy-950"
-                : "border-transparent text-slate-600 hover:text-navy-800",
+              "relative inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+              selected ? "text-navy-950" : "text-slate-600 hover:text-navy-800",
             )}
           >
             {item.icon}
@@ -57,7 +60,15 @@ export function Tabs<T extends string>({
                 {item.count}
               </span>
             )}
-          </button>
+            {selected && (
+              <m.span
+                layoutId={layoutId}
+                className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-brand-600"
+                transition={SPRING.gentle}
+                aria-hidden="true"
+              />
+            )}
+          </m.button>
         );
       })}
     </div>

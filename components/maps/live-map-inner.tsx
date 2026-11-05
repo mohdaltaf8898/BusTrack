@@ -2,7 +2,7 @@
 
 import * as L from "leaflet";
 import { LocateFixed, Navigation, RefreshCw, WifiOff } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { COLLEGE_COORDINATES } from "@/data/routes";
 import { positionAtDistance } from "@/lib/geo";
 import { bearingToCompass } from "@/lib/geo";
@@ -95,6 +95,7 @@ export function LiveMapInner({
   isLiveData,
   browserOffline = false,
   className,
+  bottomInset = 0,
   onSelectStop,
   showControls = true,
 }: LiveMapProps) {
@@ -282,6 +283,7 @@ export function LiveMapInner({
         "relative h-[340px] w-full overflow-hidden rounded-3xl border border-slate-200 bg-[#eaf1f8] shadow-card md:h-[440px]",
         className,
       )}
+      style={{ "--map-inset-b": `${bottomInset}px` } as CSSProperties}
     >
       <div
         ref={containerRef}
@@ -317,7 +319,7 @@ export function LiveMapInner({
             </Badge>
           </div>}
           {tilesLoaded && showControls && (
-            <div className="absolute bottom-16 right-3 z-[500] flex flex-col gap-2">
+            <div className="absolute bottom-[calc(4rem+var(--map-inset-b,0px))] right-3 z-[500] flex flex-col gap-2">
               <Button
                 type="button"
                 size="icon"
@@ -343,7 +345,7 @@ export function LiveMapInner({
               )}
             </div>
           )}
-          {tilesLoaded && <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-card">
+          {tilesLoaded && <div className="pointer-events-none absolute bottom-[calc(0.75rem+var(--map-inset-b,0px))] left-3 z-[500] flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-card">
             <Navigation className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
             Heading {bearingToCompass(busPosition.bearing)} · {Math.round(busPosition.bearing)}°
           </div>}

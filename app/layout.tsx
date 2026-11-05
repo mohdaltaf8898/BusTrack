@@ -1,8 +1,24 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "leaflet/dist/leaflet.css";
 import "./tokens.css";
 import "./globals.css";
+import { MotionProvider } from "@/components/motion/motion-provider";
 import { AppProvider } from "@/state/app-provider";
+
+/**
+ * Inter (variable, latin subset, ~48 kB woff2) self-hosted from the
+ * @fontsource-variable package: preloaded by next/font with size-adjusted
+ * fallbacks, so there is no third-party font request and no layout shift.
+ */
+const inter = localFont({
+  src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+  variable: "--font-inter",
+  display: "swap",
+  weight: "100 900",
+  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+  adjustFontFallback: "Arial",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -34,7 +50,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans antialiased">
         <a
           href="#main-content"
@@ -44,7 +60,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         {/* The signed-in workspace shell is applied only inside app/(app)/layout.tsx,
             so the public homepage and auth screens keep their own chrome. */}
-        <AppProvider>{children}</AppProvider>
+        <MotionProvider>
+          <AppProvider>{children}</AppProvider>
+        </MotionProvider>
       </body>
     </html>
   );

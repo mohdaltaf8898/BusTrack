@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { Eye, EyeOff, KeyRound, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { m } from "motion/react";
+import { SPRING } from "@/lib/motion";
 import { validateNewPassword } from "@/lib/auth-flow";
 import { fetchAuthProviders, type AuthProviderState } from "@/lib/auth-providers";
 import { useApp } from "@/state/app-provider";
@@ -9,7 +11,7 @@ import { GoogleButton } from "@/components/auth/google-button";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert } from "@/components/ui/feedback";
+import { Alert, Collapsible } from "@/components/ui/feedback";
 import { Input, Label } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
@@ -102,6 +104,7 @@ export function AuthCard({
   const { state, config, signIn, signInWithGoogle, signUp, requestPasswordReset } = useApp();
   const providers = useAuthProviders();
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  const modeIndicatorId = useId();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -233,9 +236,17 @@ export function AuthCard({
                 role="tab"
                 aria-selected={mode === tab.value}
                 onClick={() => chooseMode(tab.value)}
-                className={cn("min-h-11 border-b-2 border-transparent px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "border-brand-600 text-navy-950" : "text-slate-600 hover:text-navy-900")}
+                className={cn("relative min-h-11 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "text-navy-950" : "text-slate-600 hover:text-navy-900")}
               >
                 {tab.label}
+                {mode === tab.value && (
+                  <m.span
+                    layoutId={modeIndicatorId}
+                    className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-brand-600"
+                    transition={SPRING.gentle}
+                    aria-hidden="true"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -249,15 +260,15 @@ export function AuthCard({
               <p className="mt-1 text-xs leading-5 text-slate-500">We’ll send a reset link if the account is eligible.</p>
             </div>
           )}
-          {mode === "signup" && (
-            <div>
+          <Collapsible show={mode === "signup"}>
+            <div className="pb-4">
               <Label htmlFor="account-name">Name</Label>
               <div className="relative">
                 <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                 <Input id="account-name" type="text" autoComplete="name" maxLength={80} value={name} onChange={(event) => setName(event.target.value)} className="pl-9" required />
               </div>
             </div>
-          )}
+          </Collapsible>
           <div>
             <Label htmlFor="account-email">Email</Label>
             <div className="relative">

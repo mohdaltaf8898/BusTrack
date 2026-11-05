@@ -1,11 +1,22 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * Cards that lead somewhere (links, selectable options) lift slightly on
+   * hover. Pure CSS, so it must not be combined with a Motion-animated element
+   * (Motion owns inline `transform`); wrap those in `RevealItem whileHover`.
+   */
+  interactive?: boolean;
+}
+
+export function Card({ className, interactive = false, ...props }: CardProps) {
   return (
     <div
       className={cn(
         "rounded-2xl border border-slate-200 bg-white shadow-card",
+        interactive &&
+          "transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className,
       )}
       {...props}

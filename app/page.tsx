@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
-import { ArrowRight, LockKeyhole } from "lucide-react";
+import { Hero } from "@/components/home/hero";
 import { SiteHeader } from "@/components/home/site-header";
-import { RouteSchematic } from "@/components/home/route-schematic";
 import {
   CtaBand,
   DataHonestyPanel,
   Faq,
   FeatureGrid,
-  HOME_STATS,
   HowItWorks,
   RoleCards,
   Section,
   SiteFooter,
 } from "@/components/home/sections";
-import { ButtonLink } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "BusTrack · Find your college bus route and an estimated arrival",
@@ -36,56 +33,7 @@ export default function HomePage() {
       <SiteHeader />
 
       <main id="main-content" className="flex-1">
-        {/* Hero */}
-        <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14">
-            <div className="animate-fade-in">
-              <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-surface-muted px-3 py-1.5 text-xs font-medium text-slate-600">
-                <LockKeyhole className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
-                Sign-in only · Lords Institute of Engineering and Technology, Hyderabad
-              </p>
-
-              <h1 className="mt-5 max-w-2xl text-[clamp(2.25rem,5.4vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.045em] text-navy-950">
-                Know which bus is coming,{" "}
-                <span className="text-brand-600">and roughly when</span>
-              </h1>
-
-              <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-                BusTrack puts the published {HOME_STATS.scheduleYear} pickup list in your pocket:{" "}
-                {HOME_STATS.routes} routes, {HOME_STATS.stops} stops, your boarding point, and an
-                arrival estimate that always says what it is based on. Nothing here pretends to be
-                live vehicle tracking.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-2.5 sm:flex-row">
-                <ButtonLink href="/signup" size="lg">
-                  Create a student account
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </ButtonLink>
-                <ButtonLink href="/login" variant="outline" size="lg">
-                  Sign in
-                </ButtonLink>
-              </div>
-
-              <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-slate-100 pt-6">
-                {[
-                  { term: "Published routes", value: String(HOME_STATS.routes) },
-                  { term: "Pickup stops", value: String(HOME_STATS.stops) },
-                  { term: "Stops with a time", value: String(HOME_STATS.timed) },
-                ].map((stat) => (
-                  <div key={stat.term}>
-                    <dt className="text-xs text-slate-500">{stat.term}</dt>
-                    <dd className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-navy-950">
-                      {stat.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-
-            <RouteSchematic className="animate-fade-in" />
-          </div>
-        </section>
+        <Hero />
 
         <Section
           id="what-you-get"
@@ -137,9 +85,11 @@ export default function HomePage() {
           <Faq />
         </Section>
 
-        <Section tone="canvas" title="Ready when you are" lede={undefined}>
-          <CtaBand />
-        </Section>
+        <section aria-label="Create an account" className="bg-canvas">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <CtaBand />
+          </div>
+        </section>
       </main>
 
       <SiteFooter />

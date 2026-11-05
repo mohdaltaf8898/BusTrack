@@ -3,7 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import RoutesPage from "@/app/(app)/routes/page";
 import { AppProvider } from "@/state/app-provider";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/routes" }));
+const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/routes",
+  useRouter: () => ({ push: navigation.push, replace: navigation.replace, prefetch: vi.fn() }),
+}));
 
 describe("historical routes and stops", () => {
   it("browses 16 routes, exposes historical times and identifies unmapped/ambiguous stops", async () => {

@@ -48,8 +48,19 @@ const config: Config = {
       },
       boxShadow: {
         card: "var(--shadow-card)",
+        lift: "var(--shadow-lift)",
         float: "var(--shadow-float)",
         action: "var(--shadow-action)",
+        glow: "var(--shadow-glow)",
+      },
+      backgroundImage: {
+        "gradient-brand": "var(--gradient-brand)",
+        "gradient-navy": "var(--gradient-navy)",
+        "gradient-surface": "var(--gradient-surface)",
+        "gradient-hero": "var(--gradient-hero)",
+      },
+      transitionTimingFunction: {
+        out: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
       borderRadius: {
         xl: "var(--radius-control)",
@@ -68,11 +79,32 @@ const config: Config = {
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
+        "skeleton-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.45" },
+        },
+        "road-dash": {
+          to: { strokeDashoffset: "-24" },
+        },
+        rise: {
+          from: { opacity: "0", transform: "translateY(14px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "word-rise": {
+          from: { opacity: "0", transform: "translateY(105%)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 260ms ease-out both",
         "soft-pulse": "soft-pulse 2.4s ease-in-out infinite",
         shimmer: "shimmer 1.6s infinite",
+        "skeleton-pulse": "skeleton-pulse 1.8s ease-in-out infinite",
+        "road-dash": "road-dash 0.9s linear infinite",
+        // CSS-driven entrances for server-rendered, above-the-fold content: they
+        // start before hydration so the largest contentful paint is not delayed.
+        rise: "rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "word-rise": "word-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

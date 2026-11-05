@@ -19,6 +19,16 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* iOS Safari: keep the page from rubber-banding behind sheets and the pull-to-refresh control. */
+  overscroll-behavior-y: none;
+}
+
+/* Interactive surfaces: no 300ms tap delay or double-tap zoom, no long-press callout. */
+button,
+[role="button"],
+a,
+summary {
+  touch-action: manipulation;
 }
 
 button,
@@ -48,7 +58,14 @@ a {
   .no-scrollbar {
     scrollbar-width: none;
   }
-
+  /* Promote animated layers without leaving will-change on permanently. */
+  .gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
 /* Leaflet theming and inline vector markers (no external image assets). */
@@ -60,6 +77,10 @@ a {
   z-index: 0;
 }
 
+/* Map overlays (bottom sheets) ask the map to lift its bottom controls. */
+.leaflet-container .leaflet-bottom {
+  bottom: var(--map-inset-b, 0px);
+}
 .leaflet-control-attribution {
   font-size: 10px !important;
   background: rgba(255, 255, 255, 0.88) !important;
@@ -98,6 +119,17 @@ a {
 .college-marker {
   background: transparent;
   border: 0;
+}
+
+/* The simulated/remote position updates about once a second; gliding the
+   marker between updates reads as motion instead of a jump. Leaflet drives
+   the same transform during zoom, so the transition is dropped then. */
+.leaflet-marker-icon.bus-marker {
+  transition: transform 950ms linear;
+}
+.leaflet-zoom-anim .leaflet-marker-icon.bus-marker,
+.leaflet-dragging .leaflet-marker-icon.bus-marker {
+  transition: none;
 }
 
 .bus-marker__pulse {
@@ -212,5 +244,8 @@ a {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+  .leaflet-marker-icon.bus-marker {
+    transition: none;
   }
 }
