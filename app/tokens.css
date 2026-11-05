@@ -1,0 +1,48 @@
+/* BusTrack design tokens. Brand/navy palettes are RGB channels so Tailwind
+   opacity variants work: rgb(var(--color-brand-50) / 0.7). These are BusTrack's
+   own colors, not a reproduction of the playbook's example site. */
+:root {
+  color-scheme: light;
+
+  --color-brand-50: 238 246 255;
+  --color-brand-100: 217 234 255;
+  --color-brand-200: 188 218 255;
+  --color-brand-300: 142 195 255;
+  --color-brand-400: 89 161 255;
+  --color-brand-500: 49 124 251;
+  --color-brand-600: 28 95 240;
+  --color-brand-700: 22 75 220;
+  --color-brand-800: 24 63 178;
+  --color-brand-900: 26 56 140;
+
+  --color-navy-50: 241 245 251;
+  --color-navy-100: 226 234 246;
+  --color-navy-200: 197 212 236;
+  --color-navy-300: 150 178 220;
+  --color-navy-400: 97 136 198;
+  --color-navy-500: 63 104 174;
+  --color-navy-600: 48 82 143;
+  --color-navy-700: 40 67 116;
+  --color-navy-800: 37 58 97;
+  --color-navy-900: 18 41 70;
+  --color-navy-950: 10 24 44;
+
+  --color-canvas: #f3f7fc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-map-surface: #eaf1f8;
+  --color-border: #e2eaf6;
+  --color-ink: rgb(var(--color-navy-950));
+  --color-ink-muted: #475569;
+  --color-focus: rgb(var(--color-brand-600));
+
+  --font-app: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --radius-feature: 1.75rem;
+  --radius-pill: 9999px;
+  --shadow-card: 0 1px 2px rgba(16, 39, 74, 0.04), 0 10px 30px -18px rgba(16, 39, 74, 0.28);
+  --shadow-float: 0 14px 40px -18px rgba(13, 35, 71, 0.38);
+  --shadow-action: 0 8px 22px -10px rgba(28, 95, 240, 0.55);
+}

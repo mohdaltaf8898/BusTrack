@@ -70,4 +70,4 @@ A successful `/api/config` response with `serverConfigured: true` only indicates
 - Browser notifications require permission; SMS, WhatsApp and push providers are not configured. The map requires network access for tiles and road routing; the schematic/straight-line fallbacks remain available.
 - This is a prototype, not an official service or navigation tool. Do not use its estimates to make transport or safety decisions.
 
-See [testing](docs/TESTING.md) and [verification](docs/VERIFICATION.md) for what was actually checked.
+See [the BusTrack design system](DESIGN.md) for measured UI tokens and responsive rules, plus [testing](docs/TESTING.md) and [verification](docs/VERIFICATION.md) for what was actually checked.

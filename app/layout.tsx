@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "leaflet/dist/leaflet.css";
+import "./tokens.css";
 import "./globals.css";
 import { AppProvider } from "@/state/app-provider";
 import { AppShell } from "@/components/app-shell";

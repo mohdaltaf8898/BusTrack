@@ -87,10 +87,10 @@ function NavLink({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+        "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
         active
-          ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
-          : "text-navy-600 hover:bg-brand-50 hover:text-brand-700",
+          ? "bg-brand-600 text-white shadow-action"
+          : "text-navy-700 hover:bg-brand-50 hover:text-brand-700",
         compact && "min-h-12",
       )}
     >
@@ -103,7 +103,7 @@ function NavLink({
 
 function Sidebar({ pathname }: { pathname: string }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col border-r border-slate-200/80 bg-white/90 backdrop-blur-xl md:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col border-r border-slate-200 bg-white/95 backdrop-blur-xl md:flex">
       <div className="px-5 py-5">
         <Logo />
       </div>
@@ -164,8 +164,8 @@ function BottomNav({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition",
-                active ? "text-brand-700" : "text-slate-500",
+                "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                active ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50",
               )}
             >
               <span className="relative">
@@ -184,7 +184,7 @@ function BottomNav({
           type="button"
           onClick={onMore}
           aria-label="Open more navigation"
-          className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold text-slate-500"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
           More
@@ -270,7 +270,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Sidebar pathname={pathname} />
       <div className="md:pl-[264px]">
         {!state.isOnline && <OfflineNotice />}
-        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_4px_20px_-18px_rgba(10,24,44,0.5)] backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:px-5">
             <div className="md:hidden">
               <Logo compact />

@@ -112,7 +112,7 @@ export function StatusCard() {
               <p className="mt-1 text-sm font-extrabold">
                 {formatRelativeTime(lastUpdateAt, state.currentTime)}
               </p>
-              <p className="text-[11px] text-white/45">{formatClock(lastUpdateAt)} IST</p>
+              <p className="text-[11px] text-white/75">{formatClock(lastUpdateAt)} IST</p>
             </div>
             <div className="rounded-2xl bg-white/[0.07] p-3">
               <p className="flex items-center gap-1.5 text-[11px] font-semibold text-white/55">
@@ -152,7 +152,7 @@ export function StatusCard() {
           <Badge tone="navy" className="bg-white/10 text-white/80 ring-white/10">
             {isStale ? "Last known position" : snapshot.sourceLabel}
           </Badge>
-          <span className="text-[11px] text-white/45">2025–26 pickup times; confirm current service.</span>
+          <span className="text-[11px] text-white/75">2025–26 pickup times; confirm current service.</span>
         </div>
 
         {(offline || isStale) && (

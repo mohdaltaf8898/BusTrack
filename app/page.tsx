@@ -49,10 +49,10 @@ export default function DashboardPage() {
             <div className="min-w-0">
               <CardTitle className="flex items-center gap-2">
                 <Layers3 className="h-4 w-4 text-brand-600" aria-hidden="true" />
-                Live route map
+                Route map
               </CardTitle>
               <p className="mt-1 text-xs text-slate-500">
-                Bus marker and traveled route are synchronized every second.
+                Route progress updates each second in the demo; device GPS is labeled when available.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-1.5">

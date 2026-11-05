@@ -41,7 +41,7 @@ export function QuickActions() {
           >
             <span className="flex items-center justify-between w-full">
               <Navigation className="h-5 w-5 text-brand-300" aria-hidden="true" />
-              <span className="text-[10px] font-bold uppercase tracking-wide text-white/45">Map</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-white/75">Map</span>
             </span>
             <span>
               <span className="block text-sm font-extrabold">Track Bus</span>
