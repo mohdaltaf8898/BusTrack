@@ -12,7 +12,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { demoUsers, sampleRoutes } from "@/data/routes";
+import { sampleRoutes } from "@/data/routes";
 import { routeCoordinateKey, type RoadGeometry } from "@/lib/road-routing";
 import {
   APP_STORAGE_KEY,
@@ -24,7 +24,7 @@ import {
 } from "@/lib/app-reducer";
 import { mapBackendData, type BackendData } from "@/lib/backend-mapping";
 import { backendConfig, isSupabaseConfigured, publicSupabaseConfig } from "@/lib/config";
-import { authRedirect, inspectPasswordCallback, PASSWORD_PAGE, updatePasswordForToken, type PasswordLinkStatus } from "@/lib/auth-flow";
+import { authRedirect, inspectPasswordCallback, oauthCallbackUrl, PASSWORD_PAGE, updatePasswordForToken, type PasswordLinkStatus } from "@/lib/auth-flow";
 import { createLocationSynchronizer } from "@/lib/location-sync";
 import { deriveRouteSnapshot, type RouteSnapshot } from "@/lib/selectors";
 import {
@@ -85,8 +85,8 @@ interface AppContextValue {
   getRouteSnapshot: (routeId: string, selectedStopId?: string) => RouteSnapshot;
   selectRoute: (routeId: string) => void;
   selectStop: (stopId: string) => void;
-  setDemoRole: (role: UserRole) => void;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: (next?: string | null) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<{ signedIn: boolean }>;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
@@ -243,7 +243,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch {
       nextState = {
         ...nextState,
-        error: "Saved demo state could not be loaded. Fresh sample data was restored.",
+        error: "Saved browser state could not be loaded. The published catalog was restored.",
       };
     }
     nextState = { ...nextState, isOnline: navigator.onLine !== false };
@@ -287,23 +287,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch("/api/config", { cache: "no-store" });
         const config = (await response.json()) as {
+          unconfigured?: boolean;
           demoMode?: boolean;
           serverConfigured?: boolean;
           message?: string;
         };
         if (cancelled) return;
-        if (config.demoMode || !config.serverConfigured) {
+        if (config.unconfigured || config.demoMode || !config.serverConfigured) {
           dispatch({
             type: "SET_BACKEND_MESSAGE",
             ready: false,
             message:
-              "Supabase public credentials are set, but the server-only service role is missing. API-backed GPS/admin actions are disabled; local demo data is active.",
+              "Supabase public credentials are set, but the server-only service role is missing. API-backed GPS and admin actions are disabled.",
           });
         } else if (config.message) {
           dispatch({ type: "SET_BACKEND_MESSAGE", ready: true, message: config.message });
         }
       } catch {
-        // The demo engine remains available if the config endpoint cannot be reached.
+        // Local simulation continues if the config endpoint cannot be reached.
       }
     })();
     return () => {
@@ -338,7 +339,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           JSON.stringify(toPersistedState(stateRef.current)),
         );
       } catch {
-        // Storage may be unavailable in private browsing; the demo still works.
+        // Storage may be unavailable in private browsing; the app still works.
       }
     }, 3000);
     return () => window.clearInterval(interval);
@@ -444,9 +445,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       authEventRef.current += 1;
-      // A demo role must not silently switch back to a saved privileged
-      // session because of an initial-session or token-refresh event.
-      if (stateRef.current.user?.provider === "demo" && event !== "SIGNED_IN" && event !== "PASSWORD_RECOVERY") return;
       if (session?.user) {
         void syncSupabaseUser(client, session.user);
       } else {
@@ -477,7 +475,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           dispatch({ type: "SET_ERROR", error: "The sign-in link is invalid or expired. Please try again." });
         }
         // A newer auth event wins over this possibly delayed initial read.
-        if (authEventRef.current === initialEvent && stateRef.current.user?.provider !== "demo") {
+        if (authEventRef.current === initialEvent) {
           if (data.session?.user) {
             await syncSupabaseUser(client, data.session.user);
           } else {
@@ -516,7 +514,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         (current?.provider === "supabase" ? current.role : null) === role;
     };
     try {
-      // A selected demo role must never reuse an existing privileged session.
       const token = userId ? await getAccessToken() : null;
       if (!isCurrent()) return;
       const response = await fetch("/api/admin", {
@@ -706,7 +703,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string) => {
       if (!supabase) {
-        throw new Error("Supabase Auth is not configured. Use a demo role instead.");
+        throw new Error("Supabase Auth is not configured for this deployment.");
       }
       dispatch({ type: "SET_AUTH_LOADING", value: true });
       try {
@@ -721,8 +718,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [supabase, syncSupabaseUser],
   );
 
+  /**
+   * Starts the Google OAuth round trip. Supabase returns to /auth/callback,
+   * which must be listed in the project's redirect allow-list; the provider
+   * itself has to be enabled with a Google client ID and secret in Supabase
+   * Auth before this can succeed.
+   */
+  const signInWithGoogle = useCallback(
+    async (next?: string | null) => {
+      if (!supabase) {
+        throw new Error("Google sign-in needs a configured Supabase project.");
+      }
+      dispatch({ type: "SET_AUTH_LOADING", value: true });
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: oauthCallbackUrl(window.location.origin, next ?? null),
+            queryParams: { prompt: "select_account" },
+          },
+        });
+        if (error) throw new Error(error.message);
+      } catch (caught) {
+        dispatch({ type: "SET_AUTH_LOADING", value: false });
+        throw caught;
+      }
+      // On success the browser navigates away, so authLoading stays true until
+      // the callback page finishes the exchange.
+    },
+    [supabase],
+  );
+
   const signUp = useCallback(async (name: string, email: string, password: string) => {
-    if (!supabase) throw new Error("Account creation is not configured in demo mode.");
+    if (!supabase) throw new Error("Account creation needs a configured Supabase project.");
     const { data: current, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) throw new Error("Could not check the current session. Please try again.");
     if (current.session) throw new Error("Sign out of your current account before creating another one.");
@@ -740,7 +768,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [supabase, syncSupabaseUser]);
 
   const requestPasswordReset = useCallback(async (email: string) => {
-    if (!supabase) throw new Error("Password recovery is not configured in demo mode.");
+    if (!supabase) throw new Error("Password recovery needs a configured Supabase project.");
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: authRedirect(window.location.origin, PASSWORD_PAGE),
     });
@@ -748,7 +776,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const updatePassword = useCallback(async (password: string) => {
-    if (!supabase) throw new Error("Password changes are not configured in demo mode.");
+    if (!supabase) throw new Error("Password changes need a configured Supabase project.");
     const link = passwordLinkRef.current;
     if (link.status === "invalid" || link.status === "verifying") {
       throw new Error("This link cannot be used. Request a new password link.");
@@ -1118,15 +1146,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [executeAdminMutation],
   );
 
-  const setDemoRole = useCallback((role: UserRole) => {
-    locationSync.invalidate();
-    backendRequestRef.current += 1;
-    authSyncRef.current += 1;
-    setPasswordLink({ status: "none" });
-    dispatch({ type: "SET_USER", user: { ...demoUsers[role] } });
-    dispatch({ type: "SET_ERROR", error: null });
-  }, [locationSync]);
-
   const selectRoute = useCallback((routeId: string) => {
     dispatch({ type: "SELECT_ROUTE", routeId });
   }, []);
@@ -1196,8 +1215,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getRouteSnapshot,
     selectRoute,
     selectStop,
-    setDemoRole,
     signIn,
+    signInWithGoogle,
     signUp,
     requestPasswordReset,
     updatePassword,

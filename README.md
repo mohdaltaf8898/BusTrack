@@ -21,7 +21,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`. Leave the Supabase variables unset for the credential-free simulation. Demo edits and route selection are stored in localStorage under `bustrack:demo-state:v2`; the previous demonstration catalogue is not loaded into the new version.
+Open `http://localhost:3000`. You land on the public homepage; every application screen behind it requires a signed-in account. There is no demo mode and no role-switching shortcut, so `.env.local` must point at a Supabase project before the app is usable. See [docs/SETUP.md](docs/SETUP.md) for credentials, [docs/EMAIL.md](docs/EMAIL.md) for the free SMTP setup that confirmation and reset emails need, and [docs/AUTH.md](docs/AUTH.md) for email sign-up and the Google button. Route selection and cached data are stored in localStorage under `bustrack:app-state:v2`.
 
 ```bash
 npm run typecheck
@@ -31,7 +31,7 @@ npm run build
 # or: npm run check  (typecheck + tests + build)
 ```
 
-The app is mobile-first: `/` is the dashboard; `/track`, `/routes`, `/notifications`, `/bus-details`, `/driver`, `/admin`, `/login` and `/profile` provide the other flows. In demo mode, login offers local role switching solely for testing. It is **not** authorization.
+The app is mobile-first: `/` is the public homepage; `/dashboard` is the signed-in student home; `/track`, `/routes`, `/notifications`, `/bus-details`, `/driver`, `/admin` and `/profile` provide the other flows and are wrapped by the same `RequireAuth` shell. `/login`, `/signup`, `/auth/callback` and `/auth/set-password` are the public authentication screens. The client shell is a navigation guard; authorization is enforced server-side by the user's actual Supabase role.
 
 ## Supabase setup
 
@@ -44,9 +44,10 @@ To set up a separate authorized project, follow the full [setup guide](docs/SETU
    2. `supabase/migrations/20261030135426_bustrack_published_routes.sql`
    3. `supabase/migrations/20261030140136_bustrack_function_grants.sql`
    4. `supabase/migrations/20261030144351_bustrack_guarded_gps.sql`
-   5. `supabase/seed.sql`
+   5. `supabase/migrations/20261105120000_bustrack_oauth_profile_name.sql` (Google/OAuth display names)
+   6. `supabase/seed.sql`
 2. The seed inserts the historical routes and `SIM-*` placeholder vehicles without overwriting existing rows. Replace placeholders and verify the current timetable, stop locations and route corridor with transport staff. Existing older demo rows are not automatically deleted.
-3. Create accounts through the student sign-up screen (after configuring custom SMTP) or create authorized staff users in Supabase Auth. The trigger creates student profiles; use the trusted SQL editor to promote the first admin and drivers and assign real vehicles as explained in [SETUP.md](docs/SETUP.md).
+3. Create accounts through the student sign-up screen — email/password, or **Continue with Google** once the provider is enabled ([docs/AUTH.md](docs/AUTH.md)) — after configuring custom SMTP, or create authorized staff users in Supabase Auth. The trigger creates student profiles; use the trusted SQL editor to promote the first admin and drivers and assign real vehicles as explained in [SETUP.md](docs/SETUP.md).
 4. Copy `.env.example` to `.env.local` and set the project URL, public anon key and **server-only** service-role key. Never paste secret keys into chat, commit them, or prefix them with `NEXT_PUBLIC_`.
 5. Restart the app. For Vercel, set the same variables in Project Settings → Environment Variables and redeploy; configure the HTTPS site URL in Supabase Auth.
 6. Test roles, RLS, Realtime, assigned driver sharing and the live GPS path with a test project/device before a pilot. The location API refuses real GPS until an operator supplies a **verified** route corridor. Inferred OSRM paths cannot be used to authorize GPS.
@@ -59,13 +60,14 @@ A successful `/api/config` response with `serverConfigured: true` only indicates
 - Leaflet/OpenStreetMap raster tiles; responsive schematic fallback when tiles fail. `/api/road-route` calls the public OSRM demo server for a fixed catalogue route only, caches valid responses, and falls back when it cannot route. Public OSRM and OSM tiles have no production SLA; use suitable providers for production traffic.
 - `data/lords-routes-2025-26.json` is the persistent source transcription; `data/routes.ts` creates domain routes and simulation-only vehicles.
 - `lib/geo.ts`, `lib/eta.ts`, `lib/simulation.ts`, and `lib/road-routing.ts` implement geometry, estimates and movement. Simulated movement uses the same geometry shown on the map.
-- `state/app-provider.tsx` handles selected route, demo state, optional backend and Realtime. Server API handlers validate roles and keep privileged credentials server-side.
+- `state/app-provider.tsx` handles the selected route, the Supabase session, sign-in/sign-out (including Google), backend data and Realtime. Server API handlers validate roles and keep privileged credentials server-side.
+- `components/require-auth.tsx` is the app shell's access gate; it redirects to `/login` and remembers the attempted page so the student returns there after signing in.
 - `supabase/migrations/` contains tables, RLS, secure trip actions and the historical-route migration. `scripts/generate_seed.py` regenerates the insert-only seed from the JSON catalogue.
 - `tests/` covers route data, unknown stops, maps and routing fallback, simulation, UI flows, authentication, GPS validation, and SQL migrations using a local PostgreSQL-compatible test database.
 
 ## Security and limitations
 
-- Supabase service-role secrets stay server-side; client demo roles cannot authorize server actions. The API validates the user's token, role, assignment, active trip and sharing state, location age, Hyderabad bounds, and distance from a **verified** route corridor. GPS writes recheck mutable state under database row locks; direct client GPS inserts and the older, weaker GPS RPC are revoked.
+- Supabase service-role secrets stay server-side; the role stored in the browser cannot authorize a server action. The API validates the user's token, role, assignment, active trip and sharing state, location age, Hyderabad bounds, and distance from a **verified** route corridor. GPS writes recheck mutable state under database row locks; direct client GPS inserts and the older, weaker GPS RPC are revoked.
 - Real GPS, hosted RLS/Realtime, mobile Safari/Chrome rendering, and driver-device operation have **not** been end-to-end verified in this environment. The rate limiter is in-memory, not suitable for multi-instance production. A privacy review, retention policy, monitoring and a security review are needed before collecting real locations.
 - Browser notifications require permission; SMS, WhatsApp and push providers are not configured. The map requires network access for tiles and road routing; the schematic/straight-line fallbacks remain available.
 - This is a prototype, not an official service or navigation tool. Do not use its estimates to make transport or safety decisions.

@@ -1,19 +1,39 @@
-import { sampleRoutes } from "@/data/routes";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import DashboardPage from "@/app/page";
+import DashboardPage from "@/app/(app)/dashboard/page";
 import LoginPage from "@/app/login/page";
 import { DriverDashboard } from "@/components/driver/driver-dashboard";
-import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { AppProvider, useApp } from "@/state/app-provider";
-import type { UserRole } from "@/lib/types";
+import { signedInUser } from "./support/session";
+import { sampleRoutes } from "@/data/routes";
+import type { AppUser } from "@/lib/types";
 
-const pushMock = vi.hoisted(() => vi.fn());
+const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
-  useRouter: () => ({ push: pushMock }),
+  usePathname: () => "/dashboard",
+  useRouter: () => ({ push: navigation.push, replace: navigation.replace }),
+  useSearchParams: () => new URLSearchParams(),
 }));
+
+/**
+ * Demo identities are gone, so tests sign a user in by overriding the session
+ * the context reports. Everything else (reducer, simulation, components) is the
+ * real implementation.
+ */
+const session = vi.hoisted(() => ({ user: null as unknown }));
+
+vi.mock("@/state/app-provider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/state/app-provider")>();
+  return {
+    ...actual,
+    useApp: () => {
+      const value = actual.useApp();
+      const user = session.user as AppUser | null;
+      return user ? { ...value, state: { ...value.state, user } } : value;
+    },
+  };
+});
 
 vi.mock("@/components/maps/live-map", () => ({
   LiveMap: (props: {
@@ -31,45 +51,24 @@ vi.mock("@/components/maps/live-map", () => ({
   ),
 }));
 
-function RoleButton({ role }: { role: UserRole }) {
-  const { setDemoRole } = useApp();
-  return (
-    <button type="button" onClick={() => setDemoRole(role)}>
-      Set {role} role
-    </button>
-  );
-}
-
 function renderWithProvider(ui: React.ReactNode) {
   return render(<AppProvider>{ui}</AppProvider>);
 }
 
+function signInAs(user: AppUser | null) {
+  session.user = user;
+}
+
 describe("student dashboard flow", () => {
-  it("switches routes, injects a delay, goes offline, and ends a trip from the UI", async () => {
+  it("switches routes and keeps the map and estimate on the selected stop", async () => {
+    signInAs(signedInUser("student"));
     renderWithProvider(<DashboardPage />);
 
     const routeSelect = await screen.findByLabelText("Selected bus route");
     expect(routeSelect).toHaveValue("route-01");
     expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-01");
     expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", sampleRoutes[0].shape[0].lat.toFixed(6));
-
-    fireEvent.click(screen.getByText("Demo controls"));
-    fireEvent.click(screen.getByRole("button", { name: /Add 5-min delay/i }));
-    await waitFor(() => {
-      expect(screen.getAllByText(/\+5 min/i).length).toBeGreaterThan(0);
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /Simulate offline/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /Restore connection/i })).toBeInTheDocument();
-      expect(screen.getAllByText(/offline|last known/i).length).toBeGreaterThan(0);
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /Restore connection/i }));
-    fireEvent.click(screen.getByRole("button", { name: /^End trip$/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^Start trip$/i })).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Arrival times below are estimates/)).toBeInTheDocument();
 
     fireEvent.change(routeSelect, { target: { value: "route-02" } });
     await waitFor(() => {
@@ -78,26 +77,28 @@ describe("student dashboard flow", () => {
       expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", sampleRoutes[1].shape[0].lat.toFixed(6));
     });
   });
+
+  it("does not offer students any simulation controls", async () => {
+    signInAs(signedInUser("student"));
+    renderWithProvider(<DashboardPage />);
+    await screen.findByLabelText("Selected bus route");
+    expect(screen.queryByText(/Simulation controls|Demo controls/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Simulate offline/i })).not.toBeInTheDocument();
+  });
 });
 
-describe("driver demo flow", () => {
-  it("starts and ends a demo trip without requesting browser GPS", async () => {
-    renderWithProvider(
-      <>
-        <RoleButton role="driver" />
-        <DriverDashboard />
-      </>,
-    );
+describe("driver simulation flow", () => {
+  it("starts, pauses and ends a simulated trip without requesting browser GPS", async () => {
+    signInAs(signedInUser("driver"));
+    renderWithProvider(<DriverDashboard />);
 
-    const startButton = () =>
-      screen.getAllByRole("button", { name: /^Start Trip$/i })[0];
+    fireEvent.click(await screen.findByText("Simulation testing"));
+
+    const startButton = () => screen.getAllByRole("button", { name: /^Start Trip$/i })[0];
     const endButton = () => screen.getAllByRole("button", { name: /^End Trip$/i })[0];
     const resetButton = () => screen.getAllByRole("button", { name: /^Reset$/i })[0];
 
-    fireEvent.click(screen.getByRole("button", { name: /Set driver role/i }));
     await waitFor(() => expect(startButton()).toBeInTheDocument());
-    expect(startButton()).toBeDisabled();
-    expect(endButton()).toBeEnabled();
     expect(screen.getAllByText(/Simulation mode/i).length).toBeGreaterThan(0);
 
     fireEvent.click(resetButton());
@@ -112,6 +113,17 @@ describe("driver demo flow", () => {
       expect(endButton()).toBeEnabled();
     });
 
+    fireEvent.click(screen.getByRole("button", { name: /Add 5-min delay/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/\+5 min/i).length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Simulate offline/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Restore connection/i })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Restore connection/i }));
+
     fireEvent.click(endButton());
     await waitFor(() => {
       expect(startButton()).toBeEnabled();
@@ -120,42 +132,20 @@ describe("driver demo flow", () => {
   });
 });
 
-describe("login and admin flows", () => {
-  it("switches local demo roles from the login page", async () => {
+describe("sign-in screen", () => {
+  it("offers email and Google sign-in and no local role switching", async () => {
+    signInAs(null);
     renderWithProvider(<LoginPage />);
-    expect(await screen.findByText(/Apply all four migrations and the route seed/i)).toBeInTheDocument();
-    const driverRole = await screen.findByRole("button", { name: /Driver/i });
-    fireEvent.click(driverRole);
-    await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/driver");
-      expect(screen.getByText(/Switched to the local demo driver role/i)).toBeInTheDocument();
-    });
-  });
 
-  it("adds a validated bus through the admin dialog", async () => {
-    renderWithProvider(
-      <>
-        <RoleButton role="admin" />
-        <AdminDashboard />
-      </>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Set admin role/i }));
-    const addButtons = await screen.findAllByRole("button", { name: /^Add bus$/i });
-    fireEvent.click(addButtons[0]);
-
-    const dialog = await screen.findByRole("dialog");
-    fireEvent.change(within(dialog).getByLabelText("Bus number"), {
-      target: { value: "BT-UI-01" },
-    });
-    fireEvent.click(within(dialog).getByRole("button", { name: /^Add bus$/i }));
-
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByRole("tab", { name: /Buses/i }));
-    await waitFor(() => {
-      expect(screen.getAllByText("BT-UI-01").length).toBeGreaterThan(0);
-    });
+    expect(await screen.findByRole("tab", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Sign up" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+    // The Google provider is off in the test environment, so the card says so
+    // instead of rendering a control that could never complete.
+    expect(screen.getByText(/Google sign-in is not switched on yet/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Continue with Google/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Local demo roles/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Driver$/i })).not.toBeInTheDocument();
   });
 });

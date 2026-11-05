@@ -1,4 +1,6 @@
 export const PASSWORD_PAGE = "/auth/set-password";
+export const OAUTH_CALLBACK_PAGE = "/auth/callback";
+export const DASHBOARD_PATH = "/dashboard";
 
 export type PasswordLinkKind = "invite" | "recovery";
 export type PasswordLinkStatus =
@@ -38,9 +40,34 @@ export function validateNewPassword(password: string, confirmation: string): str
 }
 
 /** Only same-origin, fixed paths are used as email redirect targets. */
-export function authRedirect(origin: string, path: "/login" | typeof PASSWORD_PAGE): string {
-  if (path !== "/login" && path !== PASSWORD_PAGE) throw new Error("Unsupported authentication redirect.");
+export function authRedirect(origin: string, path: "/login" | "/signup" | typeof PASSWORD_PAGE | typeof OAUTH_CALLBACK_PAGE): string {
+  if (path !== "/login" && path !== "/signup" && path !== PASSWORD_PAGE && path !== OAUTH_CALLBACK_PAGE) {
+    throw new Error("Unsupported authentication redirect.");
+  }
   return new URL(path, origin).toString();
+}
+
+/**
+ * Post-sign-in destinations must be same-origin paths. Anything absolute,
+ * protocol-relative or carrying a fragment is discarded so a crafted `next`
+ * query cannot send a student to another site after they authenticate.
+ */
+export function sanitizeInternalPath(value: string | null | undefined, fallback = "/dashboard"): string {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.startsWith("/\\")) return fallback;
+  const withoutHash = trimmed.split("#")[0];
+  const path = withoutHash.split("?")[0];
+  if (!path || !/^\/[A-Za-z0-9\-_./%]*$/.test(path)) return fallback;
+  const query = withoutHash.slice(path.length);
+  return `${path}${query}` || fallback;
+}
+
+/** Absolute same-origin URL used as the OAuth `redirectTo` target. */
+export function oauthCallbackUrl(origin: string, next: string | null): string {
+  const target = new URL(OAUTH_CALLBACK_PAGE, origin);
+  target.searchParams.set("next", sanitizeInternalPath(next, "/dashboard"));
+  return target.toString();
 }
 
 /** Use the already-verified token, not a mutable session that can switch tabs. */

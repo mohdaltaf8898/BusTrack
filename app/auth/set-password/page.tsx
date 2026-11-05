@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { KeyRound } from "lucide-react";
 import { PasswordField } from "@/components/auth/auth-card";
-import { PageHeader } from "@/components/page-header";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/feedback";
@@ -43,15 +43,17 @@ export default function SetPasswordPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-5">
-      <PageHeader eyebrow="Account security" title="Set your password" description="Choose a password for your BusTrack account." />
+    <AuthScreen
+      title="Set your password"
+      description="Choose a password for your BusTrack account. Open the link from your email, or sign in first."
+    >
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-brand-600" aria-hidden="true" /> Password</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {!config.publicConfigured ? (
-            <Alert tone="info" title="Demo mode">Account passwords are available after Supabase Auth is configured.</Alert>
+            <Alert tone="warning" title="No backend configured">Account passwords are available only after Supabase Auth is configured for this deployment.</Alert>
           ) : saved ? (
             <>
               <Alert tone="success" title="Password saved">You can now use this password to sign in.</Alert>
@@ -89,6 +91,6 @@ export default function SetPasswordPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AuthScreen>
   );
 }

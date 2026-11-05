@@ -3,11 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const auth = vi.hoisted(() => ({
   signIn: vi.fn(async (_email: string, _password: string) => {}),
+  signInWithGoogle: vi.fn(async (_next?: string | null) => {}),
   signUp: vi.fn(async (_name: string, _email: string, _password: string) => ({ signedIn: false })),
   requestPasswordReset: vi.fn(async (_email: string) => {}),
   updatePassword: vi.fn(async (_password: string) => {}),
-  config: { publicConfigured: true },
-  state: { authLoading: false, user: null as null | { id: string; email: string; provider: "supabase" | "demo" } },
+  config: { publicConfigured: true, unconfigured: false },
+  state: { authLoading: false, user: null as null | { id: string; email: string; provider: "supabase" } },
   passwordLink: { status: "none" } as { status: string; kind?: string; userId?: string; email?: string | null },
 }));
 vi.mock("@/state/app-provider", () => ({ useApp: () => auth }));
@@ -18,6 +19,7 @@ import SetPasswordPage from "@/app/auth/set-password/page";
 beforeEach(() => {
   vi.clearAllMocks();
   auth.config.publicConfigured = true;
+  auth.config.unconfigured = false;
   auth.state.authLoading = false;
   auth.state.user = null;
   auth.passwordLink = { status: "none" };
@@ -71,11 +73,19 @@ describe("sign-in and student sign-up", () => {
     expect(screen.queryByText(/If an account exists/)).not.toBeInTheDocument();
   });
 
-  it("keeps account submission disabled in credential-free mode", () => {
+  it("keeps account submission disabled when the deployment has no backend", () => {
     auth.config.publicConfigured = false;
+    auth.config.unconfigured = true;
     render(<AuthCard />);
-    expect(screen.getByText(/Authentication is not configured/)).toBeInTheDocument();
+    expect(screen.getByText(/This deployment has no Supabase credentials/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Sign in$/ })).toBeDisabled();
+  });
+
+  it("hides the Google control until Supabase reports the provider as enabled", () => {
+    render(<AuthCard />);
+    expect(screen.getByText(/Google sign-in is not switched on yet/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Continue with Google/i })).not.toBeInTheDocument();
+    expect(auth.signInWithGoogle).not.toHaveBeenCalled();
   });
 });
 

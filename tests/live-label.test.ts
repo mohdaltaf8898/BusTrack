@@ -3,14 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/config", () => ({
   isSupabaseConfigured: true,
   backendConfig: {
-    enabled: true, demoMode: false, publicConfigured: true, serverConfigured: true,
+    enabled: true, unconfigured: false, publicConfigured: true, serverConfigured: true,
     realtimeConfigured: true, simulationSpeedMultiplier: 8, staleLocationSeconds: 45,
   },
 }));
 
 import { createInitialState, appReducer } from "@/lib/app-reducer";
 import { deriveRouteSnapshot } from "@/lib/selectors";
-import { demoUsers } from "@/data/routes";
+import { signedInUser } from "./support/session";
 import { mapBackendData } from "@/lib/backend-mapping";
 import type { RemoteBusLocation } from "@/lib/types";
 
@@ -23,7 +23,7 @@ function location(overrides: Partial<RemoteBusLocation> = {}): RemoteBusLocation
   };
 }
 function stateWithRemote(remote: RemoteBusLocation) {
-  return { ...createInitialState(now), hydrated: true, user: { ...demoUsers.student }, remoteLocations: { "route-01": remote } };
+  return { ...createInitialState(now), hydrated: true, user: signedInUser("student"), remoteLocations: { "route-01": remote } };
 }
 
 describe("live and last-known GPS labels", () => {
@@ -43,15 +43,16 @@ describe("live and last-known GPS labels", () => {
     const state = stateWithRemote(location());
     expect(appReducer(state, { type: "SET_USER", user: null }).remoteLocations).toEqual({});
     expect(appReducer(state, { type: "SET_USER", user: { ...state.user!, role: "admin" } }).remoteLocations).toEqual({});
-    expect(appReducer(state, { type: "SET_USER", user: { ...state.user!, provider: "supabase" } }).remoteLocations).toEqual({});
-    const signedIn = { ...state, user: { ...state.user, provider: "supabase" as const } };
+    // A different Supabase identity must not inherit cached positions.
+    expect(appReducer(state, { type: "SET_USER", user: signedInUser("student", { id: "44444444-4444-4444-8444-444444444444" }) }).remoteLocations).toEqual({});
+    const signedIn = state;
     const context = { userId: signedIn.user.id, role: signedIn.user.role, routeId: "route-01", busId: "bus-sim01" };
     expect(appReducer(signedIn, { type: "CLEAR_REMOTE_LOCATION", routeId: "route-01", context }).remoteLocations).toEqual({});
     const signedOut = appReducer(signedIn, { type: "SET_USER", user: null });
     expect(appReducer(signedOut, { type: "SET_REMOTE_LOCATION", location: location(), context })).toBe(signedOut);
   });
 
-  it("clears private backend lists on identity changes while retaining demo alerts", () => {
+  it("clears private backend lists on identity changes while retaining published alerts", () => {
     const base = stateWithRemote(location());
     const adminState = {
       ...base,
@@ -66,7 +67,10 @@ describe("live and last-known GPS labels", () => {
     expect(signedOut.backendTrips).toEqual([]);
     expect(signedOut.notifications.every((item) => item.simulated)).toBe(true);
     expect(signedOut.delayReports.every((item) => item.simulated)).toBe(true);
-    expect(appReducer(base, { type: "SET_USER", user: { ...demoUsers.driver } }).drivers).toEqual(base.drivers);
+    // Both identities come from Supabase now, so a switch is a real identity
+    // change and private lists must be dropped.
+    expect(appReducer(base, { type: "SET_USER", user: signedInUser("driver") }).drivers).toEqual([]);
+    expect(appReducer(base, { type: "SET_USER", user: { ...base.user! } }).drivers).toEqual(base.drivers);
   });
 
   it("does not fabricate backend drivers or buses when the database returns empty lists", () => {
@@ -75,7 +79,8 @@ describe("live and last-known GPS labels", () => {
     expect(mapped.drivers).toEqual([]);
     const updated = appReducer(stateWithRemote(location()), {
       type: "SET_BACKEND_DATA", routes: mapped.routes, buses: mapped.buses, drivers: mapped.drivers,
-      delayReports: [], backendTrips: [], message: "Loaded", identity: { userId: null, role: null },
+      delayReports: [], backendTrips: [], message: "Loaded",
+      identity: { userId: signedInUser("student").id, role: "student" },
     });
     expect(updated.buses).toEqual([]);
     expect(updated.drivers).toEqual([]);

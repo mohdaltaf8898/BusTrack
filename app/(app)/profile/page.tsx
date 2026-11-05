@@ -37,12 +37,12 @@ export default function ProfilePage() {
   if (!state.user) {
     return (
       <div className="mx-auto max-w-2xl space-y-5">
-        <PageHeader eyebrow="Profile" title="You are browsing as a guest" />
+        <PageHeader eyebrow="Profile" title="You are signed out" />
         <EmptyState
           icon={<UserRound className="h-6 w-6" />}
           title="Sign in to personalize BusTrack"
-          description="Choose a demo role or sign in with Supabase Auth to see account details and role-based tools."
-          action={<ButtonLink href="/login">Go to login</ButtonLink>}
+          description="Your account details, selected stop and notification settings are only available after signing in."
+          action={<ButtonLink href="/login">Go to sign in</ButtonLink>}
         />
       </div>
     );
@@ -184,19 +184,16 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3">
                 <span>Backend</span>
                 <Badge tone={config.publicConfigured ? "green" : "amber"}>
-                  {config.publicConfigured ? "Supabase client" : "Local demo"}
+                  {config.publicConfigured ? "Supabase Auth" : "No backend"}
                 </Badge>
               </div>
               <p className="text-xs leading-5">
-                In demo mode, roles and data are local to this browser. In real mode, server API routes verify the
-                Supabase access token and profile role before any privileged operation. Driver GPS is never accepted
-                from a student account or while a trip is inactive.
+                Your role comes from your BusTrack profile. Server API routes verify the Supabase access
+                token and profile role before any privileged operation, and driver GPS is never accepted from a
+                student account or while a trip is inactive.
               </p>
               <div className="flex flex-wrap gap-2">
-                <ButtonLink href="/login" variant="outline" size="sm">
-                  Switch role
-                </ButtonLink>
-                <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+                <Button variant="ghost" size="sm" onClick={() => void signOut().then(() => window.location.assign("/"))}>
                   <LogOut className="h-4 w-4" /> Sign out
                 </Button>
               </div>
@@ -205,14 +202,14 @@ export default function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Local demo data</CardTitle>
+              <CardTitle>Cached browser data</CardTitle>
               <p className="mt-1 text-xs text-slate-500">
-                Restore the historical route catalogue, notifications and simulation progress to their original state.
+                Restore the published 2025–26 route catalogue, notifications and simulation progress to their original state.
               </p>
             </CardHeader>
             <CardContent>
               <Button variant="danger" onClick={() => setResetOpen(true)}>
-                <RefreshCw className="h-4 w-4" /> Reset local demo state
+                <RefreshCw className="h-4 w-4" /> Reset cached browser state
               </Button>
               <p className="mt-2 text-xs text-slate-500">
                 This clears <code>{APP_STORAGE_KEY}</code> from this browser and reloads the page. It does not modify
@@ -233,7 +230,7 @@ export default function ProfilePage() {
             window.location.reload();
           }
         }}
-        title="Reset local demo state?"
+        title="Reset cached browser state?"
         description="Local route edits, notifications and simulation progress will be replaced with the original catalogue."
         confirmLabel="Reset and reload"
       />

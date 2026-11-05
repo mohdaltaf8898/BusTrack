@@ -8,7 +8,7 @@ export default function AdminPage() {
     <RoleGuard
       allow={["admin"]}
       title="Administrator login required"
-      description="Buses, routes, stops, driver assignments and trip state are restricted. Sign in with an admin account or use the clearly labelled local demo admin role."
+      description="Buses, routes, stops, driver assignments and trip state are restricted to transport administrators."
     >
       <AdminDashboard />
     </RoleGuard>

@@ -1,6 +1,6 @@
 import timetable from "@/data/lords-routes-2025-26.json";
 import { buildRoute, type RouteSeed } from "@/lib/route-builder";
-import type { AppUser, Bus, Coordinates, DemoDriver } from "@/lib/types";
+import type { Bus, Coordinates, DemoDriver } from "@/lib/types";
 
 /** Approximate campus centroid; pickup positions must be verified by transport staff. */
 export const COLLEGE_COORDINATES: Coordinates = { lat: 17.3418, lng: 78.368 };
@@ -88,36 +88,6 @@ export const sampleDrivers: DemoDriver[] = [
     shift: "Simulation",
   },
 ];
-
-export const demoUsers: Record<Exclude<AppUser["role"], "admin"> | "admin", AppUser> = {
-  student: {
-    id: "demo-student-1",
-    name: "Student",
-    email: "student@bustrack.demo",
-    role: "student",
-    avatarInitials: "ST",
-    assignedRouteId: "route-01",
-    provider: "demo",
-  },
-  driver: {
-    id: "demo-driver-1",
-    name: "Demo driver",
-    email: "driver@example.edu",
-    role: "driver",
-    avatarInitials: "DD",
-    assignedBusId: "bus-sim01",
-    assignedRouteId: "route-01",
-    provider: "demo",
-  },
-  admin: {
-    id: "demo-admin-1",
-    name: "Transport Admin",
-    email: "admin@bustrack.demo",
-    role: "admin",
-    avatarInitials: "TA",
-    provider: "demo",
-  },
-};
 
 export const transportOffice = {
   name: "College Transport Office",

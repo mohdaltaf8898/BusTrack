@@ -8,7 +8,7 @@ export default function DriverPage() {
     <RoleGuard
       allow={["driver"]}
       title="Driver login required"
-      description="The driver dashboard can start trips and share device GPS only for an authorized, assigned driver. Sign in with a driver account or use the local demo role."
+      description="The driver dashboard can start trips and share device GPS only for an authorized, assigned driver."
     >
       <DriverDashboard />
     </RoleGuard>

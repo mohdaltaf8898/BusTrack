@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { authRedirect, inspectPasswordCallback, updatePasswordForToken, validateNewPassword } from "@/lib/auth-flow";
+import { authRedirect, inspectPasswordCallback, oauthCallbackUrl, sanitizeInternalPath, updatePasswordForToken, validateNewPassword } from "@/lib/auth-flow";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -29,8 +29,34 @@ describe("authentication link handling", () => {
 
   it("uses only fixed, same-origin email redirects", () => {
     expect(authRedirect("https://bustrack.example", "/login")).toBe("https://bustrack.example/login");
+    expect(authRedirect("https://bustrack.example", "/signup")).toBe("https://bustrack.example/signup");
     expect(authRedirect("https://bustrack.example", "/auth/set-password")).toBe("https://bustrack.example/auth/set-password");
+    expect(authRedirect("https://bustrack.example", "/auth/callback")).toBe("https://bustrack.example/auth/callback");
     expect(() => authRedirect("https://bustrack.example", "//evil.example" as "/login")).toThrow();
+  });
+});
+
+describe("post-authentication destinations", () => {
+  it("keeps only same-origin internal paths", () => {
+    expect(sanitizeInternalPath("/dashboard")).toBe("/dashboard");
+    expect(sanitizeInternalPath("/routes?route=route-03")).toBe("/routes?route=route-03");
+    expect(sanitizeInternalPath("/track#map")).toBe("/track");
+    expect(sanitizeInternalPath(null)).toBe("/dashboard");
+    expect(sanitizeInternalPath("   ")).toBe("/dashboard");
+  });
+
+  it("rejects absolute, protocol-relative and backslash escapes", () => {
+    expect(sanitizeInternalPath("https://evil.example/steal")).toBe("/dashboard");
+    expect(sanitizeInternalPath("//evil.example/steal")).toBe("/dashboard");
+    expect(sanitizeInternalPath("/\\evil.example")).toBe("/dashboard");
+    expect(sanitizeInternalPath("javascript:alert(1)")).toBe("/dashboard");
+  });
+
+  it("builds the OAuth callback for the same origin only", () => {
+    expect(oauthCallbackUrl("https://bustrack-eight.vercel.app", "/routes"))
+      .toBe("https://bustrack-eight.vercel.app/auth/callback?next=%2Froutes");
+    expect(oauthCallbackUrl("http://localhost:3000", "https://evil.example"))
+      .toBe("http://localhost:3000/auth/callback?next=%2Fdashboard");
   });
 });
 

@@ -123,7 +123,7 @@ export function endDemoTrip(
         route,
         now,
         `Trip completed · ${route.busNumber}`,
-        `${route.code} reached ${route.destination}. Location sharing has stopped in this demo.`,
+        `${route.code} reached ${route.destination}. Location sharing has stopped for this simulation.`,
       ),
     ],
   };

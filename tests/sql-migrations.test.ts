@@ -28,7 +28,7 @@ beforeAll(async () => {
     -- Supabase also grants EXECUTE directly to these roles for new functions.
     alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
   `);
-  for (const path of ["20261030135413_bustrack_init.sql", "20261030135426_bustrack_published_routes.sql", "20261030140136_bustrack_function_grants.sql", "20261030144351_bustrack_guarded_gps.sql"]) {
+  for (const path of ["20261030135413_bustrack_init.sql", "20261030135426_bustrack_published_routes.sql", "20261030140136_bustrack_function_grants.sql", "20261030144351_bustrack_guarded_gps.sql", "20261105120000_bustrack_oauth_profile_name.sql"]) {
     await db.exec(await readFile(new URL(`../supabase/migrations/${path}`, import.meta.url), "utf8"));
   }
   seed = await readFile(new URL("../supabase/seed.sql", import.meta.url), "utf8");
@@ -120,6 +120,35 @@ describe("PostgreSQL migrations and 2025–26 seed", () => {
     await db.query(`select public.end_driver_trip('${tripId}'::uuid)`);
     await expect(db.query(`select public.set_trip_location_sharing('${tripId}'::uuid, true)`)).rejects.toThrow(/Active trip not found/);
     await db.exec("reset role; select set_config('request.jwt.claim.sub', '', false);");
+  });
+
+  it("creates a student profile from OAuth metadata without granting a privileged role", async () => {
+    const oauthId = "10000000-0000-4000-8000-0000000000aa";
+    await db.exec(`
+      insert into auth.users (id, email, raw_user_meta_data)
+      values ('${oauthId}', 'google.student@example.edu',
+        '{"full_name": "Google Student", "provider": "google"}'::jsonb);
+    `);
+    const created = await db.query<{ name: string; role: string }>(
+      `select name, role from public.profiles where id = '${oauthId}'`,
+    );
+    expect(created.rows[0]).toEqual({ name: "Google Student", role: "student" });
+
+    // A self-service OAuth account must not be able to elevate itself. The
+    // trusted-owner bootstrap path stays available to the database owner only.
+    await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub', '${oauthId}', false);`);
+    await expect(
+      db.exec(`update public.profiles set role = 'admin' where id = '${oauthId}'`),
+    ).rejects.toThrow(/Only an administrator/);
+    await db.exec("reset role; select set_config('request.jwt.claim.sub', '', false);");
+
+    const unchanged = await db.query<{ role: string }>(
+      `select role from public.profiles where id = '${oauthId}'`,
+    );
+    expect(unchanged.rows[0].role).toBe("student");
+
+    await db.exec(`delete from public.profiles where id = '${oauthId}';
+                   delete from auth.users where id = '${oauthId}';`);
   });
 
   it("does not overwrite operator data on reseeding and invalidates changed stop geometry", async () => {

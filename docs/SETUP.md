@@ -1,12 +1,12 @@
 # Setup guide
 
-## Credential-free demo
+## Sign-in is required
 
-Install Node 22 (or supported Node 20.9+/24), then run `npm ci` and `npm run dev`. Open `http://localhost:3000`. No `.env.local` or Supabase account is needed. The 16 stop lists/times are from the historical 2025–26 document; vehicles, positions, ETAs and alerts are simulated. Reset via Profile or remove the `bustrack:demo-state:v2` localStorage key.
+Install Node 22 (or supported Node 20.9+/24), then run `npm ci` and `npm run dev`. Open `http://localhost:3000`. The public homepage is the only screen you will see without credentials: `/dashboard` and every other app route redirect to `/login`. Demo mode has been removed, so `.env.local` must contain a Supabase project URL and anon key before the app can be used locally.
 
-## Optional Supabase project
+The hosted BusTrack project has been provisioned with the schema and seed; the local checkout has no credentials. Only configure an authorized project; creating projects and enabling services may have account/tier limits or costs. Public student sign-up needs working confirmation and reset email delivery, which means custom SMTP — see [EMAIL.md](EMAIL.md). Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
 
-The hosted BusTrack project has been provisioned with the schema and seed; the local checkout has no credentials. Only configure an authorized project; creating projects and enabling services may have account/tier limits or costs. Student sign-up can be enabled in Supabase Auth, but confirmation and reset email delivery to non-team addresses requires custom SMTP. Connecting the database does not verify routes, start a driver's GPS, or enable SMS/WhatsApp.
+Even without credentials, the homepage and the sign-in screens render from the historical catalogue: the 16 stop lists and published times are from the 2025–26 document, while vehicles, positions, ETAs and alerts are simulated. Seeded data lives in localStorage under `bustrack:app-state:v2`; clearing it resets the local selection.
 
 ### 1. Create project and apply SQL
 
@@ -16,6 +16,7 @@ The hosted BusTrack project has been provisioned with the schema and seed; the l
    - `supabase/migrations/20261030135426_bustrack_published_routes.sql`
    - `supabase/migrations/20261030140136_bustrack_function_grants.sql`
    - `supabase/migrations/20261030144351_bustrack_guarded_gps.sql`
+   - `supabase/migrations/20261105120000_bustrack_oauth_profile_name.sql`
    - `supabase/seed.sql`
 3. The seed adds 16 historical routes and placeholder `SIM-*` buses without overwriting matching rows. It contains no real driver identities or contacts. An older installation may still contain old demo routes; review and remove/migrate them deliberately after backing up, rather than deleting real records automatically.
 4. Check **Database → Publications → supabase_realtime** includes `bus_locations` and `notifications`. The initial migration tries to add them. If a table is absent, add only the missing table in the dashboard or SQL editor.
@@ -24,7 +25,7 @@ The migrations create the schema, RLS policies, trip functions, nullable stop po
 
 ### 2. Create accounts and assign roles
 
-1. For public student registration, turn on **Authentication → Providers → Email** and allow sign-ups while retaining **Confirm email**. Configure custom SMTP under **Authentication → SMTP** first: the default Supabase sender delivers only to project-team addresses (currently 2 emails/hour), so it cannot reliably confirm student addresses or send password resets. Add the deployed `https://bustrack-eight.vercel.app/login` and `https://bustrack-eight.vercel.app/auth/set-password` to **Authentication → URL Configuration** redirect allowlist, or your own site equivalents. Students use **Login → Sign up**; new profiles default to `student` regardless of client-provided metadata. For staff, create users in **Authentication → Users**, or invite them after SMTP and the password-setting screen have been deployed. Dashboard-created users with passwords can sign in directly; check confirmation status. Neither route elevates a role on its own. The `handle_new_user` trigger creates their `public.profiles` rows as students.
+1. For public student registration, turn on **Authentication → Providers → Email** and allow sign-ups while retaining **Confirm email**. Configure custom SMTP under **Authentication → SMTP** first: the default Supabase sender delivers only to project-team addresses (currently 2 emails/hour), so it cannot reliably confirm student addresses or send password resets. [EMAIL.md](EMAIL.md) has a free 15-minute setup. Add the deployed `https://bustrack-eight.vercel.app/login` and `https://bustrack-eight.vercel.app/auth/set-password` to **Authentication → URL Configuration** redirect allowlist, plus `http://localhost:3000/**` for local development, or your own site equivalents. Students use **Login → Sign up** or **Continue with Google** ([AUTH.md](AUTH.md)); new profiles default to `student` regardless of client-provided metadata, and signing up never grants a driver or admin role. For staff, create users in **Authentication → Users**, or invite them after SMTP and the password-setting screen have been deployed. Dashboard-created users with passwords can sign in directly; check confirmation status. Neither route elevates a role on its own. The `handle_new_user` trigger creates their `public.profiles` rows as students.
 2. In the trusted project SQL editor (database owner), use the UUIDs shown in Auth to promote the first admin and intended drivers. Replace the angle-bracket values locally; they are not real IDs:
 
    ```sql

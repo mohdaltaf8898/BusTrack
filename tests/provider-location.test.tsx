@@ -10,7 +10,7 @@ vi.mock("@/lib/config", () => ({
   isSupabaseConfigured: true,
   publicSupabaseConfig: { url: "https://example.supabase.co", anonKey: "public-test-key" },
   backendConfig: {
-    enabled: true, demoMode: false, publicConfigured: true, serverConfigured: true,
+    enabled: true, unconfigured: false, publicConfigured: true, serverConfigured: true,
     realtimeConfigured: true, simulationSpeedMultiplier: 8, staleLocationSeconds: 45,
   },
 }));
@@ -20,6 +20,7 @@ vi.mock("@supabase/supabase-js", () => ({
     auth: {
       initialize: async () => ({ error: null }),
       getSession: async () => ({ data: { session: { access_token: "test-token", user: { id: "student-1", email: "student@example.edu" } } }, error: null }),
+      signOut: async () => ({ error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     },
     from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: "student-1", name: "Student", role: realtime.role }, error: null }) }) }) }),
@@ -40,12 +41,12 @@ vi.mock("@supabase/supabase-js", () => ({
 import { AppProvider, useApp } from "@/state/app-provider";
 
 function LocationInspector() {
-  const { state, snapshot, setDemoRole } = useApp();
+  const { state, snapshot, signOut } = useApp();
   return <>
     <div data-testid="provider">{state.user?.provider ?? "none"}</div>
     <div data-testid="mode">{snapshot.dataMode}</div>
     <div data-testid="drivers">{state.drivers.map((driver) => driver.name).join(", ")}</div>
-    <button onClick={() => setDemoRole("student")}>Switch to demo</button>
+    <button onClick={() => void signOut()}>Sign out</button>
   </>;
 }
 
@@ -56,7 +57,7 @@ afterEach(() => {
 });
 
 describe("provider location refresh", () => {
-  it("rechecks the backend for a Realtime INSERT and clears data on demo-role switch", async () => {
+  it("rechecks the backend for a Realtime INSERT and clears data on sign-out", async () => {
     let live = true;
     let locationReads = 0;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -75,7 +76,7 @@ describe("provider location refresh", () => {
       if (url === "/api/admin") return Response.json({
         data: { routes: [], stops: [], buses: [{ id: "bus-sim01", bus_number: "SIM-01", assigned_route_id: "route-01" }], drivers: [] },
       });
-      if (url === "/api/config") return Response.json({ serverConfigured: true, demoMode: false });
+      if (url === "/api/config") return Response.json({ serverConfigured: true, unconfigured: false });
       return new Response(null, { status: 503 });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -90,8 +91,8 @@ describe("provider location refresh", () => {
     await waitFor(() => expect(screen.getByTestId("mode")).toHaveTextContent("last-known"));
     expect(locationReads).toBeGreaterThan(before);
 
-    fireEvent.click(screen.getByRole("button", { name: "Switch to demo" }));
-    await waitFor(() => expect(screen.getByTestId("provider")).toHaveTextContent("demo"));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() => expect(screen.getByTestId("provider")).toHaveTextContent("none"));
     expect(screen.getByTestId("mode")).toHaveTextContent("simulation");
     const afterSwitch = locationReads;
     act(() => realtime.location?.({ new: { bus_id: "bus-sim01" } }));
@@ -100,7 +101,7 @@ describe("provider location refresh", () => {
     expect(screen.getByTestId("mode")).toHaveTextContent("simulation");
   });
 
-  it("does not reapply an admin response or send the admin token after switching to demo", async () => {
+  it("does not reapply an admin response or send the admin token after signing out", async () => {
     realtime.role = "admin";
     let resolveAdmin!: (response: Response) => void;
     const pendingAdmin = new Promise<Response>((resolve) => { resolveAdmin = resolve; });
@@ -115,14 +116,14 @@ describe("provider location refresh", () => {
         return Response.json({ data: publicData });
       }
       if (url.startsWith("/api/locations")) return Response.json({ location: null, live: false });
-      if (url === "/api/config") return Response.json({ serverConfigured: true, demoMode: false });
+      if (url === "/api/config") return Response.json({ serverConfigured: true, unconfigured: false });
       return new Response(null, { status: 503 });
     }));
     render(<AppProvider><LocationInspector /></AppProvider>);
     await waitFor(() => expect(adminRequested).toBe(true));
     const publicBeforeSwitch = publicReads;
-    fireEvent.click(screen.getByRole("button", { name: "Switch to demo" }));
-    await waitFor(() => expect(screen.getByTestId("provider")).toHaveTextContent("demo"));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() => expect(screen.getByTestId("provider")).toHaveTextContent("none"));
     await waitFor(() => expect(publicReads).toBeGreaterThan(publicBeforeSwitch));
     await act(async () => {
       resolveAdmin(Response.json({ data: { ...publicData, drivers: [{ id: "driver-1", name: "Private driver" }] } }));

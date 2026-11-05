@@ -125,7 +125,7 @@ export function OfflineNotice({ className }: { className?: string }) {
       role="status"
     >
       <WifiOff className="h-4 w-4" aria-hidden="true" />
-      Browser offline — showing cached demo data. Live map tiles may be unavailable.
+      Browser offline — showing the last data cached in this browser. Live map tiles may be unavailable.
     </div>
   );
 }

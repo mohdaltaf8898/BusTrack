@@ -10,6 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        canvas: "var(--color-canvas)",
+        surface: "var(--color-surface)",
+        "surface-muted": "var(--color-surface-muted)",
+        "map-surface": "var(--color-map-surface)",
+        line: "var(--color-border)",
+        ink: "var(--color-ink)",
+        "ink-muted": "var(--color-ink-muted)",
         navy: {
           50: "rgb(var(--color-navy-50) / <alpha-value>)",
           100: "rgb(var(--color-navy-100) / <alpha-value>)",

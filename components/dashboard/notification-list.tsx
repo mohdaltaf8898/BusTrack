@@ -268,7 +268,7 @@ export function NotificationList() {
           setConfirmClear(false);
         }}
         title="Clear all notifications?"
-        description="This removes local demo notifications from this browser. New simulated alerts can still be generated."
+        description="This removes cached notifications from this browser. New alerts can still arrive."
         confirmLabel="Clear all"
       />
     </Card>

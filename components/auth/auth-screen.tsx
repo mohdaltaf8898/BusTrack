@@ -1,0 +1,64 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Logo } from "@/components/brand";
+
+/**
+ * Shared chrome for the public account screens. They sit outside the workspace
+ * shell, so each one carries its own brand row and a way back to the
+ * introduction page.
+ */
+export function AuthScreen({
+  title,
+  description,
+  children,
+  aside,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+  aside?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <Logo />
+          <Link
+            href="/"
+            className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Introduction
+          </Link>
+        </div>
+      </header>
+
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+          <div className="order-2 lg:order-1">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-navy-950 sm:text-4xl">
+              {title}
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+              {description}
+            </p>
+            {aside && <div className="mt-6 max-w-xl">{aside}</div>}
+          </div>
+          <div className="order-1 w-full lg:order-2">{children}</div>
+        </div>
+      </main>
+
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs leading-5 text-slate-500 sm:flex-row sm:items-center sm:px-6">
+          <span>BusTrack · Lords Institute of Engineering and Technology, Hyderabad</span>
+          <span className="hidden sm:inline" aria-hidden="true">·</span>
+          <span>
+            Arrival times are estimates from published pickup times. Live positions need an
+            authorized driver device.
+          </span>
+        </div>
+      </footer>
+    </div>
+  );
+}

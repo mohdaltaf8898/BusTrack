@@ -10,7 +10,7 @@ import {
   Gauge,
   GraduationCap,
   Home,
-  LogIn,
+  LogOut,
   MapPinned,
   Menu,
   Route as RouteIcon,
@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
-import { DemoModeBadge, SourceLabel } from "@/components/ui/labels";
+import { SourceLabel } from "@/components/ui/labels";
 import { Logo } from "@/components/brand";
 import { RouteSelector } from "@/components/route-selector";
 import { Alert, LoadingScreen, OfflineNotice } from "@/components/ui/feedback";
@@ -35,7 +35,7 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: Home, match: "exact" },
+  { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/track", label: "Track bus", icon: MapPinned },
   { href: "/routes", label: "Routes & Stops", icon: RouteIcon },
   { href: "/notifications", label: "Notifications", icon: Bell },
@@ -46,11 +46,10 @@ const workspaceNav: NavItem[] = [
   { href: "/driver", label: "Driver Dashboard", icon: Gauge },
   { href: "/admin", label: "Admin Dashboard", icon: ShieldCheck },
   { href: "/profile", label: "Profile", icon: UserRound },
-  { href: "/login", label: "Login / Switch role", icon: LogIn },
 ];
 
 const titles: Record<string, string> = {
-  "/": "Student Dashboard",
+  "/dashboard": "Student Dashboard",
   "/track": "Bus tracking",
   "/routes": "Routes & Stops",
   "/notifications": "Notifications",
@@ -58,7 +57,6 @@ const titles: Record<string, string> = {
   "/driver": "Driver Dashboard",
   "/admin": "Admin Dashboard",
   "/profile": "Profile",
-  "/login": "Login",
   "/auth/set-password": "Set password",
 };
 
@@ -143,7 +141,7 @@ function BottomNav({
 }) {
   const { unreadCount } = useApp();
   const items: Array<NavItem & { badge?: number }> = [
-    { href: "/", label: "Home", icon: Home, match: "exact" },
+    { href: "/dashboard", label: "Home", icon: Home },
     { href: "/track", label: "Track", icon: MapPinned },
     { href: "/routes", label: "Routes", icon: RouteIcon },
     { href: "/notifications", label: "Alerts", icon: Bell, badge: unreadCount },
@@ -242,11 +240,11 @@ function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => 
             variant="outline"
             className="mt-4 w-full"
             onClick={() => {
-              void signOut();
+              void signOut().then(() => window.location.assign("/"));
               onClose();
             }}
           >
-            Sign out
+            <LogOut className="h-4 w-4" aria-hidden="true" /> Sign out
           </Button>
         )}
       </div>
@@ -280,11 +278,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
               <h1 className="truncate text-sm font-semibold text-navy-950">{pageTitle}</h1>
             </div>
-            <div className={cn("hidden w-64 xl:block", pathname === "/" && "xl:hidden")}>
+            <div className={cn("hidden w-64 xl:block", pathname === "/dashboard" && "xl:hidden")}>
               <RouteSelector showLabel={false} compact />
             </div>
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-              {snapshot.dataMode === "simulation" ? <DemoModeBadge compact /> : <SourceLabel mode={snapshot.dataMode} />}
+              <SourceLabel mode={snapshot.dataMode} />
               <Link
                 href="/notifications"
                 aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`}

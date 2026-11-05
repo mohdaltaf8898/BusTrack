@@ -4,7 +4,7 @@ import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { useApp } from "@/state/app-provider";
 import type { UserRole } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/ui/feedback";
 
@@ -19,12 +19,10 @@ export function RoleGuard({
   description: string;
   children: React.ReactNode;
 }) {
-  const { state, config, setDemoRole } = useApp();
+  const { state } = useApp();
 
   if (!state.hydrated || state.authLoading) return <LoadingScreen />;
   if (state.user && allow.includes(state.user.role)) return <>{children}</>;
-
-  const desiredRole = allow[0];
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-14">
       <Card className="overflow-hidden">
@@ -44,24 +42,18 @@ export function RoleGuard({
             <p>
               {state.user
                 ? `You are signed in as ${state.user.role}. Switch to an authorized account to continue.`
-                : "Sign in with an authorized account. In demo mode, role changes are local only and never grant access to a real backend."}
+                : "Sign in with an authorized account. Roles come from your BusTrack profile; opening this page never grants access on its own."}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <ButtonLink href="/login" className="w-full sm:w-auto">
-              Go to login
+              Go to sign in
             </ButtonLink>
-            {config.demoMode && (
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => setDemoRole(desiredRole)}
-              >
-                Continue as demo {desiredRole}
-              </Button>
-            )}
-            <ButtonLink href="/" variant="ghost" className="w-full sm:w-auto">
+            <ButtonLink href="/dashboard" variant="outline" className="w-full sm:w-auto">
               Back to dashboard
+            </ButtonLink>
+            <ButtonLink href="/" variant="ghost" className="w-full sm:w-auto">
+              Introduction
             </ButtonLink>
           </div>
         </CardContent>

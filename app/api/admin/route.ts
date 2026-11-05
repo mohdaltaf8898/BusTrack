@@ -200,7 +200,7 @@ async function loadAdminData(request: Request) {
 
   return {
     configured: true,
-    demoMode: false,
+    unconfigured: false,
     message:
       routes.length > 0
         ? "Supabase routes loaded. Simulated bus positions remain active until an authorized driver sends GPS."
@@ -223,7 +223,7 @@ export async function GET(request: Request) {
     return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const { body, status } = apiErrorResponse(error);
-    return NextResponse.json({ ...body, demoMode: status === 503 }, { status });
+    return NextResponse.json({ ...body, unconfigured: status === 503 }, { status });
   }
 }
 

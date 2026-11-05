@@ -21,17 +21,17 @@ function jsonRequest(path: string, body: unknown, token?: string) {
   });
 }
 
-describe("credential-free backend behavior", () => {
+describe("unconfigured backend behavior", () => {
   it("reports server configuration without exposing secrets", async () => {
     const response = await configGet();
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.serverConfigured).toBe(false);
-    expect(body.demoMode).toBe(true);
+    expect(body.unconfigured).toBe(true);
     expect(JSON.stringify(body)).not.toMatch(/SERVICE_ROLE|serviceRoleKey|secret/i);
   });
 
-  it("rejects GPS submissions without a token and reports demo mode when credentials are incomplete", async () => {
+  it("rejects GPS submissions without a token and reports missing credentials", async () => {
     const unauthenticated = await locationsPost(
       jsonRequest("/api/locations", {
         busId: "bus-sim01",
@@ -60,8 +60,8 @@ describe("credential-free backend behavior", () => {
     );
     expect(noBackend.status).toBe(503);
     const demoBody = await noBackend.json();
-    expect(demoBody.demoMode).toBe(true);
-    expect(demoBody.code).toBe("DEMO_MODE");
+    expect(demoBody.unconfigured).toBe(true);
+    expect(demoBody.code).toBe("BACKEND_UNCONFIGURED");
   });
 
   it("protects trip, admin and location read endpoints from anonymous requests", async () => {
@@ -73,7 +73,7 @@ describe("credential-free backend behavior", () => {
     ]);
     expect(tripResponse.status).toBe(401);
     expect(adminMutation.status).toBe(401);
-    expect((await adminRead.json()).demoMode).toBe(true);
+    expect((await adminRead.json()).unconfigured).toBe(true);
     expect(adminRead.status).toBe(503);
     expect(locationRead.status).toBe(401);
   });

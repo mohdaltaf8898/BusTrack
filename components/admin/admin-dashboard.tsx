@@ -265,7 +265,7 @@ export function AdminDashboard() {
                 {isBackendAdmin ? "Route snapshots; check each row’s location source." : "Local simulation values from student routes."}
               </p>
             </div>
-            {!isBackendAdmin && <SimulatedTag label="Demo telemetry" />}
+            {!isBackendAdmin && <SimulatedTag label="Simulated telemetry" />}
           </CardHeader>
           <CardContent className="space-y-4">
             {routeSnapshots.length === 0 ? (
@@ -316,7 +316,7 @@ export function AdminDashboard() {
               <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3">
                 <span className="text-slate-500">Mode</span>
                 <Badge tone={isBackendAdmin ? "green" : "amber"}>
-                  {isBackendAdmin ? "Supabase API" : "Local demo"}
+                  {isBackendAdmin ? "Supabase API" : "Browser cache"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-3">
@@ -344,8 +344,8 @@ export function AdminDashboard() {
               )}
               {!isBackendAdmin && (
                 <Alert tone="info">
-                  Missing backend credentials or a demo admin session. Changes stay in this browser and are clearly
-                  labelled as local demonstration data.
+                  Missing backend credentials. Changes stay in this browser and are clearly
+                  labelled as cached browser data.
                 </Alert>
               )}
             </CardContent>
@@ -449,7 +449,7 @@ export function AdminDashboard() {
             }
             rowLabel={(bus) => bus.number}
             emptyTitle="No buses found"
-            emptyDescription="Change the filter or add a bus to the demo catalog."
+            emptyDescription="Change the filter or add a bus to the catalog."
           />
         </CardContent>
       </Card>
@@ -577,7 +577,7 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <Alert tone="warning" className="mb-4">
-            Saving or deleting a stop rebuilds the demo polyline from ordered stop coordinates. Detailed road-shape
+            Saving or deleting a stop rebuilds the schematic polyline from ordered stop coordinates. Detailed road-shape
             points are replaced with straight links.
           </Alert>
           <DataTable
@@ -761,7 +761,7 @@ export function AdminDashboard() {
                 : "Rows reflect local simulation trips. Ending a trip also stops simulated sharing."}
             </p>
           </div>
-          <SimulatedTag label={isBackendAdmin ? "API read" : "Demo trips"} />
+          <SimulatedTag label={isBackendAdmin ? "API read" : "Simulated trips"} />
         </CardHeader>
         <CardContent>
           <DataTable
@@ -1039,7 +1039,7 @@ export function AdminDashboard() {
       <PageHeader
         eyebrow="Administration"
         title="Transport operations"
-        description="Routes, buses and assignments in one workspace. Demo telemetry is not operational GPS."
+        description="Routes, buses and assignments in one workspace. Simulated telemetry is not operational GPS."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {isBackendAdmin && <Badge tone="neutral">Supabase admin</Badge>}
@@ -1069,7 +1069,7 @@ export function AdminDashboard() {
       {!isBackendAdmin && (
         <Alert tone="info">
           <div className="flex flex-wrap items-center gap-2">
-            <SimulatedTag label="Local demo mode" />
+            <SimulatedTag label="Simulated telemetry" />
             <span>
               Add, edit and delete operations are stored in this browser. Configure Supabase credentials, apply the
               migration, and sign in as an admin to use server-authorized database operations.

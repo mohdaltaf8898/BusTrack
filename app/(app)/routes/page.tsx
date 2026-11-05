@@ -106,7 +106,7 @@ export default function RoutesPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-navy-950">{route.name}</p>
                     <p className="mt-1 truncate text-xs text-slate-600">
-                      {route.stops.length} stops · {route.scheduleYear ?? "Custom"} · {route.busNumber.startsWith("SIM-") ? "Demo vehicle" : route.busNumber}
+                      {route.stops.length} stops · {route.scheduleYear ?? "Custom"} · {route.busNumber.startsWith("SIM-") ? "Simulation vehicle" : route.busNumber}
                     </p>
                   </div>
                   <Button
@@ -227,7 +227,7 @@ export default function RoutesPage() {
                     <UserRound className="mt-0.5 h-4 w-4 text-brand-600" aria-hidden="true" />
                     <div>
                       <p className="font-bold text-navy-950">Assigned driver</p>
-                      <p className="text-slate-600">{snapshot.driver?.name ?? "Awaiting assignment (demo)"}</p>
+                      <p className="text-slate-600">{snapshot.driver?.name ?? "No driver assigned yet"}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">

@@ -12,7 +12,7 @@ vi.mock("@/lib/config", () => ({
   isSupabaseConfigured: true,
   publicSupabaseConfig: { url: "https://example.supabase.co", anonKey: "public-test-key" },
   backendConfig: {
-    enabled: true, demoMode: false, publicConfigured: true, serverConfigured: true,
+    enabled: true, unconfigured: false, publicConfigured: true, serverConfigured: true,
     realtimeConfigured: true, simulationSpeedMultiplier: 8, staleLocationSeconds: 45,
   },
 }));

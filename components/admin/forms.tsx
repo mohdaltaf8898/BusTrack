@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import type { Bus, DemoDriver, Route } from "@/lib/types";
 import type {
@@ -49,11 +49,25 @@ interface RouteOption {
   label: string;
 }
 
-function useFormDialogReset(open: boolean, reset: () => void, dependencies: unknown[]) {
+/**
+ * Re-initialises an open dialog when the record it edits changes.
+ *
+ * The signature must be built from stable primitives. Passing arrays such as
+ * `routes` made every background refresh (Realtime event, admin re-read) wipe a
+ * form an administrator was halfway through filling in.
+ */
+function useFormDialogReset(open: boolean, reset: () => void, signature: string) {
+  const appliedSignature = useRef<string | null>(null);
   useEffect(() => {
-    if (open) reset();
+    if (!open) {
+      appliedSignature.current = null;
+      return;
+    }
+    if (appliedSignature.current === signature) return;
+    appliedSignature.current = signature;
+    reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, ...dependencies]);
+  }, [open, signature]);
 }
 
 export function BusFormDialog({
@@ -88,7 +102,7 @@ export function BusFormDialog({
     setValues(initial());
     setErrors({});
     setMessage(null);
-  }, [editing, routes]);
+  }, `${editing?.id ?? "new"}:${routes[0]?.id ?? ""}`);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -261,7 +275,7 @@ export function RouteFormDialog({
     setValues(initial());
     setErrors({});
     setMessage(null);
-  }, [editing, routes]);
+  }, `${editing?.id ?? "new"}:${routes[0]?.id ?? ""}`);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -313,7 +327,7 @@ export function RouteFormDialog({
             <span className="inline-flex items-start gap-2">
               <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
-                A new demo route copies a template’s stop geometry rather than generating random coordinates. Edit the
+                A new route copies a template’s stop geometry rather than generating random coordinates. Edit the
                 copied stops after creation.
               </span>
             </span>
@@ -371,7 +385,7 @@ export function RouteFormDialog({
             <FieldError message={errors.destination} />
           </div>
           <div>
-            <Label htmlFor="route-speed">Average demo speed (km/h)</Label>
+            <Label htmlFor="route-speed">Average simulation speed (km/h)</Label>
             <Input
               id="route-speed"
               type="number"
@@ -473,7 +487,7 @@ export function StopFormDialog({
     setValues(initial());
     setErrors({});
     setMessage(null);
-  }, [editing, defaultRouteId, routes]);
+  }, `${editing?.id ?? "new"}:${defaultRouteId}:${routes[0]?.id ?? ""}`);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -501,7 +515,7 @@ export function StopFormDialog({
       open={open}
       onClose={onClose}
       title={editing ? "Edit stop" : "Add stop"}
-      description="Coordinates are validated. Saving rebuilds a simple stop-to-stop demo polyline."
+      description="Coordinates are validated. Saving rebuilds a simple stop-to-stop schematic polyline."
       footer={
         <>
           <Button variant="outline" onClick={onClose} disabled={submitting}>
@@ -612,7 +626,7 @@ export function DriverAssignmentDialog({
   useFormDialogReset(open, () => {
     setDriverId(bus?.driverId ?? "");
     setMessage(null);
-  }, [bus]);
+  }, bus?.id ?? "none");
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -708,7 +722,7 @@ export function DelayReportDialog({
     setValues(initial());
     setErrors({});
     setMessage(null);
-  }, [routes, buses]);
+  }, `${routes[0]?.id ?? ""}:${buses[0]?.id ?? ""}`);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -752,7 +766,7 @@ export function DelayReportDialog({
       <form id="delay-form" onSubmit={(event) => void submit(event)} className="space-y-4">
         {message && <Alert tone="error">{message}</Alert>}
         <div className="flex items-center gap-2">
-          <SimulatedTag label="Demo report" />
+          <SimulatedTag label="Simulated report" />
           <span className="text-xs text-slate-500">ETAs are estimates, not exact predictions.</span>
         </div>
         <FormGrid>

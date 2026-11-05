@@ -2,16 +2,16 @@
 
 ## Principles
 
-1. **Demo mode is not an authorization boundary.** Client-side demo roles are for UX testing only.
+1. **There is no demo mode.** Every application screen requires a signed-in Supabase user; the role shown in the browser is display state, never an authorization boundary.
 2. **Real actions are authorized on the server.** API routes validate a Supabase Auth token and the database profile role for every privileged operation.
 3. **Defense in depth.** RLS policies, foreign keys, check constraints, secure RPCs, and API validation overlap intentionally.
 4. **Least privilege.** The public anon key can read public route metadata only. The service role key exists only in server route handlers.
 5. **Privacy by default.** No off-duty driver location is exposed; students see only active-trip or recent last-known bus locations.
-6. **Safe failure.** Missing credentials produce a clear 503/demo response; validation failures produce concise 4xx messages; unexpected errors return a generic 500.
+6. **Safe failure.** Missing credentials produce a clear `503 BACKEND_UNCONFIGURED` response with `unconfigured: true`; validation failures produce concise 4xx messages; unexpected errors return a generic 500.
 
 ## Roles
 
-| Role | Demo UI | Backend permissions |
+| Role | Client screens | Backend permissions |
 | --- | --- | --- |
 | Student | Dashboard, tracking, routes, notifications, bus details, profile | Read public routes/stops/buses, active/recent shared locations, own notifications. Cannot write GPS, trips, routes, buses, stops, or delay reports. |
 | Driver | Student pages + driver dashboard | Read own assignments/trips; start/end/share only assigned trips through validated API/RPC; submit GPS only when assigned, active, sharing ON. |
@@ -24,7 +24,7 @@
 - Reads the `Authorization: Bearer <access_token>` header.
 - Calls `supabase.auth.getUser(token)` with the service-role client.
 - Loads `profiles.role` from Postgres. Never trusts a role provided in the request body.
-- Throws `401 UNAUTHORIZED`, `403 FORBIDDEN`, or `503 DEMO_MODE` as appropriate.
+- Throws `401 UNAUTHORIZED`, `403 FORBIDDEN`, or `503 BACKEND_UNCONFIGURED` as appropriate.
 
 `lib/server/rate-limit.ts` applies a small in-memory bucket per user to location, trip, and admin routes. It is prototype-grade; use Redis or an edge limiter in production.
 
@@ -74,8 +74,8 @@ The original `submit_bus_location` RPC only checked a bounding box; its executio
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser/server | Public anon key protected by RLS. |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server only** | Used by `app/api/*` route handlers. Never expose. |
 | `NEXT_PUBLIC_SITE_URL` | Browser/server | Public canonical URL. |
-| `NEXT_PUBLIC_SIMULATION_SPEED_MULTIPLIER` | Browser | Demo tuning; not secret. |
-| `NEXT_PUBLIC_STALE_LOCATION_SECONDS` | Browser | Demo tuning; not secret. |
+| `NEXT_PUBLIC_SIMULATION_SPEED_MULTIPLIER` | Browser | Simulation pacing for the authorized driver's own demo trip; not secret. |
+| `NEXT_PUBLIC_STALE_LOCATION_SECONDS` | Browser | How long a shared position stays "recent"; not secret. |
 
 `.env.example` contains empty placeholders only. `.gitignore` ignores `.env` and `.env*.local`.
 
@@ -107,6 +107,7 @@ The original `submit_bus_location` RPC only checked a bounding box; its executio
 - The service-role API is the privileged GPS path; trip RPCs exist separately, but the weaker GPS RPC is not executable by browser roles.
 - GPS checks use polyline distance from an operator-verified route, not map matching. Changing stop coordinates or order invalidates verification.
 - The in-memory rate limiter is per server instance.
-- Demo localStorage state can be modified by the browser and must never be treated as trusted server data.
+- Cached localStorage state (selected route, mirrored backend payload) can be modified by the browser and must never be treated as trusted server data.
+- The app shell's `RequireAuth` gate is a client-side navigation guard only: with no middleware the Supabase session is not visible to the server during SSR. RLS and `requireApiUser` are the enforcement layer, so a hand-edited localStorage payload cannot read or write data the account lacks permission for.
 - No SMS/WhatsApp/push provider is configured; browser notification permission is optional.
 - Real GPS/Auth/Realtime have not been end-to-end tested with live credentials/devices in this repository.

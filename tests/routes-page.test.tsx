@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import RoutesPage from "@/app/routes/page";
+import RoutesPage from "@/app/(app)/routes/page";
 import { AppProvider } from "@/state/app-provider";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/routes" }));

@@ -3,20 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { BusStatus } from "@/lib/types";
 
-export function DemoModeBadge({
-  compact = false,
-  className,
-}: {
-  compact?: boolean;
-  className?: string;
-}) {
-  return (
-    <Badge tone="amber" className={cn("whitespace-nowrap", compact && "px-2", className)}>
-      DEMO MODE
-    </Badge>
-  );
-}
-
 export function SimulatedTag({
   label = "Simulated",
   className,

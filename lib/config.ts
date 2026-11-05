@@ -15,9 +15,14 @@ function positiveNumber(value: string | undefined, fallback: number) {
 
 export const publicSupabaseConfig = { url, anonKey };
 
+/**
+ * BusTrack has no credential-free demo: every workspace route needs a signed-in
+ * account. `unconfigured` only reports that this deployment is missing Supabase
+ * credentials, so the UI can explain what to set instead of looping on sign-in.
+ */
 export const backendConfig: BackendConfig = {
   enabled: Boolean(url && anonKey && serviceRoleKey),
-  demoMode: !(url && anonKey),
+  unconfigured: !(url && anonKey),
   publicConfigured: Boolean(url && anonKey),
   // A browser must never know whether a server-side secret exists. The UI only
   // needs to know whether public auth is configured; API routes do the rest.

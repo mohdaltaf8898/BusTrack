@@ -3,7 +3,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff, KeyRound, LockKeyhole, Mail, UserRound } from "lucide-react";
 import { validateNewPassword } from "@/lib/auth-flow";
+import { fetchAuthProviders, type AuthProviderState } from "@/lib/auth-providers";
 import { useApp } from "@/state/app-provider";
+import { GoogleButton } from "@/components/auth/google-button";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +13,7 @@ import { Alert } from "@/components/ui/feedback";
 import { Input, Label } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
-type Mode = "signin" | "signup" | "reset";
+export type AuthMode = "signin" | "signup" | "reset";
 
 export function PasswordField({
   id,
@@ -57,38 +59,82 @@ export function PasswordField({
 function authError(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
   if (/email address not authorized|error sending (confirmation|recovery|invite)|smtp/i.test(message)) {
-    return "The account email could not be sent. Contact the transport administrator to configure email delivery.";
+    return "The account email could not be sent. The transport administrator needs to configure SMTP delivery (see docs/EMAIL.md).";
   }
   if (/signup.*disabled|signups.*disabled|sign.?up.*disabled/i.test(message)) {
     return "Account sign-up is currently disabled. Contact the transport administrator.";
   }
   if (/rate.?limit|too many|over_email_send_rate_limit/i.test(message)) {
-    return "Too many attempts. Please wait and try again.";
+    return "Too many emails were requested. Supabase limits the default sender, so wait a while or use Google sign-in.";
+  }
+  if (/provider.*not enabled|oauth.*not|external provider/i.test(message)) {
+    return "Google sign-in is not enabled for this deployment yet. Use email and password, or ask the administrator to add the Google provider.";
   }
   return message || fallback;
 }
 
-export function AuthCard() {
-  const { state, config, signIn, signUp, requestPasswordReset } = useApp();
-  const [mode, setMode] = useState<Mode>("signin");
+/** Reads which sign-in providers Supabase actually has switched on. */
+export function useAuthProviders(): AuthProviderState {
+  const [providers, setProviders] = useState<AuthProviderState>({
+    google: false,
+    emailSignUp: true,
+    checked: false,
+  });
+  useEffect(() => {
+    let active = true;
+    void fetchAuthProviders().then((state) => {
+      if (active) setProviders(state);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+  return providers;
+}
+
+export function AuthCard({
+  initialMode = "signin",
+  next = null,
+}: {
+  initialMode?: AuthMode;
+  next?: string | null;
+}) {
+  const { state, config, signIn, signInWithGoogle, signUp, requestPasswordReset } = useApp();
+  const providers = useAuthProviders();
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("reset") === "1") setMode("reset");
-  }, []);
+    if (initialMode === "reset") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "1") setMode("reset");
+  }, [initialMode]);
 
-  const chooseMode = (next: Mode) => {
-    setMode(next);
+  const chooseMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
     setPassword("");
     setConfirmation("");
     setError(null);
     setNotice(null);
+  };
+
+  const startGoogle = async () => {
+    setError(null);
+    setNotice(null);
+    setOauthLoading(true);
+    try {
+      await signInWithGoogle(next);
+    } catch (caught) {
+      setOauthLoading(false);
+      setError(authError(caught, "Google sign-in could not start. Please try again."));
+    }
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -145,8 +191,8 @@ export function AuthCard() {
           <CardTitle className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-brand-600" aria-hidden="true" /> Account access
           </CardTitle>
-          <Badge tone={config.publicConfigured ? "green" : "neutral"}>
-            {config.publicConfigured ? "Configured" : "Demo only"}
+          <Badge tone={config.publicConfigured ? "green" : "amber"}>
+            {config.publicConfigured ? "Supabase Auth" : "No backend"}
           </Badge>
         </div>
         <p className="mt-1 text-xs leading-5 text-slate-500">
@@ -154,35 +200,52 @@ export function AuthCard() {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!config.publicConfigured && (
-          <Alert tone="info" title="Credential-free mode">
-            Authentication is not configured. Explore using a local demo role, or configure Supabase to use accounts.
-            <span className="mt-1 block text-xs">Apply all four migrations and the route seed before creating users.</span>
+        {config.unconfigured && (
+          <Alert tone="warning" title="This deployment has no Supabase credentials">
+            Accounts cannot be created or verified until <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> are set and the migrations are applied. See{" "}
+            <code>docs/SETUP.md</code>.
           </Alert>
         )}
-        <div className="grid grid-cols-2 gap-4 border-b border-slate-200" role="tablist" aria-label="Account action">
-          {([
-            { value: "signin" as const, label: "Sign in" },
-            { value: "signup" as const, label: "Sign up" },
-          ]).map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              role="tab"
-              aria-selected={mode === tab.value}
-              onClick={() => chooseMode(tab.value)}
-              className={cn("min-h-11 border-b-2 border-transparent px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "border-brand-600 text-navy-950" : "text-slate-600 hover:text-navy-900")}
-            >
-              {tab.label}
-            </button>
-          ))}
+
+        <GoogleButton
+          mode={mode}
+          enabled={providers.google && config.publicConfigured}
+          loading={oauthLoading}
+          onClick={() => void startGoogle()}
+        />
+
+        <div className="flex items-center gap-3" role="separator" aria-label="or use email and password">
+          <span className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium text-slate-500">or</span>
+          <span className="h-px flex-1 bg-slate-200" />
         </div>
+
+        {mode !== "reset" && (
+          <div className="grid grid-cols-2 gap-4 border-b border-slate-200" role="tablist" aria-label="Account action">
+            {([
+              { value: "signin" as const, label: "Sign in" },
+              { value: "signup" as const, label: "Sign up" },
+            ]).map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={mode === tab.value}
+                onClick={() => chooseMode(tab.value)}
+                className={cn("min-h-11 border-b-2 border-transparent px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500", mode === tab.value ? "border-brand-600 text-navy-950" : "text-slate-600 hover:text-navy-900")}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
         {error && <Alert tone="error" title="Account error" onDismiss={() => setError(null)}>{error}</Alert>}
         {notice && !error && <Alert tone="info" onDismiss={() => setNotice(null)}>{notice}</Alert>}
         <form className="space-y-4" onSubmit={(event) => void submit(event)}>
           {mode === "reset" && (
             <div>
-              <p className="text-sm font-bold text-navy-950">Reset your password</p>
+              <p className="text-sm font-semibold text-navy-950">Reset your password</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">We’ll send a reset link if the account is eligible.</p>
             </div>
           )}
@@ -208,10 +271,13 @@ export function AuthCard() {
           {mode === "signup" && (
             <>
               <PasswordField id="account-confirm-password" label="Confirm password" value={confirmation} onChange={setConfirmation} autoComplete="new-password" />
-              <p className="text-xs leading-5 text-slate-500">Use at least 8 characters. New accounts start as students. Email confirmation is required; if delivery is unavailable, ask the transport administrator to configure custom SMTP.</p>
+              <p className="text-xs leading-5 text-slate-500">
+                Use at least 8 characters. New accounts start as students and must confirm their
+                email before they can sign in.
+              </p>
             </>
           )}
-          <Button type="submit" className="w-full" loading={loading} disabled={!config.publicConfigured || state.authLoading}>
+          <Button type="submit" className="w-full" loading={loading} disabled={config.unconfigured || state.authLoading}>
             {mode === "signin" ? "Sign in" : mode === "signup" ? "Create student account" : "Send reset link"}
           </Button>
           {mode === "signin" ? (

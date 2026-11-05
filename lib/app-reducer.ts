@@ -1,4 +1,4 @@
-import { sampleBuses, sampleDrivers, sampleRoutes, demoUsers } from "@/data/routes";
+import { sampleBuses, sampleDrivers, sampleRoutes } from "@/data/routes";
 import { backendConfig, isSupabaseConfigured } from "@/lib/config";
 import { buildRouteGeometry } from "@/lib/geo";
 import type { LocationReadContext } from "@/lib/location-sync";
@@ -25,8 +25,8 @@ import type {
 } from "@/lib/validation-types";
 import { makeId } from "@/lib/utils";
 
-// Keep the earlier demo catalog untouched in v1 while loading the 2025–26 routes.
-export const APP_STORAGE_KEY = "bustrack:demo-state:v2";
+// Keep the published catalog untouched in v1 while loading the 2025–26 routes.
+export const APP_STORAGE_KEY = "bustrack:app-state:v2";
 const MAX_NOTIFICATIONS = 80;
 const MAX_EVENT_KEYS = 400;
 
@@ -121,7 +121,8 @@ export function createInitialState(now: number): AppState {
   return {
     hydrated: false,
     currentTime: now,
-    user: isSupabaseConfigured ? null : { ...demoUsers.student },
+    // Identity always comes from Supabase Auth; the initial state is signed out.
+    user: null,
     selectedRouteId: sampleRoutes[0].id,
     selectedStopId: sampleRoutes[0].stops[2]?.id ?? sampleRoutes[0].stops[0].id,
     routes: sampleRoutes.map((route) => ({ ...route, stops: [...route.stops] })),
@@ -146,8 +147,8 @@ export function createInitialState(now: number): AppState {
     error: null,
     backendReady: !isSupabaseConfigured,
     backendMessage: isSupabaseConfigured
-      ? "Supabase client configured. Sign in for role-based features; demo data remains available."
-      : "No Supabase credentials found. Local simulation is active.",
+      ? "Supabase client configured. Sign in to open your role-based workspace."
+      : "No Supabase credentials found. Sign-in is unavailable until the backend is configured.",
     realtimeStatus: isSupabaseConfigured ? "connecting" : "disabled",
     isOnline: true,
     authLoading: isSupabaseConfigured,
@@ -173,7 +174,8 @@ export function toPersistedState(state: AppState): PersistedAppState {
   return {
     version: 1,
     savedAt: state.currentTime,
-    user: state.user?.provider === "demo" ? state.user : null,
+    // Sessions are owned by the Supabase client, never by app storage.
+    user: null,
     selectedRouteId: state.selectedRouteId,
     selectedStopId: state.selectedStopId,
     routes: state.routes,
@@ -239,7 +241,7 @@ export function hydratePersistedState(stored: PersistedAppState, now: number): A
     ...fresh,
     hydrated: true,
     currentTime: now,
-    user: stored.user?.provider === "demo" ? stored.user : fresh.user,
+    user: null,
     selectedRouteId: selectedRoute.id,
     selectedStopId: selectedStop.id,
     routes,
@@ -255,7 +257,7 @@ export function hydratePersistedState(stored: PersistedAppState, now: number): A
       : [],
     backendMessage: isSupabaseConfigured
       ? fresh.backendMessage
-      : "Restored local demo state. All locations and times remain simulated.",
+      : "Restored the published catalog. All locations and times remain simulated.",
   };
 }
 
@@ -340,7 +342,7 @@ function updateRouteById(
 
 function removeRouteCascade(state: AppState, routeId: string): AppState {
   if (state.routes.length <= 1) {
-    return { ...state, error: "At least one route must remain in the demo catalog." };
+    return { ...state, error: "At least one route must remain in the catalog." };
   }
   const routes = state.routes.filter((route) => route.id !== routeId);
   const buses = state.buses.filter((bus) => bus.routeId !== routeId);
@@ -667,7 +669,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case "DELETE_BUS": {
       if (state.buses.length <= 1) {
-        return { ...state, error: "At least one bus must remain in the demo catalog." };
+        return { ...state, error: "At least one bus must remain in the catalog." };
       }
       return {
         ...state,
@@ -812,6 +814,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
+/** Short label for the account screen: is a backend attached or not. */
 export function getBackendModeLabel() {
-  return backendConfig.demoMode ? "DEMO MODE" : "SUPABASE MODE";
+  return backendConfig.unconfigured ? "NO BACKEND CONFIGURED" : "SUPABASE CONNECTED";
 }

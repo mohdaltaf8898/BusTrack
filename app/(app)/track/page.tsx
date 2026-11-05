@@ -24,7 +24,6 @@ import { PageHeader } from "@/components/page-header";
 import { RouteSelector } from "@/components/route-selector";
 import { LiveMap } from "@/components/maps/live-map";
 import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
-import { SimulationControls } from "@/components/dashboard/simulation-controls";
 import { UpcomingStops } from "@/components/dashboard/upcoming-stops";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -244,7 +243,6 @@ export default function TrackPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
-            <SimulationControls />
             <UpcomingStops limit={7} />
           </div>
         </>

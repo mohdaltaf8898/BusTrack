@@ -378,7 +378,7 @@ export function DriverDashboard() {
             <CardContent className="space-y-4">
               {!isRealMode && (
                 <div>
-                  <Label htmlFor="demo-route">Demo route assignment</Label>
+                  <Label htmlFor="demo-route">Simulation route</Label>
                   <Select
                     id="demo-route"
                     value={demoRouteId}
@@ -391,7 +391,7 @@ export function DriverDashboard() {
                     ))}
                   </Select>
                   <p className="mt-1.5 text-[11px] text-slate-500">
-                    Demo-only selector. A real driver receives one assigned bus and route from Supabase.
+                    Testing selector only. An assigned driver receives one bus and route from Supabase.
                   </p>
                 </div>
               )}
@@ -544,7 +544,7 @@ export function DriverDashboard() {
       {!isRealMode && (
         <details className="group rounded-2xl border border-slate-200 bg-white">
           <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-semibold text-navy-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">
-            Demo scenarios <ChevronDown className="h-4 w-4 text-slate-600 transition-transform group-open:rotate-180" aria-hidden="true" />
+            Simulation testing <ChevronDown className="h-4 w-4 text-slate-600 transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
           <div className="border-t border-slate-100 p-4">
             <SimulationControls routeId={routeId} className="border-0 shadow-none" />

@@ -45,7 +45,7 @@ export function createAdminClient(): SupabaseClient {
   if (!config.fullyConfigured) {
     throw new ApiError(
       503,
-      "DEMO_MODE",
+      "BACKEND_UNCONFIGURED",
       "Real backend API is not configured. Set the public Supabase URL/anon key and the server-only service role key, then apply the migration.",
     );
   }
@@ -121,7 +121,7 @@ export async function optionalApiUser(request: Request): Promise<AuthContext | n
 export function apiErrorResponse(error: unknown) {
   if (error instanceof ApiError) {
     return {
-      body: { error: error.message, code: error.code, demoMode: error.code === "DEMO_MODE" },
+      body: { error: error.message, code: error.code, unconfigured: error.code === "BACKEND_UNCONFIGURED" },
       status: error.status,
     };
   }

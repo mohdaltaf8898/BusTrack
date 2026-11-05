@@ -3,15 +3,14 @@ import "leaflet/dist/leaflet.css";
 import "./tokens.css";
 import "./globals.css";
 import { AppProvider } from "@/state/app-provider";
-import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
   title: {
-    default: "BusTrack · Know Before You Go",
+    default: "BusTrack · Know before you go",
     template: "%s · BusTrack",
   },
   description:
-    "Explore college bus routes and simulated tracking for Lords Institute of Engineering and Technology, Hyderabad.",
+    "BusTrack helps Lords Institute of Engineering and Technology students in Hyderabad find their college bus route and see an estimated arrival time. Sign in to open the dashboard.",
   applicationName: "BusTrack",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -43,9 +42,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to content
         </a>
-        <AppProvider>
-          <AppShell>{children}</AppShell>
-        </AppProvider>
+        {/* The signed-in workspace shell is applied only inside app/(app)/layout.tsx,
+            so the public homepage and auth screens keep their own chrome. */}
+        <AppProvider>{children}</AppProvider>
       </body>
     </html>
   );

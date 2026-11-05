@@ -43,21 +43,9 @@ The API routes require the Node.js runtime; do not switch to a static `output: e
 
 ## 3. Environment variables
 
-### Demo-only deployment
+### Required credentials
 
-Leave all Supabase variables unset. Optionally set:
-
-```dotenv
-NEXT_PUBLIC_SITE_URL=https://YOUR_VERCEL_DOMAIN
-NEXT_PUBLIC_SIMULATION_SPEED_MULTIPLIER=8
-NEXT_PUBLIC_STALE_LOCATION_SECONDS=45
-```
-
-The `/api/config` endpoint will report `demoMode: true`.
-
-### Optional configured backend
-
-Add these in Vercel Project Settings → Environment Variables:
+Demo mode has been removed: without credentials the deployment serves only the public homepage and redirects every app route to `/login`, and `/api/config` reports `configured: false`. Add these in Vercel Project Settings → Environment Variables:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -68,17 +56,28 @@ NEXT_PUBLIC_SITE_URL=https://YOUR_VERCEL_DOMAIN
 
 Set the same values for Production and Preview environments as needed. Keep `SUPABASE_SERVICE_ROLE_KEY` out of any client bundle and out of GitHub.
 
+Optional tuning:
+
+```dotenv
+NEXT_PUBLIC_SIMULATION_SPEED_MULTIPLIER=8
+NEXT_PUBLIC_STALE_LOCATION_SECONDS=45
+```
+
+The simulated driver only produces positions for an authorized driver's own active trip; the multiplier changes the demonstration pace, not real GPS.
+
 ## 4. Supabase configuration for the deployed domain
 
-1. Apply `supabase/migrations/20261030135413_bustrack_init.sql`, `20261030135426_bustrack_published_routes.sql`, `20261030140136_bustrack_function_grants.sql`, and `20261030144351_bustrack_guarded_gps.sql`, in that order.
+1. Apply `supabase/migrations/20261030135413_bustrack_init.sql`, `20261030135426_bustrack_published_routes.sql`, `20261030140136_bustrack_function_grants.sql`, `20261030144351_bustrack_guarded_gps.sql` and `20261105120000_bustrack_oauth_profile_name.sql`, in that order.
 2. Apply `supabase/seed.sql`. These are already applied to the hosted BusTrack project; use this sequence for a separate project.
 3. Add the Vercel domain to **Authentication → URL Configuration**:
    - Site URL: `https://YOUR_VERCEL_DOMAIN`
-   - Redirect URLs: `https://YOUR_VERCEL_DOMAIN/**`
-4. Confirm Realtime publication includes `bus_locations` and `notifications`.
-5. Confirm Auth users and `profiles.role` assignments exist.
-6. Replace `SIM-*` vehicles, verify routes/stop coordinates, provision a verified corridor, and set `buses.driver_id` for each assigned driver before real tracking.
-7. Test sign-in at `/login`.
+   - Redirect URLs: `https://YOUR_VERCEL_DOMAIN/**` and `http://localhost:3000/**` (local development)
+4. Configure **Authentication → SMTP** with a real sender before opening public sign-up; the default sender reaches project-team addresses only. [EMAIL.md](EMAIL.md) has a free option and the exact fields.
+5. To show **Continue with Google**, enable the provider under **Authentication → Providers** with the client ID/secret from Google Cloud; the button appears only when Supabase reports Google as enabled. [AUTH.md](AUTH.md) lists the consent-screen scopes and the callback URL to register.
+6. Confirm Realtime publication includes `bus_locations` and `notifications`.
+7. Confirm Auth users and `profiles.role` assignments exist.
+8. Replace `SIM-*` vehicles, verify routes/stop coordinates, provision a verified corridor, and set `buses.driver_id` for each assigned driver before real tracking.
+9. Test the homepage at `/`, then sign-up and sign-in at `/signup` and `/login`, and confirm an unauthenticated visit to `/dashboard` redirects to `/login`.
 
 ## 5. HTTPS and GPS
 

@@ -18,18 +18,18 @@ function hydratedState() {
   return { ...createInitialState(now), hydrated: true, currentTime: now };
 }
 
-describe("credential-free demo mode", () => {
-  it("works without Supabase credentials and loads the central sample data", () => {
-    expect(backendConfig.demoMode).toBe(true);
+describe("unconfigured deployment", () => {
+  it("reports missing credentials, loads the published catalog and stays signed out", () => {
+    expect(backendConfig.unconfigured).toBe(true);
     const state = hydratedState();
     expect(state.routes).toHaveLength(16);
     expect(state.buses.length).toBeGreaterThanOrEqual(3);
-    expect(state.user?.role).toBe("student");
-    expect(state.backendMessage).toMatch(/simulation|demo/i);
+    expect(state.user).toBeNull();
+    expect(state.backendMessage).toMatch(/no supabase credentials|sign-in is unavailable/i);
     expect(state.notifications.every((item) => item.simulated)).toBe(true);
   });
 
-  it("persists and restores demo state while disabling stale movement", () => {
+  it("persists and restores browser state while disabling stale movement", () => {
     const state = hydratedState();
     state.simulations["route-01"].distanceMeters = 1200;
     const persisted = toPersistedState(state);

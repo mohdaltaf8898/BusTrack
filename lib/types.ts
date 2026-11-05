@@ -86,7 +86,8 @@ export interface AppUser {
   avatarInitials: string;
   assignedBusId?: string;
   assignedRouteId?: string;
-  provider: "demo" | "supabase";
+  /** Accounts only come from Supabase Auth; there is no local demo identity. */
+  provider: "supabase";
 }
 
 export interface RouteGeometry {
@@ -237,7 +238,8 @@ export interface AppState {
 
 export interface BackendConfig {
   enabled: boolean;
-  demoMode: boolean;
+  /** True when this deployment has no Supabase URL/anon key at all. */
+  unconfigured: boolean;
   publicConfigured: boolean;
   serverConfigured: boolean;
   realtimeConfigured: boolean;
