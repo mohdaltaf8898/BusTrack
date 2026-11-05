@@ -18,15 +18,15 @@ export function PageHeader({
     <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div className="min-w-0">
         {eyebrow && (
-          <p className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-600">
+          <p className="mb-1 text-xs font-medium text-slate-500">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-2xl font-extrabold tracking-tight text-navy-950 sm:text-3xl">
+        <h1 className="text-3xl font-semibold tracking-[-0.04em] text-navy-950 sm:text-4xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">{description}</p>
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

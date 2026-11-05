@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SchematicRouteMap } from "@/components/maps/schematic-map";
-import { MapSkeleton } from "@/components/maps/map-skeleton";
 import type { LiveMapProps } from "@/components/maps/map-types";
 import type { Coordinates } from "@/lib/types";
 
@@ -293,9 +292,19 @@ export function LiveMapInner({
       {!mapFailed && (
         <>
           {(!mapReady || !tilesLoaded) && (
-            <MapSkeleton className="pointer-events-none absolute inset-0 h-full w-full rounded-none" />
+            <div className="pointer-events-none absolute inset-0 z-[450]">
+              <SchematicRouteMap
+                route={route}
+                geometry={geometry}
+                busPosition={busPosition}
+                busStatus={busStatus}
+                selectedStopId={selectedStopId}
+                className="rounded-none"
+                reason="Map tiles loading · schematic preview shown in the meantime."
+              />
+            </div>
           )}
-          <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
+          {tilesLoaded && <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
             <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[11px] font-bold text-navy-900 shadow-card">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: route.color }} />
               {route.code} · {route.busNumber}
@@ -306,8 +315,8 @@ export function LiveMapInner({
             >
               {isStale ? "Last known position" : isLiveData ? "Device GPS" : "Simulated position"}
             </Badge>
-          </div>
-          {showControls && (
+          </div>}
+          {tilesLoaded && showControls && (
             <div className="absolute bottom-16 right-3 z-[500] flex flex-col gap-2">
               <Button
                 type="button"
@@ -334,10 +343,10 @@ export function LiveMapInner({
               )}
             </div>
           )}
-          <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-card">
+          {tilesLoaded && <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-card">
             <Navigation className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
             Heading {bearingToCompass(busPosition.bearing)} · {Math.round(busPosition.bearing)}°
-          </div>
+          </div>}
         </>
       )}
       {mapFailed && (

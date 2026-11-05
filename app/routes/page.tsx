@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowRight,
   BusFront,
   Clock3,
-  MapPin,
   Navigation,
   Route as RouteIcon,
   Search,
@@ -14,8 +12,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/state/app-provider";
 import { TIMETABLE_SOURCE_URL } from "@/data/routes";
-import { buildRouteGeometry } from "@/lib/geo";
-import { formatClock, formatDistance, formatEta, formatScheduledTime } from "@/lib/format";
+import { formatClock, formatEta, formatScheduledTime } from "@/lib/format";
 import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
 import { PageHeader } from "@/components/page-header";
 import { RoutePreview } from "@/components/routes/route-preview";
@@ -24,11 +21,11 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, EmptyState } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/form";
-import { SimulatedTag, StatusPill } from "@/components/ui/labels";
+import { SimulatedTag } from "@/components/ui/labels";
 import { cn } from "@/lib/utils";
 
 export default function RoutesPage() {
-  const { state, snapshot, selectRoute, selectStop, getRouteSnapshot } = useApp();
+  const { state, snapshot, selectRoute, selectStop } = useApp();
   const [query, setQuery] = useState("");
   const filteredRoutes = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -89,89 +86,46 @@ export default function RoutesPage() {
           action={<Button onClick={() => setQuery("")}>Clear search</Button>}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filteredRoutes.map((route) => {
-            const routeSnapshot = getRouteSnapshot(route.id);
-            const bus = state.buses.find((item) => item.routeId === route.id);
-            const selected = route.id === state.selectedRouteId;
-            const geometry = buildRouteGeometry(route);
-            return (
-              <Card
-                key={route.id}
-                className={cn(
-                  "overflow-hidden transition",
-                  selected ? "border-brand-300 ring-2 ring-brand-100" : "hover:border-slate-200",
-                )}
-              >
-                <div className="h-1.5 w-full" style={{ backgroundColor: route.color }} />
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge tone="blue">{route.code}</Badge>
-                        <Badge tone="neutral">{route.scheduleYear ?? "Custom route"}</Badge>
-                      </div>
-                      <CardTitle className="mt-2 truncate">{route.name}</CardTitle>
-                    </div>
-                    <StatusPill status={routeSnapshot.busStatus} />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <RoutePreview
-                    route={route}
-                    geometry={geometry}
-                    selectedStopId={selected ? snapshot.selectedStop.id : undefined}
-                    className="h-32"
-                  />
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{route.busNumber.startsWith("SIM-") ? "Simulation vehicle" : "Vehicle"}</p>
-                      <p className="mt-0.5 font-extrabold text-navy-950">{bus?.number ?? route.busNumber}</p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Timetable span</p>
-                      <p className="mt-0.5 font-extrabold text-navy-950">
-                        {route.scheduledDurationMinutes == null ? "Not listed" : `${route.scheduledDurationMinutes} min`}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Approx. distance</p>
-                      <p className="mt-0.5 font-extrabold text-navy-950">
-                        {formatDistance(geometry.totalDistanceMeters)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Stops</p>
-                      <p className="mt-0.5 font-extrabold text-navy-950">{route.stops.length}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 text-xs text-slate-600">
-                    <p className="flex items-center gap-2">
-                      <MapPin className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
-                      <span className="truncate">{route.startLocation}</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
-                      <span className="truncate">{route.destination}</span>
+        <Card className="overflow-hidden">
+          <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+            <h2 className="text-base font-semibold text-navy-950">All routes</h2>
+            <p className="mt-1 text-xs text-slate-600">2025–26 timetable · select a route to inspect its stops below.</p>
+          </div>
+          <div className="grid md:grid-cols-2">
+            {filteredRoutes.map((route) => {
+              const selected = route.id === state.selectedRouteId;
+              return (
+                <div key={route.id} className={cn(
+                  "flex min-h-[92px] items-center gap-4 border-b border-slate-100 px-5 py-4 sm:px-6 md:odd:border-r",
+                  selected && "bg-brand-50/50",
+                )}>
+                  <span className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-xs font-semibold tabular-nums",
+                    selected ? "border-brand-600 bg-brand-600 text-white" : "border-slate-200 bg-white text-navy-700",
+                  )} aria-hidden="true">{route.code.replace(/\D/g, "").padStart(2, "0")}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-navy-950">{route.name}</p>
+                    <p className="mt-1 truncate text-xs text-slate-600">
+                      {route.stops.length} stops · {route.scheduleYear ?? "Custom"} · {route.busNumber.startsWith("SIM-") ? "Demo vehicle" : route.busNumber}
                     </p>
                   </div>
                   <Button
-                    variant={selected ? "soft" : "outline"}
-                    className="w-full"
+                    variant={selected ? "soft" : "ghost"}
+                    size="sm"
                     aria-pressed={selected}
+                    className="shrink-0"
                     onClick={() => {
                       selectRoute(route.id);
                       document.getElementById("route-stop-list")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
                     }}
                   >
                     {selected ? "Selected route" : "Select route"}
-                    <ArrowRight className="h-4 w-4" />
                   </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
       )}
 
       {state.routes.length > 0 && (

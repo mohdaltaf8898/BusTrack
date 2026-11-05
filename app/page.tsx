@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Layers3 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useApp } from "@/state/app-provider";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { StatusCard } from "@/components/dashboard/status-card";
@@ -9,32 +9,23 @@ import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SimulationControls } from "@/components/dashboard/simulation-controls";
 import { LiveMap } from "@/components/maps/live-map";
 import { RouteAccuracyNote } from "@/components/maps/route-accuracy-note";
-import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, EmptyState } from "@/components/ui/feedback";
-import { SourceLabel } from "@/components/ui/labels";
 
 export default function DashboardPage() {
   const { state, snapshot, selectStop } = useApp();
 
   if (state.routes.length === 0) {
-    return (
-      <EmptyState
-        title="No routes available"
-        description="Add a route in the admin dashboard to begin tracking a simulated bus."
-      />
-    );
+    return <EmptyState title="No routes available" description="Add a route in the admin dashboard to begin tracking a simulated bus." />;
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 sm:space-y-6">
       <DashboardHeader />
       <StatusCard />
-
       {snapshot.isStale && (
         <Alert tone="warning" title="Location data is stale">
-          No fresh update for {snapshot.route.busNumber}. The map is showing the last known position;
-          the ETA below is a frozen estimate rather than a live prediction.
+          No fresh update for {snapshot.route.busNumber}. The map shows the last known position; the ETA is a frozen estimate.
         </Alert>
       )}
       {!state.isOnline && (
@@ -42,22 +33,11 @@ export default function DashboardPage() {
           BusTrack is using cached demo data. Simulated movement and notifications continue locally.
         </Alert>
       )}
-
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(310px,0.8fr)]">
         <Card className="overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <div className="min-w-0">
-              <CardTitle className="flex items-center gap-2">
-                <Layers3 className="h-4 w-4 text-brand-600" aria-hidden="true" />
-                Route map
-              </CardTitle>
-              <p className="mt-1 text-xs text-slate-500">
-                Route progress updates each second in the demo; device GPS is labeled when available.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-1.5">
-              <SourceLabel mode={snapshot.dataMode} />
-            </div>
+          <CardHeader>
+            <CardTitle>Route map</CardTitle>
+            <p className="mt-1 text-xs text-slate-600">Position and route are simulated unless device GPS is explicitly labeled.</p>
           </CardHeader>
           <CardContent className="space-y-3">
             <LiveMap
@@ -70,22 +50,23 @@ export default function DashboardPage() {
               isStale={snapshot.isStale}
               isLiveData={snapshot.isLiveData}
               onSelectStop={selectStop}
-              className="h-[330px] md:h-[420px]"
+              className="h-[300px] md:h-[400px]"
             />
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <RouteAccuracyNote route={snapshot.route} />
-              <ButtonLink href="/track" variant="soft" size="sm">
-                Full tracking <ArrowUpRight className="h-4 w-4" />
-              </ButtonLink>
-            </div>
+            <RouteAccuracyNote route={snapshot.route} />
           </CardContent>
         </Card>
-
         <UpcomingStops />
       </div>
-
       <QuickActions />
-      <SimulationControls compact />
+      <details className="group rounded-2xl border border-slate-200 bg-white">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-semibold text-navy-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">
+          <span>Demo controls <span className="ml-2 font-normal text-slate-600">Manage the local simulation</span></span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-slate-500 transition group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <div className="border-t border-slate-100 p-3 sm:p-4">
+          <SimulationControls compact className="border-0 shadow-none" />
+        </div>
+      </details>
     </div>
   );
 }

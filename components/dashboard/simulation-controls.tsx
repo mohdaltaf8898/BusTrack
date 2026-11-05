@@ -19,7 +19,7 @@ import { Alert } from "@/components/ui/feedback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SimulatedTag, SourceLabel } from "@/components/ui/labels";
+import { SourceLabel } from "@/components/ui/labels";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,6 @@ export function SimulationControls({
             <CardTitle>Simulation controls</CardTitle>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <SimulatedTag label="Demo data" />
             <SourceLabel mode={routeSnapshot.dataMode} />
           </div>
         </div>
@@ -77,22 +76,22 @@ export function SimulationControls({
             Device GPS is active for this route. These controls only affect the local simulation fallback.
           </Alert>
         )}
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          <div className="rounded-xl bg-slate-50 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Trip status</p>
+        <div className="grid grid-cols-3 gap-3 border-y border-slate-100 py-4">
+          <div className="min-w-0 border-l border-slate-200 pl-3">
+            <p className="text-xs text-slate-500">Trip status</p>
             <p className="mt-1 text-sm font-extrabold capitalize text-navy-950">
               {simulation.tripStatus}
             </p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Last update</p>
-            <p className="mt-1 text-sm font-extrabold text-navy-950">
+          <div className="min-w-0 border-l border-slate-200 pl-3">
+            <p className="text-xs text-slate-500">Last update</p>
+            <p className="mt-1 text-sm font-semibold text-navy-950">
               {formatRelativeTime(simulation.lastUpdateAt, state.currentTime)}
             </p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sim traffic</p>
-            <p className="mt-1 text-sm font-extrabold text-navy-950">
+          <div className="min-w-0 border-l border-slate-200 pl-3">
+            <p className="text-xs text-slate-500">Sim traffic</p>
+            <p className="mt-1 text-sm font-semibold text-navy-950">
               {routeSnapshot.traffic.label}
               {simulation.delaySeconds > 0 && (
                 <span className="ml-1.5 text-xs font-bold text-amber-600">

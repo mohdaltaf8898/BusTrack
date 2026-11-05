@@ -28,7 +28,7 @@ const variants: Record<ButtonVariant, string> = {
 const sizes: Record<ButtonSize, string> = {
   sm: "h-9 rounded-xl px-3 text-xs gap-1.5",
   md: "h-11 rounded-xl px-4 text-sm gap-2",
-  lg: "h-12 rounded-2xl px-5 text-sm gap-2",
+  lg: "h-12 rounded-xl px-5 text-sm gap-2",
   icon: "h-11 w-11 rounded-xl",
 };
 
@@ -38,7 +38,7 @@ export function buttonClasses(options: {
   className?: string;
 }) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.985]",
+    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70",
     variants[options.variant ?? "primary"],
     sizes[options.size ?? "md"],
     options.className,

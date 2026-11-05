@@ -1,38 +1,37 @@
 # BusTrack design system
 
-This system records **BusTrack's own existing UI**, measured from its source and checked in the browser. The supplied design playbook is a methodology (measure, name, reuse, verify), not a site whose visual identity should be copied. No third-party skills, logos, icons, fonts, illustrations or text were imported.
+BusTrack is a quiet transport utility, not a marketing landing page. The design playbook supplied by the user informed the process—measure existing screens, name roles, build, then check phone and desktop screenshots—not another site's visual identity. No third-party skill archive, imagery, font, copy or brand assets were installed.
 
-## Audit and decisions
+## What changed after the minimalism review
 
-Before this pass, the most frequent text utilities in `app/` and `components/` were `text-slate-500` (81 uses), `text-navy-950` (67), `text-brand-600` (35); the most frequent corners were `rounded-xl` (62), `rounded-2xl` (42) and `rounded-3xl` (10). Blue `#1c5ff0`, ink `#0a182c`, pale canvas `#f3f7fc` and map blue-grey `#eaf1f8` were already in use. These measured values—not an imagined reference brand—are the basis for the semantic roles below. Counts are a snapshot, not a target to optimize.
+The earlier dashboard repeated its status in multiple colored pills, nested four metric tiles inside a dark card, drew a decorative grid over the ETA, and exposed every simulation control by default. At 375px, this made the actual answer—*when is my bus estimated to arrive?*—hard to scan. The second pass removed those decorations, made the ETA the dominant typographic element, moved secondary facts into simple text rows, flattened the navigation and route list, and put optional demo controls behind an explicit disclosure. The map now shows a clearly labeled schematic while tiles load rather than an empty skeleton.
 
-| Role | Token | Value | Usage |
+## Tokens
+
+The brand blue and navy ink already belonged to BusTrack. `app/tokens.css` is their single source of truth; `tailwind.config.ts` maps their RGB channels to opacity-capable utilities. Keep provenance/warning semantics distinct from decorative accent colors.
+
+| Role | Token | Current value | Use |
 | --- | --- | --- | --- |
-| Primary action | `--color-brand-600` | `#1c5ff0` | CTA, active navigation, selected stop |
-| Primary hover | `--color-brand-700` | `#164bdc` | Button hover, links |
-| Ink | `--color-ink` / `--color-navy-950` | `#0a182c` | Headlines and dark status cards |
-| Supporting ink | `--color-ink-muted` | `#475569` | Helper text on light surfaces |
-| Canvas | `--color-canvas` | `#f3f7fc` | Page background |
-| Surface | `--color-surface` | `#ffffff` | Cards and input surfaces |
-| Muted surface | `--color-surface-muted` | `#f8fafc` | Supporting panels |
-| Border | `--color-border` | `#e2eaf6` | Quiet dividers |
-| Map fallback | `--color-map-surface` | `#eaf1f8` | Schematic/empty map |
-| Focus | `--color-focus` | `#1c5ff0` | Visible keyboard focus |
+| Action | `--color-brand-600` | `#1c5ff0` | Selected states, primary CTA, focus |
+| Ink | `--color-navy-950` | `#0a182c` | Headlines and main data |
+| Secondary ink | `--color-ink-muted` | `#475569` | Supporting information |
+| Canvas | `--color-canvas` | `#f7f8fa` | Page background |
+| Surface | `--color-surface` | `#ffffff` | Cards and controls |
+| Muted surface | `--color-surface-muted` | `#f5f6f8` | Quiet grouped content |
+| Border | `--color-border` | `#e7e9ee` | Structural divisions |
+| Map surface | `--color-map-surface` | `#f0f3f7` | Map fallback, never passed off as geography |
 
-The full brand/navy ramps, radii, shadows and font stack live in `app/tokens.css`. `tailwind.config.ts` maps those variables to existing `bg-brand-*`, `text-navy-*`, `rounded-*` and `shadow-*` utilities. Change the token source instead of adding another near-identical hex value. Slate/emerald/amber/rose remain Tailwind semantic colors for supporting text and real status states. Never encode state by color alone: include text and/or an icon.
-
-## Layout and components
-
-- **Typeface:** Inter if installed, then system sans. A legible 14–16px body, 11–12px metadata; dashboard hero headline scales from 28px on phone to 44px on wide screens. The 4px spacing rhythm underlies 8/12/16/20/24px gaps.
-- **Geometry:** controls 12px; ordinary cards 20px; feature/hero panels 28px; badges are pills. Use `Card`, `Button`, `Badge`, `PageHeader`, `Input` and `Select` rather than local one-off versions.
-- **Hierarchy:** a single route selector near the dashboard greeting; the prominent dark ETA card; route map and next stops below. Keep status and data provenance visible before controls. Pages other than the dashboard use `PageHeader` and the same card/panel treatment.
-- **Navigation:** desktop sidebar from 768px with an obvious active item; sticky desktop/mobile header; phone bottom tabs at least 48px tall. The "More" sheet keeps staff/profile/login accessible without squeezing the primary four tabs.
-- **Interaction:** at least 44px for principal inputs/buttons, visible focus rings, restrained hover lift, and reduced-motion support. Never hide needed information behind hover.
-- **Data trust:** `DEMO MODE`, simulation tags, approximate-map wording, historical-time caveats and stale/paused states must remain legible. A premium appearance must never suggest the buses are live unless actual verified GPS is present.
+- **Type:** system sans; no network font dependency. Headings are semibold and tightly tracked; primary supporting copy is at least 12px, with smaller type reserved for short badges and mobile tab labels. One big ETA, not a grid of competing numbers.
+- **Space:** 4px rhythm; 16–32px section gaps. Use white space and hairlines to group content, not multiple nested panels.
+- **Shape:** 10px controls, 16px cards, 20px feature panels. Pills are for real state labels only.
+- **Depth:** a hairline border and near-invisible card shadow, with a stronger shadow reserved for overlays. No decorative background glows, tile-grid over the ETA, hover translation, or blue-filled navigation rail.
+- **Components:** use `Card`, `Button`, `Badge`, `PageHeader`, `Input` and `Select`. A single route selector on the dashboard; no redundant header selector there. Route list is scannable before opening the ordered stops.
+- **Responsive:** navigation becomes a bottom bar on phones; the primary ETA and selected stop are readable at 320px without horizontal scroll. Inputs/buttons are at least 44px where principal actions occur.
+- **Trust:** always show `DEMO MODE` for the credential-free demonstration. Label simulation, historical pickup times, unmapped stops, stale locations and schematic geometry in text; never imply live GPS or real-time traffic from a decorative UI. A tile-loading schematic is still a schematic, not a verified route.
 
 ## Check a UI change
 
-1. Reuse a named token; if a new role is necessary, add it here and to `app/tokens.css` before using it.
-2. Check `/`, `/track`, `/routes`, `/login`, `/auth/set-password`, `/driver` and `/admin` at 320, 375, 430 and 1440px; make sure the document does not scroll horizontally.
-3. Exercise route switching, stop selection, demo/offline states, sign-in form, and keyboard focus. Check map fallback and `prefers-reduced-motion`.
-4. Run `npm run check` and `npm run lint`; never claim real GPS or email delivery has been verified by these UI checks.
+1. Reuse or amend a token rather than introducing a near-duplicate color/shadow.
+2. Check `/`, `/track`, `/routes`, `/login`, `/auth/set-password`, `/driver`, `/admin`, `/notifications`, `/profile` and `/bus-details` at 320, 375, 430, 768 and 1440px. Verify no horizontal overflow.
+3. Exercise route selection, stop selection, demo control disclosure, offline/stale states, map fallback and keyboard focus. Keep reduced-motion support.
+4. Run `npm run check` and `npm run lint`. UI checks cannot verify SMTP delivery, a real device GPS trace or an authorized bus assignment.

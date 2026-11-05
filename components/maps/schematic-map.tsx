@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Navigation } from "lucide-react";
+import { Info } from "lucide-react";
 import type { BusStatus, Coordinates, PointOnRoute, Route, RouteGeometry } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -42,19 +42,17 @@ export function SchematicRouteMap({
   const routePoints = geometry.points.map(project);
   const path = routePoints.map((point) => `${point.x},${point.y}`).join(" ");
   const bus = project(busPosition);
-  const selected = route.stops.find((stop) => stop.id === selectedStopId) ?? route.stops[0];
 
   return (
     <div
       className={cn(
-        "relative h-full min-h-[340px] w-full overflow-hidden rounded-3xl bg-[#eaf1f8] md:min-h-[440px]",
+        "relative h-full w-full overflow-hidden rounded-2xl bg-[var(--color-map-surface)]",
         className,
       )}
     >
-      <div className="map-grid absolute inset-0" />
-      <div className="absolute left-4 top-4 z-10 max-w-[80%] rounded-xl bg-white/95 px-3 py-2 text-xs font-semibold text-amber-900 shadow-card">
+      <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs font-medium text-slate-700 shadow-card">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <Info className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
           <span>{reason}</span>
         </div>
       </div>
@@ -115,17 +113,8 @@ export function SchematicRouteMap({
           <path d="M0 -1 L0.65 0.35 L0 0 L-0.65 0.35 Z" fill="white" />
         </g>
       </svg>
-      <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-navy-800">
-        <span className="rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
-          {route.code} · {route.busNumber}
-        </span>
-        <span className="rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
-          Selected: {selected.name}
-        </span>
-        <span className="ml-auto inline-flex items-center gap-1 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
-          <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
-          Schematic · not to scale
-        </span>
+      <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-card">
+        Schematic route · not to scale
       </div>
     </div>
   );

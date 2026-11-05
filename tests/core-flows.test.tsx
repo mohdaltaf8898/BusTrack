@@ -53,6 +53,7 @@ describe("student dashboard flow", () => {
     expect(screen.getByTestId("live-map")).toHaveAttribute("data-route-id", "route-01");
     expect(screen.getByTestId("live-map")).toHaveAttribute("data-bus-lat", sampleRoutes[0].shape[0].lat.toFixed(6));
 
+    fireEvent.click(screen.getByText("Demo controls"));
     fireEvent.click(screen.getByRole("button", { name: /Add 5-min delay/i }));
     await waitFor(() => {
       expect(screen.getAllByText(/\+5 min/i).length).toBeGreaterThan(0);

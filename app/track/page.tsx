@@ -131,46 +131,46 @@ export default function TrackPage() {
                     </Select>
                   </div>
 
-                  <div className="rounded-2xl bg-navy-950 p-4 text-white">
-                    <p className="text-xs font-semibold text-brand-200">Estimated arrival</p>
-                    <p className="mt-1 text-4xl font-extrabold">
+                  <div className="border-y border-slate-200 py-5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">Estimated arrival</p>
+                    <p className="mt-2 text-5xl font-semibold tracking-[-0.06em] text-navy-950">
                       {snapshot.selectedStopEta.status === "unmapped" ? "Unavailable" : snapshot.busStatus === "offline" ? "Paused" : formatEta(snapshot.selectedStopEta.etaSeconds)}
                     </p>
-                    <p className="mt-1 text-xs text-white/60">
+                    <p className="mt-1 text-xs text-slate-600">
                       {snapshot.selectedStopEta.status === "unmapped"
                         ? "This stop needs verified coordinates before an ETA can be calculated."
                         : snapshot.busStatus === "offline"
                           ? "Waiting for a fresh location update."
                           : `Around ${formatClock(snapshot.selectedStopEta.etaAt)} IST`}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-[11px] text-white/60">
+                    <div className="mt-4 flex items-center justify-between text-xs text-slate-600">
                       <span>{formatDistance(snapshot.selectedStopEta.distanceMeters)} to stop</span>
                       <span>{snapshot.selectedStopEta.status}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Bus</p>
-                      <p className="mt-1 text-sm font-extrabold text-navy-950">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+                    <div className="border-l border-slate-200 pl-3">
+                      <p className="text-xs text-slate-500">Bus</p>
+                      <p className="mt-1 text-sm font-semibold text-navy-950">
                         {snapshot.bus?.number ?? "Unassigned"}
                       </p>
                     </div>
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Last update</p>
-                      <p className="mt-1 text-sm font-extrabold text-navy-950">
+                    <div className="border-l border-slate-200 pl-3">
+                      <p className="text-xs text-slate-500">Last update</p>
+                      <p className="mt-1 text-sm font-semibold text-navy-950">
                         {formatRelativeTime(snapshot.lastUpdateAt, state.currentTime)}
                       </p>
                     </div>
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sim speed</p>
-                      <p className="mt-1 text-sm font-extrabold text-navy-950">
+                    <div className="border-l border-slate-200 pl-3">
+                      <p className="text-xs text-slate-500">Sim speed</p>
+                      <p className="mt-1 text-sm font-semibold text-navy-950">
                         {Math.round(snapshot.route.averageSpeedKmh * snapshot.traffic.factor)} km/h
                       </p>
                     </div>
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Traffic</p>
-                      <p className="mt-1 text-sm font-extrabold text-navy-950">
+                    <div className="border-l border-slate-200 pl-3">
+                      <p className="text-xs text-slate-500">Traffic</p>
+                      <p className="mt-1 text-sm font-semibold text-navy-950">
                         {snapshot.traffic.label}
                       </p>
                     </div>
@@ -184,8 +184,8 @@ export default function TrackPage() {
                     <ProgressBar value={snapshot.progressPercent} className="bg-slate-100" />
                   </div>
 
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-                    <p className="mb-1 flex items-center gap-1.5 font-bold text-navy-900">
+                  <div className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-600">
+                    <p className="mb-1 flex items-center gap-1.5 font-semibold text-navy-900">
                       <Gauge className="h-4 w-4 text-brand-600" aria-hidden="true" />
                       How this ETA is calculated
                     </p>

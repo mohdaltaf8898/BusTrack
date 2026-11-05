@@ -34,7 +34,7 @@ export function RoutePreview({
   return (
     <div
       className={cn(
-        "map-grid relative h-44 w-full overflow-hidden rounded-2xl border border-slate-100 bg-[#eaf1f8]",
+        "relative h-44 w-full overflow-hidden rounded-2xl border border-slate-100 bg-[var(--color-map-surface)]",
         className,
       )}
     >

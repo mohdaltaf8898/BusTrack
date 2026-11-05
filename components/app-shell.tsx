@@ -89,26 +89,25 @@ function NavLink({
       className={cn(
         "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
         active
-          ? "bg-brand-600 text-white shadow-action"
-          : "text-navy-700 hover:bg-brand-50 hover:text-brand-700",
+          ? "bg-brand-50 text-brand-700"
+          : "text-slate-600 hover:bg-slate-50 hover:text-navy-950",
         compact && "min-h-12",
       )}
     >
       <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
       <span className="truncate">{item.label}</span>
-      {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />}
     </Link>
   );
 }
 
 function Sidebar({ pathname }: { pathname: string }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col border-r border-slate-200 bg-white/95 backdrop-blur-xl md:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[240px] flex-col border-r border-slate-200 bg-white md:flex">
       <div className="px-5 py-5">
         <Logo />
       </div>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        <p className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+        <p className="px-3 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           Student
         </p>
         <nav className="space-y-1" aria-label="Student navigation">
@@ -116,7 +115,7 @@ function Sidebar({ pathname }: { pathname: string }) {
             <NavLink key={item.href} item={item} pathname={pathname} />
           ))}
         </nav>
-        <p className="px-3 pb-2 pt-6 text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+        <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           Workspace
         </p>
         <nav className="space-y-1" aria-label="Workspace navigation">
@@ -152,7 +151,7 @@ function BottomNav({
   return (
     <nav
       aria-label="Mobile primary navigation"
-      className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-1 pt-1.5 shadow-[0_-8px_30px_rgba(10,24,44,0.08)] backdrop-blur-xl md:hidden"
+      className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white px-1 pt-1.5 md:hidden"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around">
         {items.map((item) => {
@@ -165,11 +164,11 @@ function BottomNav({
               aria-current={active ? "page" : undefined}
               className={cn(
                 "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
-                active ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50",
+                active ? "text-brand-700" : "text-slate-600 hover:bg-slate-50",
               )}
             >
               <span className="relative">
-                <Icon className={cn("h-5 w-5", active && "fill-brand-50")} aria-hidden="true" />
+                <Icon className="h-5 w-5" aria-hidden="true" />
                 {!!item.badge && item.badge > 0 && (
                   <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-extrabold text-white">
                     {item.badge > 9 ? "9+" : item.badge}
@@ -208,7 +207,7 @@ function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => 
       <div className="safe-bottom absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-6 shadow-float animate-fade-in">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-extrabold text-navy-950">More</p>
+            <p className="text-sm font-semibold text-navy-950">More</p>
             <p className="text-xs text-slate-500">BusTrack workspace</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
@@ -268,20 +267,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <Sidebar pathname={pathname} />
-      <div className="md:pl-[264px]">
+      <div className="md:pl-[240px]">
         {!state.isOnline && <OfflineNotice />}
-        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_4px_20px_-18px_rgba(10,24,44,0.5)] backdrop-blur-xl">
-          <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:px-5">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
+          <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2 px-3 sm:px-5">
             <div className="md:hidden">
               <Logo compact />
             </div>
             <div className="hidden min-w-0 md:block">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand-600">
+              <p className="text-xs font-medium text-slate-500">
                 BusTrack
               </p>
-              <h1 className="truncate text-sm font-extrabold text-navy-950">{pageTitle}</h1>
+              <h1 className="truncate text-sm font-semibold text-navy-950">{pageTitle}</h1>
             </div>
-            <div className="hidden w-64 xl:block">
+            <div className={cn("hidden w-64 xl:block", pathname === "/" && "xl:hidden")}>
               <RouteSelector showLabel={false} compact />
             </div>
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
@@ -307,13 +306,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         {state.error && (
-          <div className="mx-auto max-w-7xl px-3 pt-3 sm:px-5">
+          <div className="mx-auto max-w-[1200px] px-4 pt-3 sm:px-6">
             <Alert tone="error" title="Something needs attention" onDismiss={clearError}>
               {state.error}
             </Alert>
           </div>
         )}
-        <main id="main-content" className="mx-auto w-full max-w-7xl px-3 pb-28 pt-4 sm:px-5 sm:pt-6 md:pb-10">
+        <main id="main-content" className="mx-auto w-full max-w-[1200px] px-4 pb-28 pt-6 sm:px-6 sm:pt-8 md:pb-16">
           {state.hydrated ? children : <LoadingScreen />}
         </main>
       </div>
