@@ -15,8 +15,9 @@ Supabase's built-in sender is a development convenience:
 | Template editing | Locked on new free projects (since June 2026) | Unlocked |
 | Suitability | Local testing | Production sign-up |
 
-The active BusTrack project (`tshpnbrulzjuhkjuexep`) currently reports `smtp_host = null`, which
-means it is still on the default sender.
+The active BusTrack project (`tshpnbrulzjuhkjuexep`) is configured for Brevo
+(`smtp-relay.brevo.com:587`) as of 6 November 2026. If emails do not arrive, work through
+[Troubleshooting](#troubleshooting-emails-do-not-arrive) below before changing anything else.
 
 ## The free, easy path (about 15 minutes)
 
@@ -47,12 +48,39 @@ Free tier: 3,000 emails/month, 100/day. Enough for a student cohort signing up o
 
 ### Option B — Brevo (largest free volume)
 
-Free tier: 300 emails/day (~9,000/month).
+Free tier: 300 emails/day (~9,000/month). Three Brevo details catch almost everyone:
 
-1. Create a free account at https://www.brevo.com and verify a sender domain.
-2. **SMTP & API → SMTP** and generate an SMTP key.
-3. Supabase SMTP fields: host `smtp-relay.brevo.com`, port `587`, user your Brevo login email,
-   password the SMTP key, admin email an address on the verified domain.
+1. Create a free account at https://www.brevo.com and **complete the account profile** (company
+   name, verified phone number). Brevo reviews new accounts before it lets them send transactional
+   email.
+2. Open the top-right account menu → **SMTP & API → SMTP tab**.
+   - If the page shows a banner like **"Your SMTP account is not yet activated"**, create a support
+     ticket from that page asking for transactional sending to be activated. Until Brevo approves
+     it, the relay answers every message with `450 Your SMTP account is not yet activated` and
+     nothing is delivered, however correct the rest of the setup is.
+   - Copy the **Login** shown on that tab. On accounts created since 2024 it looks like
+     `7abc123001@smtp-brevo.com` — it is **not** your Brevo account email. If the tab shows your own
+     email as the login and sending fails with `535 Authentication failed`, regenerate the SMTP
+     credentials on that page and use the new `…@smtp-brevo.com` login.
+   - Click **Generate a new SMTP key**. The value starts with `xsmtpsib-` and is shown once. Do not
+     use an API key (`xkeysib-…`); the relay rejects those.
+3. **Senders, Domains & Dedicated IPs → Senders**: the address you give Supabase as the sender must
+   be listed there as verified. The account email is verified automatically; anything else needs its
+   own verification. A personal `@gmail.com` sender works but often lands in spam because Gmail's
+   DKIM cannot align with Brevo's signature — authenticate a domain you control for real use.
+4. In Supabase, **Authentication → Emails → SMTP Settings** (older dashboards: Providers → Email →
+   SMTP Settings), switch **Enable Custom SMTP** on and enter:
+
+   | Supabase field | Value |
+   | --- | --- |
+   | `Host` | `smtp-relay.brevo.com` |
+   | `Port` | `587` |
+   | `Username` | the Login from the SMTP tab (`…@smtp-brevo.com`) |
+   | `Password` | the `xsmtpsib-…` SMTP key, no leading/trailing spaces |
+   | `Sender email` | a verified Brevo sender |
+   | `Sender name` | `BusTrack Transport` |
+
+   Save, then test with a **new** email address on https://bustrack-eight.vercel.app/signup.
 
 ### Option C — A college/institutional SMTP server
 
@@ -71,6 +99,28 @@ the college domain rather than a personal one.
 - The confirmation link returns the student to `/login`, where the Supabase client consumes the
   hash fragment and signs them in.
 - Password recovery uses the same sender and returns to `/auth/set-password`.
+
+## Troubleshooting: emails do not arrive
+
+Supabase Auth sends the email inside the same database transaction that creates the account or
+records the reset request. If the SMTP relay refuses the message, the transaction is rolled back:
+no user row is created, `confirmation_sent_at` / `recovery_sent_at` stay empty, and the app shows
+an error. Read the symptom, not the inbox:
+
+| What you see | What it means | Where to look |
+| --- | --- | --- |
+| Red notice "The account email could not be sent. The transport administrator needs to configure SMTP delivery" | Brevo rejected the SMTP session. `535` = wrong login or key (account email used as login, API key used as password, stray space). `450 … not yet activated` = Brevo has not activated transactional sending. Unverified sender addresses are also refused. | Supabase dashboard → **Logs → Auth** (filter `error`) shows Brevo's exact reply. |
+| Green notice "check your inbox…" but nothing arrives | Brevo accepted the message. It is in the spam folder, Brevo delayed it, or the address already had a confirmed account (Supabase then sends nothing, by design, so addresses cannot be enumerated). | Brevo → **Transactional → Logs / Statistics**; the recipient's spam folder; `select email, confirmation_sent_at from auth.users` in the SQL editor. |
+| "Too many emails were requested" | Supabase allows one email per address per 60 seconds and 30 auth emails per hour by default. | Authentication → Rate Limits. |
+| No sign-up attempt appears anywhere | The test never reached Supabase (for example a sign-in instead of a sign-up, or a browser that lost its connection). | Try again from an incognito window with a brand-new address. |
+
+Quick checks against the project configuration (Supabase → Authentication → Emails → SMTP):
+
+- Username ends in `@smtp-brevo.com` (unless Brevo's SMTP tab explicitly shows your account email).
+- Password is an SMTP key (`xsmtpsib-…`), not an API key (`xkeysib-…`), and not the Brevo password.
+- Sender email is verified under Brevo → Senders.
+- Brevo's SMTP tab shows no "not yet activated" banner.
+- The Supabase project's Site URL and Redirect URLs still point at `https://bustrack-eight.vercel.app`.
 
 ## What still will not work without SMTP
 
