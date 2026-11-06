@@ -65,7 +65,7 @@ A successful `/api/config` response with `serverConfigured: true` only indicates
 - `state/app-provider.tsx` handles the selected route, the Supabase session, sign-in/sign-out (including Google), backend data and Realtime. Server API handlers validate roles and keep privileged credentials server-side.
 - `components/require-auth.tsx` is the app shell's access gate; it redirects to `/login` and remembers the attempted page so the student returns there after signing in.
 - `supabase/migrations/` contains tables, RLS, secure trip actions and the historical-route migration. `scripts/generate_seed.py` regenerates the insert-only seed from the JSON catalogue.
-- `tests/` (135 tests) covers route data, unknown stops, maps and routing fallback, simulation, UI flows, authentication, GPS validation, gesture maths and motion components, and SQL migrations using a local PostgreSQL-compatible test database.
+- `tests/` (136 tests) covers route data, unknown stops, maps and routing fallback, simulation, UI flows, authentication, GPS validation, gesture maths and motion components, and SQL migrations using a local PostgreSQL-compatible test database.
 
 ## Security and limitations
 

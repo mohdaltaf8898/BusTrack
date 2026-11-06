@@ -73,6 +73,16 @@ describe("sign-in and student sign-up", () => {
     expect(screen.queryByText(/If an account exists/)).not.toBeInTheDocument();
   });
 
+  it("treats Supabase's opaque recovery failure as a delivery problem", async () => {
+    auth.requestPasswordReset.mockRejectedValueOnce(new Error("Unable to process request"));
+    render(<AuthCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Forgot password?" }));
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "person@example.edu" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send reset link" }));
+    expect(await screen.findByText(/could not be sent/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Unable to process request/)).not.toBeInTheDocument();
+  });
+
   it("keeps account submission disabled when the deployment has no backend", () => {
     auth.config.publicConfigured = false;
     auth.config.unconfigured = true;

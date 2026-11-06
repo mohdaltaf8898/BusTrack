@@ -60,8 +60,11 @@ export function PasswordField({
 
 function authError(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
-  if (/email address not authorized|error sending (confirmation|recovery|invite)|smtp/i.test(message)) {
-    return "The account email could not be sent. The transport administrator needs to configure SMTP delivery (see docs/EMAIL.md).";
+  // Supabase Auth wraps SMTP failures differently per endpoint: sign-up says
+  // "Error sending confirmation email", password recovery only says
+  // "Unable to process request". Both mean the mail relay refused the message.
+  if (/email address not authorized|error sending (confirmation|recovery|invite|magic link)|smtp|unable to process request/i.test(message)) {
+    return "The account email could not be sent. The mail relay refused it, so nothing was created or changed. The transport administrator can read the relay's reply under Supabase → Logs → Auth and the setup steps in docs/EMAIL.md.";
   }
   if (/signup.*disabled|signups.*disabled|sign.?up.*disabled/i.test(message)) {
     return "Account sign-up is currently disabled. Contact the transport administrator.";
