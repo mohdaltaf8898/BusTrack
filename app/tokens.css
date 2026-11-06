@@ -49,6 +49,21 @@
   --shadow-action: 0 2px 6px -3px rgba(28, 95, 240, 0.22);
   --shadow-glow: 0 8px 24px -10px rgba(28, 95, 240, 0.45);
 
+  /* Frosted glass (see the .glass utilities in globals.css). Alpha stays high
+     enough for AA text on any backdrop; blur and saturation follow the iOS
+     material look. Chrome-only: headers, navigation, sheets, map chips and a
+     few hero accents — content cards stay solid. */
+  --glass-blur: 20px;
+  --glass-saturate: 1.7;
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-bg-strong: rgb(255 255 255 / 0.86);
+  --glass-bg-dark: rgb(255 255 255 / 0.08);
+  --glass-line: rgb(10 24 44 / 0.08);
+  --glass-highlight: rgb(255 255 255 / 0.7);
+  --shadow-glass: inset 0 1px 0 0 var(--glass-highlight), 0 1px 2px rgb(10 24 44 / 0.05),
+    0 14px 36px -20px rgb(10 24 44 / 0.28);
+  --shadow-glass-dark: inset 0 1px 0 0 rgb(255 255 255 / 0.14), 0 14px 36px -20px rgb(0 0 0 / 0.5);
+
   /* Subtle brand gradients. Decorative only; never used to encode status. */
   --gradient-brand: linear-gradient(135deg, rgb(var(--color-brand-500)) 0%, rgb(var(--color-brand-700)) 100%);
   --gradient-navy: linear-gradient(160deg, rgb(var(--color-navy-900)) 0%, rgb(var(--color-navy-950)) 60%, #071225 100%);

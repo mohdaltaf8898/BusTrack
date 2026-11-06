@@ -1,5 +1,5 @@
 import { ArrowRight, LockKeyhole } from "lucide-react";
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 import { CountUp } from "@/components/motion/count-up";
 import { BusIllustration } from "@/components/motion/bus-illustration";
 import { RouteSchematic } from "@/components/home/route-schematic";
@@ -28,15 +28,19 @@ function Words({ text, className, offset = 0 }: { text: string; className?: stri
   return (
     <>
       {words.map((word, index) => (
-        <span key={`${word}-${index}`} className="inline-block overflow-hidden pb-[0.08em] align-bottom">
-          <span
-            className={`inline-block animate-word-rise motion-reduce:animate-none ${className ?? ""}`}
-            style={delay(BLOCK_STAGGER + (offset + index) * WORD_STAGGER)}
-          >
-            {word}
+        <Fragment key={`${word}-${index}`}>
+          <span className="inline-block overflow-hidden pb-[0.08em] align-bottom">
+            <span
+              className={`inline-block animate-word-rise motion-reduce:animate-none ${className ?? ""}`}
+              style={delay(BLOCK_STAGGER + (offset + index) * WORD_STAGGER)}
+            >
+              {word}
+            </span>
           </span>
+          {/* The space must sit between the clipped inline-blocks; a trailing
+              space inside one is collapsed and the words run together. */}
           {index < words.length - 1 ? " " : ""}
-        </span>
+        </Fragment>
       ))}
     </>
   );
@@ -56,10 +60,14 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-slate-200 bg-white">
       <div className="pointer-events-none absolute inset-0 bg-gradient-hero" aria-hidden="true" />
+      {/* Soft colour for the frosted stat tiles and schematic to blur. */}
+      <div className="glow-blob -left-16 top-[55%] h-64 w-64 bg-brand-200/60" aria-hidden="true" />
+      <div className="glow-blob right-[8%] top-10 h-72 w-72 bg-brand-100/80 lg:right-[30%]" aria-hidden="true" />
+      <div className="glow-blob -right-20 bottom-0 h-64 w-64 bg-navy-200/50" aria-hidden="true" />
       <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14">
         <div className="min-w-0">
           <p
-            className="inline-flex animate-rise items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-card backdrop-blur motion-reduce:animate-none"
+            className="glass glass-edge inline-flex animate-rise items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium text-slate-600 motion-reduce:animate-none"
             style={delay(0)}
           >
             <LockKeyhole className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
@@ -103,13 +111,13 @@ export function Hero() {
           </div>
 
           <dl
-            className="mt-10 grid max-w-lg animate-rise grid-cols-3 gap-4 border-t border-slate-100 pt-6 motion-reduce:animate-none"
+            className="mt-10 grid max-w-lg animate-rise grid-cols-3 gap-2.5 motion-reduce:animate-none sm:gap-3"
             style={delay(afterHeadline + BLOCK_STAGGER * 2)}
           >
             {STATS.map((stat, index) => (
-              <div key={stat.term} className="min-w-0">
-                <dt className="text-xs text-slate-500">{stat.term}</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-navy-950">
+              <div key={stat.term} className="glass glass-edge min-w-0 rounded-2xl px-3 py-3 sm:px-4">
+                <dt className="text-xs leading-4 text-slate-500">{stat.term}</dt>
+                <dd className="mt-1.5 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-navy-950">
                   <CountUp value={stat.value} delay={afterHeadline + 0.2 + index * 0.1} />
                 </dd>
               </div>

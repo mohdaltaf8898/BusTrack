@@ -188,7 +188,7 @@ export function AuthCard({
   };
 
   return (
-    <Card>
+    <Card tone="glass">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2">

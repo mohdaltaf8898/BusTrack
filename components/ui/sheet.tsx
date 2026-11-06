@@ -115,7 +115,7 @@ export function BottomSheet({
           {/* Pointer-only dismiss surface; keyboard users have Escape and the header button. */}
           <m.div
             aria-hidden="true"
-            className="absolute inset-0 touch-none bg-navy-950/50 backdrop-blur-[2px]"
+            className="absolute inset-0 touch-none bg-navy-950/40 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -131,7 +131,7 @@ export function BottomSheet({
             aria-label={ariaLabel}
             tabIndex={-1}
             className={cn(
-              "relative z-10 flex w-full flex-col bg-white shadow-float outline-none",
+              "glass-strong glass-edge relative z-10 flex w-full flex-col outline-none",
               desktop
                 ? "max-h-[88vh] max-w-lg rounded-3xl"
                 : "max-h-[92dvh] rounded-t-3xl pb-[max(env(safe-area-inset-bottom),0.25rem)]",

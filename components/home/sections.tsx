@@ -50,8 +50,19 @@ export function Section({
   const label = tone === "navy" ? "text-brand-200" : "text-brand-700";
 
   return (
-    <section id={id} className={cn("scroll-mt-16", palette)} aria-labelledby={id ? `${id}-title` : undefined}>
-      <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+    <section
+      id={id}
+      className={cn("scroll-mt-16", tone === "navy" && "relative overflow-hidden", palette)}
+      aria-labelledby={id ? `${id}-title` : undefined}
+    >
+      {tone === "navy" && (
+        <>
+          {/* Glow behind the frosted panels; decorative only. */}
+          <div className="glow-blob -left-24 top-1/3 h-80 w-80 bg-brand-500/30" aria-hidden="true" />
+          <div className="glow-blob -right-16 bottom-0 h-72 w-72 bg-brand-400/20" aria-hidden="true" />
+        </>
+      )}
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <Reveal className="max-w-2xl">
           {eyebrow && <p className={`text-xs font-semibold uppercase tracking-[0.08em] ${label}`}>{eyebrow}</p>}
           <h2
@@ -241,7 +252,7 @@ export function DataHonestyPanel() {
       {HONESTY.map((item) => (
         <RevealItem
           key={item.label}
-          className="rounded-2xl bg-white/[0.06] p-6 ring-1 ring-inset ring-white/10 backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.09]"
+          className="glass-dark glass-edge rounded-2xl p-6 transition-colors duration-300 hover:bg-white/[0.12]"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-brand-200">{item.label}</p>
           <p className="mt-2 text-sm leading-6 text-white/75">{item.body}</p>

@@ -125,7 +125,7 @@ export function DragSheet({
     <m.div
       ref={sheetRef}
       className={cn(
-        "absolute inset-x-0 z-[700] flex flex-col rounded-t-3xl border-t border-slate-200 bg-white shadow-float will-change-transform",
+        "glass-strong glass-edge absolute inset-x-0 z-[700] flex flex-col rounded-t-3xl will-change-transform",
         className,
       )}
       style={{ y, top: `calc(100% - ${peekHeight}px)`, height: `${fullFraction * 100}%` }}

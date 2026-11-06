@@ -68,6 +68,74 @@ a {
   }
 }
 
+/* Frosted glass. Component layer so Tailwind utilities can still override a
+   background or border when a one-off needs it. `.glass-edge` adds the lit rim
+   (1px inner highlight + hairline + soft drop shadow). Blur is skipped when the
+   browser cannot do it or the user asked for less transparency, and the
+   surfaces fall back to opaque colours. */
+@layer components {
+  .glass,
+  .glass-strong,
+  .glass-dark {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+  .glass {
+    background-color: var(--glass-bg);
+  }
+  .glass-strong {
+    background-color: var(--glass-bg-strong);
+  }
+  .glass-dark {
+    background-color: var(--glass-bg-dark);
+  }
+  .glass-edge {
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-glass);
+  }
+  .glass-dark.glass-edge {
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow: var(--shadow-glass-dark);
+  }
+  /* Soft colour behind glass so the blur has something to show. Static, so
+     the expensive filter is painted once. */
+  .glow-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(56px);
+    pointer-events: none;
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass,
+    .glass-strong {
+      background-color: rgb(255 255 255 / 0.96);
+    }
+    .glass-dark {
+      background-color: rgb(255 255 255 / 0.1);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .glass,
+    .glass-strong,
+    .glass-dark {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .glass,
+    .glass-strong {
+      background-color: var(--color-surface);
+    }
+    .glass-dark {
+      background-color: rgb(255 255 255 / 0.1);
+    }
+    .glow-blob {
+      display: none;
+    }
+  }
+}
+
 /* Leaflet theming and inline vector markers (no external image assets). */
 .leaflet-container {
   width: 100%;
@@ -83,16 +151,20 @@ a {
 }
 .leaflet-control-attribution {
   font-size: 10px !important;
-  background: rgba(255, 255, 255, 0.88) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
+  backdrop-filter: blur(10px) saturate(1.5);
   border-radius: 8px 0 0 0;
   padding: 2px 6px !important;
 }
 
 .leaflet-control-zoom {
   border: 0 !important;
-  box-shadow: 0 8px 24px rgba(10, 24, 44, 0.18) !important;
+  box-shadow: var(--shadow-glass) !important;
   border-radius: 14px !important;
   overflow: hidden;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 .leaflet-control-zoom a {
@@ -100,8 +172,25 @@ a {
   height: 38px !important;
   line-height: 36px !important;
   color: rgb(var(--color-navy-900)) !important;
-  border-color: var(--color-border) !important;
+  background-color: var(--glass-bg-strong) !important;
+  border-color: var(--glass-line) !important;
   font-size: 20px !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgb(255 255 255 / 0.96) !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .leaflet-control-attribution,
+  .leaflet-control-zoom {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .leaflet-control-attribution,
+  .leaflet-control-zoom a {
+    background-color: #fff !important;
+  }
 }
 
 .leaflet-popup-content-wrapper {

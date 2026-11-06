@@ -103,8 +103,11 @@ const config: Config = {
         "road-dash": "road-dash 0.9s linear infinite",
         // CSS-driven entrances for server-rendered, above-the-fold content: they
         // start before hydration so the largest contentful paint is not delayed.
-        rise: "rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both",
-        "word-rise": "word-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
+        // `backwards`, not `both`: the keyframes end at the natural state, and a
+        // finished fill-forwards opacity animation would keep the element a
+        // backdrop root, which stops frosted-glass children blurring the page.
+        rise: "rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards",
+        "word-rise": "word-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards",
       },
     },
   },

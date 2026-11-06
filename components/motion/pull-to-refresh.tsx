@@ -134,7 +134,7 @@ export function PullToRefresh({
     <div ref={containerRef} className={cn("relative", className)} data-pull-status={status}>
       <m.div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 z-10 -ml-5 -mt-12 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-brand-700 shadow-float"
+        className="glass-strong glass-edge pointer-events-none absolute left-1/2 top-0 z-10 -ml-5 -mt-12 flex h-10 w-10 items-center justify-center rounded-full text-brand-700"
         style={{ y: pull, opacity: indicatorOpacity, scale: indicatorScale }}
       >
         {status === "done" ? (

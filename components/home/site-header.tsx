@@ -55,8 +55,8 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b bg-white/90 backdrop-blur transition-[box-shadow,border-color] duration-300 supports-[backdrop-filter]:bg-white/80",
-        scrolled || open ? "border-slate-200 shadow-card" : "border-transparent",
+        "glass-strong sticky top-0 z-50 border-b transition-[box-shadow,border-color] duration-300",
+        scrolled || open ? "border-slate-200/70 shadow-card" : "border-transparent",
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">

@@ -307,7 +307,7 @@ export function LiveMapInner({
             </div>
           )}
           {tilesLoaded && <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
-            <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[11px] font-bold text-navy-900 shadow-card">
+            <span className="glass glass-edge pointer-events-auto inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-navy-900">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: route.color }} />
               {route.code} · {route.busNumber}
             </span>
@@ -326,7 +326,8 @@ export function LiveMapInner({
                 onClick={centerOnBus}
                 aria-label="Center map on bus"
                 title="Center on bus"
-                className="rounded-2xl bg-white text-navy-900 shadow-float hover:bg-brand-50"
+                variant="glass"
+                className="rounded-2xl"
               >
                 <LocateFixed className="h-5 w-5" />
               </Button>
@@ -337,15 +338,15 @@ export function LiveMapInner({
                   onClick={retryTiles}
                   aria-label="Retry map tiles"
                   title="Retry map tiles"
-                  variant="outline"
-                  className="rounded-2xl bg-white shadow-float"
+                  variant="glass"
+                  className="rounded-2xl"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               )}
             </div>
           )}
-          {tilesLoaded && <div className="pointer-events-none absolute bottom-[calc(0.75rem+var(--map-inset-b,0px))] left-3 z-[500] flex items-center gap-1.5 rounded-xl bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-card">
+          {tilesLoaded && <div className="glass glass-edge pointer-events-none absolute bottom-[calc(0.75rem+var(--map-inset-b,0px))] left-3 z-[500] flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-semibold text-slate-600">
             <Navigation className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
             Heading {bearingToCompass(busPosition.bearing)} · {Math.round(busPosition.bearing)}°
           </div>}
@@ -369,9 +370,9 @@ export function LiveMapInner({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="glass"
             onClick={retryTiles}
-            className="absolute right-4 top-16 z-10 bg-white shadow-card"
+            className="absolute right-4 top-20 z-10"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Retry tiles

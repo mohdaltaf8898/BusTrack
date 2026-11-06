@@ -158,7 +158,7 @@ function BottomNav({
   return (
     <nav
       aria-label="Mobile primary navigation"
-      className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-1 pt-1.5 backdrop-blur supports-[backdrop-filter]:bg-white/85 md:hidden"
+      className="glass-strong safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/70 px-1 pt-1.5 md:hidden"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around">
         {items.map((item) => {
@@ -292,7 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Sidebar pathname={pathname} />
       <div className="md:pl-[240px]">
         {!state.isOnline && <OfflineNotice />}
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+        <header className="glass-strong sticky top-0 z-40 border-b border-slate-200/70">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2 px-3 sm:px-5">
             <div className="md:hidden">
               <Logo compact />

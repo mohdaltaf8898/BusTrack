@@ -13,7 +13,8 @@ export type ButtonVariant =
   | "outline"
   | "ghost"
   | "danger"
-  | "soft";
+  | "soft"
+  | "glass";
 export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const variants: Record<ButtonVariant, string> = {
@@ -27,6 +28,8 @@ const variants: Record<ButtonVariant, string> = {
   danger:
     "bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800 disabled:bg-rose-300",
   soft: "bg-brand-50 text-brand-700 hover:bg-brand-100",
+  /** Floating controls over maps and imagery: frosted backdrop with a lit rim. */
+  glass: "glass-strong glass-edge text-navy-900 hover:bg-white/95 active:bg-white",
 };
 
 const sizes: Record<ButtonSize, string> = {

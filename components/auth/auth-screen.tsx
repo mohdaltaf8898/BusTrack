@@ -35,8 +35,12 @@ export function AuthScreen({
         </div>
       </header>
 
-      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+      <main id="main-content" className="relative flex-1 overflow-hidden">
+        {/* Soft brand colour behind the frosted card; decorative only. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-hero" aria-hidden="true" />
+        <div className="glow-blob -right-24 top-6 h-72 w-72 bg-brand-200/60" aria-hidden="true" />
+        <div className="glow-blob -left-20 bottom-0 h-64 w-64 bg-navy-200/50" aria-hidden="true" />
+        <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
           {/* CSS entrances: these screens are server-rendered and must paint before hydration. */}
           <div className="order-2 animate-rise motion-reduce:animate-none lg:order-1">
             <h1 className="text-3xl font-semibold tracking-[-0.04em] text-navy-950 sm:text-4xl">

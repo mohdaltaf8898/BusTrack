@@ -32,6 +32,19 @@ describe("public introduction page", () => {
     expect(screen.getAllByRole("link", { name: /^Sign in$/i })[0]).toHaveAttribute("href", "/login");
   });
 
+  it("keeps spaces between the staggered headline words", () => {
+    render(<HomePage />);
+    const heading = screen.getByRole("heading", { level: 1, name: /know which bus is coming/i });
+    // Each word is clipped in its own inline-block for the rise animation; the
+    // visible text must still read as a sentence, not one run-together word.
+    expect(heading.textContent?.replace(/\s+/g, " ").trim()).toBe("Know which bus is coming, and roughly when");
+    // A space that ends up *inside* a clipped inline-block is collapsed by the
+    // browser, so every separator has to live between the clipping spans.
+    const clipped = Array.from(heading.querySelectorAll("span.overflow-hidden"));
+    expect(clipped.length).toBeGreaterThan(5);
+    for (const span of clipped) expect(span.textContent).toMatch(/\S$/);
+  });
+
   it("states plainly that positions are not live and times are estimates", () => {
     render(<HomePage />);
     expect(screen.getByText(/Nothing here pretends to be\s*live vehicle tracking/i)).toBeInTheDocument();

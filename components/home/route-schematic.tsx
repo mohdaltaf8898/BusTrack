@@ -31,7 +31,7 @@ export function RouteSchematic({ className, animated = false }: { className?: st
   return (
     <figure
       className={cn(
-        "overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-float",
+        "glass-strong glass-edge overflow-hidden rounded-3xl",
         className,
       )}
     >

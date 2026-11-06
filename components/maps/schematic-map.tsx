@@ -50,7 +50,7 @@ export function SchematicRouteMap({
         className,
       )}
     >
-      <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs font-medium text-slate-700 shadow-card">
+      <div className="glass glass-edge absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-xl px-3 py-2 text-xs font-medium text-slate-700">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
           <span>{reason}</span>
@@ -113,7 +113,7 @@ export function SchematicRouteMap({
           <path d="M0 -1 L0.65 0.35 L0 0 L-0.65 0.35 Z" fill="white" />
         </g>
       </svg>
-      <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-card">
+      <div className="glass glass-edge absolute bottom-4 left-4 z-10 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700">
         Schematic route · not to scale
       </div>
     </div>
