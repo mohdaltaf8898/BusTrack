@@ -58,13 +58,14 @@ A successful `/api/config` response with `serverConfigured: true` only indicates
 
 - Next.js 15, React 19, TypeScript, Tailwind CSS, Lucide and reusable UI primitives.
 - [Motion](https://motion.dev) (`motion`, loaded lazily with `LazyMotion`) powers the animation and gesture layer: staggered hero entrance, scroll reveals, count-up statistics, animated ETA digits, page entrances, swipeable/expandable route cards, swipe-to-dismiss bottom sheets, the drag-to-expand Track sheet, swipe actions on notifications and pull-to-refresh on routes. Every gesture has a button or keyboard equivalent, `prefers-reduced-motion` is honoured, and no animation substitutes for real tracking data. Conventions live in [DESIGN.md](DESIGN.md#motion--gestures-november-2026).
+- Frosted glass is reserved for chrome: sticky headers, the mobile bottom navigation, bottom sheets, the Track drag sheet, map chips and the sign-in card. It degrades to near-opaque white without `backdrop-filter`, becomes fully opaque under `prefers-reduced-transparency`, and never carries page content. Rules are in [DESIGN.md](DESIGN.md#frosted-glass-november-2026).
 - Leaflet/OpenStreetMap raster tiles; responsive schematic fallback when tiles fail. `/api/road-route` calls the public OSRM demo server for a fixed catalogue route only, caches valid responses, and falls back when it cannot route. Public OSRM and OSM tiles have no production SLA; use suitable providers for production traffic.
 - `data/lords-routes-2025-26.json` is the persistent source transcription; `data/routes.ts` creates domain routes and simulation-only vehicles.
 - `lib/geo.ts`, `lib/eta.ts`, `lib/simulation.ts`, and `lib/road-routing.ts` implement geometry, estimates and movement. Simulated movement uses the same geometry shown on the map.
 - `state/app-provider.tsx` handles the selected route, the Supabase session, sign-in/sign-out (including Google), backend data and Realtime. Server API handlers validate roles and keep privileged credentials server-side.
 - `components/require-auth.tsx` is the app shell's access gate; it redirects to `/login` and remembers the attempted page so the student returns there after signing in.
 - `supabase/migrations/` contains tables, RLS, secure trip actions and the historical-route migration. `scripts/generate_seed.py` regenerates the insert-only seed from the JSON catalogue.
-- `tests/` (134 tests) covers route data, unknown stops, maps and routing fallback, simulation, UI flows, authentication, GPS validation, gesture maths and motion components, and SQL migrations using a local PostgreSQL-compatible test database.
+- `tests/` (135 tests) covers route data, unknown stops, maps and routing fallback, simulation, UI flows, authentication, GPS validation, gesture maths and motion components, and SQL migrations using a local PostgreSQL-compatible test database.
 
 ## Security and limitations
 
