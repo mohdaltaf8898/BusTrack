@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, Bell, BusFront, Check, MapPin, Route as RouteIcon, type LucideIcon } from "lucide-react";
+import { Bell, BusFront, Check, ChevronRight, MapPin, Route as RouteIcon, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, m } from "motion/react";
 import { useApp } from "@/state/app-provider";
@@ -32,8 +32,8 @@ function ActionLink({ href, icon, label }: { href: string; icon: LucideIcon; lab
       <Link href={href} className={actionClass}>
         <ActionIcon icon={icon} />
         <span className="min-w-0 text-sm font-medium text-navy-950">{label}</span>
-        <ArrowUpRight
-          className="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-600"
+        <ChevronRight
+          className="ml-auto h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-brand-600"
           aria-hidden="true"
         />
       </Link>

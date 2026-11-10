@@ -132,9 +132,9 @@ function Sidebar({ pathname }: { pathname: string }) {
         </nav>
       </div>
       <div className="border-t border-slate-100 p-4">
-        <div className="flex items-center gap-2 px-1 text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 px-1 text-xs text-slate-500">
           <GraduationCap className="h-4 w-4" aria-hidden="true" />
-          <span>LIET Hyderabad · Transport</span>
+          <span>LIET Hyderabad transport</span>
         </div>
       </div>
     </aside>
@@ -170,7 +170,7 @@ function BottomNav({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
                 active ? "text-brand-700" : "text-slate-600 active:bg-slate-50",
               )}
             >
@@ -196,7 +196,7 @@ function BottomNav({
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
                       transition={{ type: "spring", stiffness: 500, damping: 24 }}
-                      className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white"
+                      className="absolute -right-2.5 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold leading-none tabular-nums text-white"
                     >
                       {item.badge > 9 ? "9+" : item.badge}
                     </m.span>
@@ -212,7 +212,7 @@ function BottomNav({
           onClick={onMore}
           whileTap={{ scale: 0.92 }}
           aria-label="Open more navigation"
-          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold text-slate-600 active:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[11px] font-medium text-slate-600 active:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
           More

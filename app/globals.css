@@ -16,7 +16,6 @@ body {
   overflow-x: hidden;
   background: var(--color-canvas);
   color: var(--color-ink);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* iOS Safari: keep the page from rubber-banding behind sheets and the pull-to-refresh control. */
@@ -46,6 +45,21 @@ a {
 ::selection {
   background: rgb(var(--color-brand-200));
   color: var(--color-ink);
+}
+
+/* Headings balance their lines; running text avoids a lone last word. Both
+   are no-ops in browsers without text-wrap support. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li,
+dd,
+figcaption {
+  text-wrap: pretty;
 }
 
 @layer utilities {
@@ -257,7 +271,7 @@ a {
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 8px solid currentColor;
+  border-bottom: 8px solid currentColor; /* impeccable-disable-line border-accent-on-rounded: CSS triangle for the tooltip arrow */
   color: rgb(var(--color-brand-600));
 }
 

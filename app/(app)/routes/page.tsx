@@ -132,7 +132,7 @@ export default function RoutesPage() {
         >
           <div className="relative w-full sm:max-w-sm">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
               aria-hidden="true"
             />
             <Input
@@ -151,7 +151,7 @@ export default function RoutesPage() {
         <RevealItem>
           {filteredRoutes.length === 0 ? (
             <EmptyState
-              icon={<RouteIcon className="h-6 w-6" />}
+              icon={<RouteIcon className="h-7 w-7" strokeWidth={1.5} />}
               title="No routes match your search"
               description="Try a route code, bus number, area name, or clear the search field."
               action={
@@ -173,7 +173,7 @@ export default function RoutesPage() {
                     inspect its stops below.
                   </p>
                 </div>
-                <p className="hidden shrink-0 text-[11px] text-slate-400 sm:block">
+                <p className="hidden shrink-0 text-xs text-slate-500 sm:block">
                   Swipe right to select · left to track
                 </p>
               </div>
@@ -281,20 +281,21 @@ export default function RoutesPage() {
                             <span className="block break-words text-sm font-bold text-navy-950">
                               {item.stop.name}
                             </span>
-                            <span className="mt-0.5 block text-[11px] text-slate-500">
+                            <span className="mt-0.5 block text-xs tabular-nums text-slate-500">
                               {snapshot.route.scheduleYear ?? "Schedule"}{" "}
                               {item.stop.order ===
                                 snapshot.route.stops.length &&
                               item.stop.name === "Lords College"
                                 ? "arrival"
                                 : "pickup"}
-                              : {formatScheduledTime(item.stop.scheduledTime)}
+                              {": "}
+                              {formatScheduledTime(item.stop.scheduledTime)}
                               {item.stop.lat == null
-                                ? " · Location pending"
-                                : " · Approx. map location"}
+                                ? ", location pending"
+                                : ", approximate map location"}
                             </span>
                             {item.stop.note && (
-                              <span className="mt-0.5 block text-[11px] text-amber-700">
+                              <span className="mt-0.5 block text-xs text-amber-700">
                                 {item.stop.note}
                               </span>
                             )}
@@ -305,7 +306,7 @@ export default function RoutesPage() {
                                 ? "Passed"
                                 : formatEta(item.etaSeconds)}
                             </span>
-                            <span className="block text-[10px] text-slate-400">
+                            <span className="block text-xs text-slate-500">
                               {item.status === "unmapped"
                                 ? "No map position"
                                 : item.status === "departed"

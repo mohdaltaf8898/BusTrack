@@ -18,7 +18,7 @@ describe("historical routes and stops", () => {
     expect(screen.getByText(/2025–26 pickup: 8:47 AM/)).toBeInTheDocument();
     const unmapped = screen.getByText("Pillar No. 26").closest("button");
     expect(unmapped).not.toBeNull();
-    expect(within(unmapped!).getByText(/Location pending/)).toBeInTheDocument();
+    expect(within(unmapped!).getByText(/location pending/i)).toBeInTheDocument();
     expect(within(unmapped!).getByText(/No map position/)).toBeInTheDocument();
     fireEvent.click(unmapped!);
     expect(unmapped).toHaveAttribute("aria-pressed", "true");

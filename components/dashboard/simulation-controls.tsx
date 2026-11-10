@@ -102,7 +102,7 @@ export function SimulationControls({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 p-3.5">
+        <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-sm font-bold text-navy-950">
               <Radio className="h-4 w-4 text-brand-600" aria-hidden="true" />
@@ -168,7 +168,7 @@ export function SimulationControls({
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
           <Badge tone="blue">
             <RouteIcon className="h-3 w-3" /> {routeSnapshot.route.code}
           </Badge>

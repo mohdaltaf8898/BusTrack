@@ -272,7 +272,7 @@ export function AdminDashboard() {
               <EmptyState title="No routes" description="Add a route to see health metrics." />
             ) : (
               routeSnapshots.slice(0, 6).map((snapshot) => (
-                <div key={snapshot.route.id} className="rounded-2xl border border-slate-100 p-3.5">
+                <div key={snapshot.route.id} className="border-t border-slate-100 pt-3.5 first:border-t-0 first:pt-0">
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-navy-950">
@@ -744,7 +744,7 @@ export function AdminDashboard() {
         cell: (trip) => (
           <div className="min-w-24">
             <ProgressBar value={trip.progress} className="bg-slate-100" />
-            <span className="mt-1 block text-[10px] text-slate-400">{Math.round(trip.progress)}%</span>
+            <span className="mt-1 block text-xs text-slate-500">{Math.round(trip.progress)}%</span>
           </div>
         ),
       },
@@ -933,7 +933,7 @@ export function AdminDashboard() {
         cell: (row) => (
           <div className="min-w-24">
             <ProgressBar value={row.progress} className="bg-slate-100" />
-            <span className="mt-1 block text-[10px] text-slate-400">{Math.round(row.progress)}%</span>
+            <span className="mt-1 block text-xs text-slate-500">{Math.round(row.progress)}%</span>
           </div>
         ),
       },

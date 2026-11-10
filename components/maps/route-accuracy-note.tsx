@@ -6,7 +6,7 @@ export function RouteAccuracyNote({ route }: { route: Route }) {
   const mapped = mappedStopCount(route);
   const missing = route.stops.length - mapped;
   return (
-    <p className="text-[11px] leading-5 text-slate-500">
+    <p className="max-w-[60ch] text-pretty text-xs leading-5 text-slate-500">
       {route.geometrySource === "road"
         ? "Road-aligned estimate via OpenStreetMap / OSRM, not a verified bus path."
         : route.geometrySource === "verified"

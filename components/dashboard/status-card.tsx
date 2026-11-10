@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, BusFront, Clock3 } from "lucide-react";
+import { BusFront, Clock3 } from "lucide-react";
 import Link from "next/link";
 import { m } from "motion/react";
 import { useApp } from "@/state/app-provider";
@@ -86,7 +86,7 @@ export function StatusCard() {
                 </span>
               )}
             </div>
-            <p className="mt-4 max-w-xl text-xs leading-5 text-slate-600">
+            <p className="mt-4 max-w-md text-pretty text-sm leading-6 text-slate-600">
               {selectedStopEta.status === "unmapped"
                 ? "This stop has no verified map location. Check its historical pickup time on the routes page."
                 : describeEtaMethod(route, traffic)}
@@ -112,11 +112,11 @@ export function StatusCard() {
         <RouteProgress value={progressPercent} paused={offline} />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-slate-600">
           <span>
-            {snapshot.dataMode === "last-known" ? "Last known GPS position" : isLiveData ? "Device GPS · simulated traffic ETA" : offline ? "Simulated location · paused" : "Simulated location · not live"}
-            {simulation.delaySeconds > 0 ? ` · +${Math.round(simulation.delaySeconds / 60)} min simulated delay` : ""}
+            {snapshot.dataMode === "last-known" ? "Last known GPS position" : isLiveData ? "Device GPS, simulated traffic ETA" : offline ? "Simulated location, paused" : "Simulated location, not live"}
+            {simulation.delaySeconds > 0 ? `, +${Math.round(simulation.delaySeconds / 60)} min simulated delay` : ""}
           </span>
-          <Link href="/routes" className="group inline-flex items-center gap-1 font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-brand-600">
-            2025–26 times · confirm service <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+          <Link href="/routes" className="font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-brand-600">
+            See the 2025–26 pickup times
           </Link>
         </div>
       </div>

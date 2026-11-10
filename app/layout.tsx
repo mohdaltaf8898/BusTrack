@@ -7,13 +7,18 @@ import { MotionProvider } from "@/components/motion/motion-provider";
 import { AppProvider } from "@/state/app-provider";
 
 /**
- * Inter (variable, latin subset, ~48 kB woff2) self-hosted from the
- * @fontsource-variable package: preloaded by next/font with size-adjusted
- * fallbacks, so there is no third-party font request and no layout shift.
+ * Overpass (variable, latin subset, ~39 kB woff2), self-hosted from the
+ * @fontsource-variable package and preloaded by next/font with a size-adjusted
+ * fallback, so there is no third-party font request and no layout shift.
+ * Overpass descends from Highway Gothic, the US road-sign face, which keeps the
+ * interface in the vocabulary of transit signage rather than generic SaaS.
  */
-const inter = localFont({
-  src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
-  variable: "--font-inter",
+// app/fonts/ holds the Fontsource build of Overpass 4.000 with its GDEF mark
+// class corrected (see scripts/fonts/patch-overpass.py); the unpatched file
+// renders the middle dot with zero width in Chrome and Firefox.
+const overpass = localFont({
+  src: "./fonts/overpass-latin-wght-normal.woff2",
+  variable: "--font-overpass",
   display: "swap",
   weight: "100 900",
   fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
@@ -45,12 +50,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#0a182c",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={overpass.variable}>
       <body className="min-h-screen font-sans antialiased">
         <a
           href="#main-content"

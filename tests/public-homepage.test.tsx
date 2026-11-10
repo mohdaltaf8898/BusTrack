@@ -47,7 +47,9 @@ describe("public introduction page", () => {
 
   it("states plainly that positions are not live and times are estimates", () => {
     render(<HomePage />);
-    expect(screen.getByText(/Nothing here pretends to be\s*live vehicle tracking/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A live bus position appears only while an authorized driver is sharing GPS/i),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/Simulated/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Inferred geometry/i)).toBeInTheDocument();
     expect(screen.getByText(/Estimated times/i)).toBeInTheDocument();
@@ -61,6 +63,18 @@ describe("public introduction page", () => {
     expect(HOME_STATS.unlocated).toBeGreaterThan(0);
     expect(screen.getByText(/stops have no reliable coordinates yet/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Contains data provided by TGSRTC/i).length).toBeGreaterThan(0);
+  });
+
+  it("opens without a stat strip, eyebrow labels or accent-coloured headline words", () => {
+    const { container } = render(<HomePage />);
+    const heading = screen.getByRole("heading", { level: 1, name: /know which bus is coming/i });
+    // The headline is one colour: no single word is picked out in brand blue.
+    expect(heading.querySelector(".text-brand-600, .text-brand-700")).toBeNull();
+    // The hero makes its case in prose; the catalog numbers live in the
+    // "what is estimated" section where they can be explained.
+    expect(container.querySelector("header dl, section:first-of-type dl")).toBeNull();
+    // No small-caps kicker sits above any section heading.
+    expect(container.querySelector("[class*='uppercase']")).toBeNull();
   });
 
   it("keeps transport contact details marked as placeholders", () => {

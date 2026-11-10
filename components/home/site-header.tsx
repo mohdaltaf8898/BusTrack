@@ -15,7 +15,7 @@ export const HOME_NAV = [
   { href: "/#what-you-get", label: "What you get" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#who-uses-it", label: "Who uses it" },
-  { href: "/#data-honesty", label: "Data honesty" },
+  { href: "/#what-is-estimated", label: "What is estimated" },
   { href: "/#questions", label: "Questions" },
 ];
 
@@ -148,7 +148,7 @@ export function SiteHeader() {
                 ) : (
                   <>
                     <ButtonLink href="/signup" className="w-full">
-                      Create account
+                      Create a student account
                     </ButtonLink>
                     <ButtonLink href="/login" variant="outline" className="w-full">
                       Sign in

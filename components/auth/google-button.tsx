@@ -43,17 +43,15 @@ export function GoogleButton({
 }) {
   if (!enabled) {
     return (
-      <div
-        className={cn(
-          "rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600",
-          className,
-        )}
-      >
-        <p className="font-semibold text-navy-900">Google sign-in is not switched on yet</p>
-        <p className="mt-0.5">
-          An administrator adds the Google client ID and secret in Supabase Auth → Providers. The
-          button appears here automatically once that is done. Use email and password meanwhile.
-        </p>
+      <div className={cn("flex gap-3 text-xs leading-5 text-slate-600", className)}>
+        <GoogleGlyph className="mt-0.5 h-4 w-4 shrink-0 opacity-60" />
+        <div className="min-w-0">
+          <p className="font-semibold text-navy-900">Google sign-in is not switched on yet</p>
+          <p className="mt-0.5 text-pretty">
+            An administrator adds the Google client ID and secret in Supabase Auth → Providers. The
+            button appears here automatically once that is done. Use email and password meanwhile.
+          </p>
+        </div>
       </div>
     );
   }

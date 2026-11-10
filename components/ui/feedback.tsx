@@ -98,11 +98,13 @@ export function LoadingScreen() {
 
 type AlertTone = "info" | "success" | "warning" | "error";
 
+// Tinted, borderless: alerts mostly sit inside cards, and a second frame
+// inside the card frame reads as box-in-box.
 const alertConfig: Record<AlertTone, { classes: string; Icon: typeof Info }> = {
-  info: { classes: "border-brand-100 bg-brand-50 text-brand-900", Icon: Info },
-  success: { classes: "border-emerald-100 bg-emerald-50 text-emerald-900", Icon: CheckCircle2 },
-  warning: { classes: "border-amber-200 bg-amber-50 text-amber-900", Icon: AlertTriangle },
-  error: { classes: "border-rose-200 bg-rose-50 text-rose-900", Icon: XCircle },
+  info: { classes: "bg-brand-50 text-brand-900", Icon: Info },
+  success: { classes: "bg-emerald-50 text-emerald-900", Icon: CheckCircle2 },
+  warning: { classes: "bg-amber-50 text-amber-900", Icon: AlertTriangle },
+  error: { classes: "bg-rose-50 text-rose-900", Icon: XCircle },
 };
 
 export function Alert({
@@ -125,12 +127,13 @@ export function Alert({
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: DURATION.base, ease: EASE_OUT }}
-      className={cn("flex items-start gap-3 rounded-xl border p-4 text-sm", classes, className)}
+      className={cn("flex items-start gap-3 rounded-xl p-4 text-sm", classes, className)}
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         {title && <p className="font-semibold">{title}</p>}
-        <div className={cn(title && "mt-0.5", "leading-6")}>{children}</div>
+        {/* ~60ch keeps alert prose under 80 characters a line on wide layouts. */}
+        <div className={cn(title && "mt-0.5", "max-w-[60ch] text-pretty leading-6")}>{children}</div>
       </div>
       {onDismiss && (
         <m.button
@@ -166,20 +169,23 @@ export function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: DURATION.base, ease: EASE_OUT }}
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 py-12 text-center",
         className,
       )}
     >
+      {/* A plain icon, not a tile; and a paragraph, not a heading, because an
+          empty state is a message inside a section rather than a section. */}
       <m.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.08 }}
-        className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm"
+        className="mb-3 text-slate-500"
+        aria-hidden="true"
       >
-        {icon ?? <Inbox className="h-6 w-6" />}
+        {icon ?? <Inbox className="h-7 w-7" strokeWidth={1.5} />}
       </m.div>
-      <h3 className="text-base font-medium text-navy-950">{title}</h3>
-      <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">{description}</p>
+      <p className="text-base font-medium text-navy-950">{title}</p>
+      <p className="mt-1 max-w-md text-pretty text-sm leading-6 text-slate-500">{description}</p>
       {action && <div className="mt-5">{action}</div>}
     </m.div>
   );

@@ -45,11 +45,11 @@ describe("sign-in and student sign-up", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "student@example.edu" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "long-password" } });
     fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "mismatch" } });
-    fireEvent.click(screen.getByRole("button", { name: "Create student account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create a student account" }));
     expect(await screen.findByText("The passwords do not match.")).toBeInTheDocument();
     expect(auth.signUp).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "long-password" } });
-    fireEvent.click(screen.getByRole("button", { name: "Create student account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create a student account" }));
     await waitFor(() => expect(auth.signUp).toHaveBeenCalledWith("Student Name", "student@example.edu", "long-password"));
     expect(await screen.findByText(/check your inbox for a confirmation link/i)).toBeInTheDocument();
   });

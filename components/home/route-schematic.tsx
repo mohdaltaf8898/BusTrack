@@ -37,8 +37,8 @@ export function RouteSchematic({ className, animated = false }: { className?: st
     >
       <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-4">
         <span className="text-sm font-semibold text-navy-950">
-          {route.code} · {route.startLocation}
-          <span className="text-slate-400" aria-hidden="true"> → </span>
+          {route.code}: {route.startLocation}
+          <span className="text-slate-500" aria-hidden="true"> → </span>
           {route.destination}
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-100">
@@ -75,7 +75,7 @@ export function RouteSchematic({ className, animated = false }: { className?: st
                     isCollege
                       ? "bg-navy-900 text-white"
                       : index === 0
-                        ? "bg-brand-600 text-white shadow-glow"
+                        ? "bg-brand-600 text-white"
                         : "border border-brand-200 bg-white text-navy-800",
                   )}
                   aria-hidden="true"
@@ -84,10 +84,8 @@ export function RouteSchematic({ className, animated = false }: { className?: st
                 </m.span>
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                   <span className={cn("text-sm text-navy-950", isCollege ? "font-semibold" : "font-medium")}>{stop.name}</span>
-                  <span className="font-mono text-xs text-slate-600">
-                    {stop.scheduledTime ?? (
-                      <span className="text-slate-400">{isCollege ? "arrival time not published" : "time not published"}</span>
-                    )}
+                  <span className="text-xs tabular-nums text-slate-600">
+                    {stop.scheduledTime ?? (isCollege ? "arrival time not published" : "time not published")}
                   </span>
                 </span>
                 <span className="mt-0.5 block text-xs text-slate-500">
@@ -102,7 +100,7 @@ export function RouteSchematic({ className, animated = false }: { className?: st
       </m.div>
 
       <p className="border-t border-slate-100 bg-surface-muted px-5 py-3 text-xs leading-5 text-slate-600">
-        Illustration of the published 2025–26 pickup list — {timed} of the first {stops.length} stops
+        Illustration of the published 2025–26 pickup list: {timed} of the first {stops.length} stops
         carry a time. The signed-in dashboard turns this into a stop-by-stop estimate for your own
         boarding point.
       </p>

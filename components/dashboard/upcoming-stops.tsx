@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { m } from "motion/react";
 import { useApp } from "@/state/app-provider";
@@ -31,10 +30,10 @@ export function UpcomingStops({ limit = 5 }: { limit?: number }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-tight text-navy-950">Upcoming stops</h2>
-          <p className="mt-1 text-xs leading-5 text-slate-600">Simulated arrival estimates · select a stop to see its ETA.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-600">Simulated arrival estimates. Select a stop to see its ETA.</p>
         </div>
-        <Link href="/routes" className="group inline-flex min-h-8 shrink-0 items-center gap-1 text-xs font-semibold text-brand-700 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-brand-600">
-          All stops <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+        <Link href="/routes" className="inline-flex min-h-8 shrink-0 items-center text-xs font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-brand-600">
+          All stops
         </Link>
       </div>
       {stops.length === 0 ? (

@@ -137,7 +137,7 @@ export function RouteCard({ route, selected, expanded, onToggle, onSelect, onTra
               </span>
             </span>
             <m.span
-              className="ml-1 hidden shrink-0 text-slate-400 sm:block"
+              className="ml-1 hidden shrink-0 text-slate-500 sm:block"
               animate={{ rotate: expanded ? 180 : 0 }}
               transition={{ duration: DURATION.fast, ease: EASE_OUT }}
               aria-hidden="true"
@@ -184,14 +184,14 @@ export function RouteCard({ route, selected, expanded, onToggle, onSelect, onTra
                     </dd>
                   </div>
                 </dl>
-                <p className="mt-3 text-[11px] leading-5 text-slate-500">
+                <p className="mt-3 text-xs leading-5 text-slate-500">
                   {route.startLocation} → {route.destination}. Times are the {route.scheduleYear ?? "listed"} timetable, not a live schedule.
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <Button size="sm" variant="primary" onClick={onTrack}>
                     <Navigation className="h-4 w-4" aria-hidden="true" /> Track on map
                   </Button>
-                  <span className="text-[11px] text-slate-400 sm:hidden">Swipe right to select · left to track</span>
+                  <span className="text-xs text-slate-500 sm:hidden">Swipe right to select, left to track</span>
                 </div>
               </div>
             </m.div>

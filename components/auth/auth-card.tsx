@@ -35,7 +35,7 @@ export function PasswordField({
     <div>
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
-        <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+        <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
         <Input
           id={id}
           type={visible ? "text" : "password"}
@@ -221,11 +221,16 @@ export function AuthCard({
           onClick={() => void startGoogle()}
         />
 
-        <div className="flex items-center gap-3" role="separator" aria-label="or use email and password">
-          <span className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-medium text-slate-500">or</span>
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
+        {/* The "or" only makes sense between two working options. */}
+        {providers.google && config.publicConfigured ? (
+          <div className="flex items-center gap-3" role="separator" aria-label="or use email and password">
+            <span className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-medium text-slate-500">or</span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+        ) : (
+          <div className="h-px bg-slate-200" role="separator" />
+        )}
 
         {mode !== "reset" && (
           <div className="grid grid-cols-2 gap-4 border-b border-slate-200" role="tablist" aria-label="Account action">
@@ -267,7 +272,7 @@ export function AuthCard({
             <div className="pb-4">
               <Label htmlFor="account-name">Name</Label>
               <div className="relative">
-                <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
                 <Input id="account-name" type="text" autoComplete="name" maxLength={80} value={name} onChange={(event) => setName(event.target.value)} className="pl-9" required />
               </div>
             </div>
@@ -275,8 +280,22 @@ export function AuthCard({
           <div>
             <Label htmlFor="account-email">Email</Label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-              <Input id="account-email" type="email" autoComplete={mode === "signin" ? "username" : "email"} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.edu" className="pl-9" required />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
+              <Input
+                id="account-email"
+                type="email"
+                name="email"
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete={mode === "signin" ? "username" : "email"}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.edu"
+                className="pl-9"
+                required
+              />
             </div>
           </div>
           {mode !== "reset" && (
@@ -292,7 +311,7 @@ export function AuthCard({
             </>
           )}
           <Button type="submit" className="w-full" loading={loading} disabled={config.unconfigured || state.authLoading}>
-            {mode === "signin" ? "Sign in" : mode === "signup" ? "Create student account" : "Send reset link"}
+            {mode === "signin" ? "Sign in" : mode === "signup" ? "Create a student account" : "Send reset link"}
           </Button>
           {mode === "signin" ? (
             <button type="button" onClick={() => chooseMode("reset")} className="min-h-11 w-full rounded-xl text-sm font-semibold text-brand-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">

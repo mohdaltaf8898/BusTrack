@@ -113,8 +113,9 @@ export function SchematicRouteMap({
           <path d="M0 -1 L0.65 0.35 L0 0 L-0.65 0.35 Z" fill="white" />
         </g>
       </svg>
-      <div className="glass glass-edge absolute bottom-4 left-4 z-10 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700">
-        Schematic route · not to scale
+      {/* Sits above the Track page's drag sheet, which publishes its peek height as --map-inset-b. */}
+      <div className="glass glass-edge absolute bottom-[calc(1rem+var(--map-inset-b,0px))] left-4 z-10 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700">
+        Schematic route, not to scale
       </div>
     </div>
   );

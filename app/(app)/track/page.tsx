@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowUpRight,
   BusFront,
   Clock3,
   Compass,
@@ -181,7 +180,7 @@ export default function TrackPage() {
                 />
                 <span className="pb-0.5 text-xs text-slate-600">{etaCaption}</span>
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
                 <span>{formatDistance(snapshot.selectedStopEta.distanceMeters)} to stop</span>
                 <span aria-hidden="true">·</span>
                 <span>{snapshot.route.code} · {snapshot.bus?.number ?? "No bus"}</span>
@@ -200,7 +199,7 @@ export default function TrackPage() {
             <RouteAccuracyNote route={snapshot.route} />
             <UpcomingStops limit={7} />
             <ButtonLink href="/routes" variant="outline" className="w-full">
-              View all stops <ArrowUpRight className="h-4 w-4" />
+              View all stops
             </ButtonLink>
           </div>
         </DragSheet>
@@ -245,7 +244,7 @@ export default function TrackPage() {
           <CardContent className="space-y-3">
             {map("h-[430px] sm:h-[520px] lg:h-[590px]")}
             <RouteAccuracyNote route={snapshot.route} />
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
               <span className="inline-flex items-center gap-1.5">
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
                 Heading {bearingToCompass(snapshot.busPosition.bearing)} · {Math.round(snapshot.busPosition.bearing)}°
@@ -289,7 +288,7 @@ export default function TrackPage() {
               {method}
 
               <ButtonLink href="/routes" variant="outline" className="w-full">
-                View all stops <ArrowUpRight className="h-4 w-4" />
+                View all stops
               </ButtonLink>
             </CardContent>
           </Card>

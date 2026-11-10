@@ -38,9 +38,8 @@ export default function HomePage() {
         <Section
           id="what-you-get"
           tone="canvas"
-          eyebrow="After you sign in"
-          title="What you get"
-          lede="The public site stops here. These are the screens a signed-in student sees, built to answer one question quickly: should I leave now?"
+          title="What you get after you sign in"
+          lede="These are the screens a signed-in student uses to decide whether to leave for the stop now."
         >
           <FeatureGrid />
         </Section>
@@ -48,7 +47,6 @@ export default function HomePage() {
         <Section
           id="how-it-works"
           tone="surface"
-          eyebrow="Three steps"
           title="How it works"
           lede="Account creation is open to students. Driver and administrator access is granted by the transport office on your profile."
         >
@@ -58,30 +56,22 @@ export default function HomePage() {
         <Section
           id="who-uses-it"
           tone="canvas"
-          eyebrow="Three roles"
           title="Who uses it"
-          lede="One dataset, three points of view. Roles come from your BusTrack profile and are re-checked by the API on every privileged request."
+          lede="Roles come from your BusTrack profile and are re-checked by the API on every privileged request."
         >
           <RoleCards />
         </Section>
 
         <Section
-          id="data-honesty"
+          id="what-is-estimated"
           tone="navy"
-          eyebrow="Read this before you rely on it"
           title="What is estimated, and what would be live"
-          lede="BusTrack is a wayfinding and estimation tool. It does not currently receive GPS from college buses, and it will not claim otherwise."
+          lede="BusTrack is an estimation tool. No college bus sends it GPS today, and each screen labels the kind of data it is showing."
         >
           <DataHonestyPanel />
         </Section>
 
-        <Section
-          id="questions"
-          tone="surface"
-          eyebrow="Questions"
-          title="Things students ask"
-          lede={undefined}
-        >
+        <Section id="questions" tone="surface" title="Things students ask">
           <Faq />
         </Section>
 

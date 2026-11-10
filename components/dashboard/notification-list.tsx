@@ -132,7 +132,7 @@ export function NotificationList() {
       <CardContent className="space-y-4">
         <Tabs items={tabs} value={filter} onChange={setFilter} />
 
-        <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-3">
+        <div className="border-y border-slate-100 py-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-2.5">
               <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
@@ -180,7 +180,7 @@ export function NotificationList() {
 
         {filtered.length === 0 ? (
           <EmptyState
-            icon={<Inbox className="h-6 w-6" />}
+            icon={<Inbox className="h-7 w-7" strokeWidth={1.5} />}
             title={filter === "unread" ? "You’re all caught up" : "No notifications here"}
             description={
               filter === "unread"
@@ -189,7 +189,7 @@ export function NotificationList() {
             }
           />
         ) : (
-          <m.ul layout className="space-y-2.5">
+          <m.ul layout className="divide-y divide-slate-100">
             <AnimatePresence initial={false} mode="popLayout">
               {filtered.map((item) => {
                 const meta = notificationMeta[item.type];
@@ -199,6 +199,7 @@ export function NotificationList() {
                   <m.li
                     key={item.id}
                     layout
+                    className="py-1"
                     initial={{ opacity: 0, y: -8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.16 } }}
@@ -221,10 +222,8 @@ export function NotificationList() {
                     >
                       <div
                         className={cn(
-                          "rounded-xl border p-4 transition-colors duration-300",
-                          unread
-                            ? "border-brand-100 bg-brand-50/40"
-                            : "border-slate-100 bg-white",
+                          "px-2 py-3.5 transition-colors duration-300 sm:px-3",
+                          unread ? "bg-brand-50" : "bg-white",
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -251,12 +250,11 @@ export function NotificationList() {
                             </div>
                             <h3 className="mt-2 text-sm font-bold text-navy-950">{item.title}</h3>
                             <p className="mt-1 text-xs leading-5 text-slate-600">{item.message}</p>
-                            <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                            <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                               <span className="inline-flex items-center gap-1">
                                 <Clock3 className="h-3 w-3" aria-hidden="true" />
                                 {formatRelativeTime(item.createdAt, state.currentTime)}
                               </span>
-                              <span>·</span>
                               <span>{formatDateTime(item.createdAt)} IST</span>
                             </p>
                           </div>
@@ -276,7 +274,7 @@ export function NotificationList() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 text-slate-400 hover:text-rose-600"
+                              className="h-9 w-9 text-slate-500 hover:text-rose-600"
                               aria-label={`Delete ${item.title}`}
                               title="Delete"
                               onClick={() => deleteNotification(item.id)}

@@ -17,6 +17,12 @@ const config: Config = {
         line: "var(--color-border)",
         ink: "var(--color-ink)",
         "ink-muted": "var(--color-ink-muted)",
+        // Secondary text sits on white, canvas (#f7f8fa) and brand-50 tints.
+        // Tailwind's slate-500 (#64748b) measures 4.3–4.5:1 on the tints, so
+        // the step is nudged darker to clear WCAG AA (4.5:1) everywhere.
+        slate: {
+          500: "#5f6e84",
+        },
         navy: {
           50: "rgb(var(--color-navy-50) / <alpha-value>)",
           100: "rgb(var(--color-navy-100) / <alpha-value>)",

@@ -71,7 +71,7 @@ export default function BusDetailsPage() {
 
       {!snapshot.bus ? (
         <EmptyState
-          icon={<BusFront className="h-6 w-6" />}
+          icon={<BusFront className="h-7 w-7" strokeWidth={1.5} />}
           title="No bus assigned to this route"
           description="An administrator can assign a bus from the admin dashboard."
         />
@@ -124,7 +124,7 @@ export default function BusDetailsPage() {
                 <RouteAccuracyNote route={snapshot.route} />
                 <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
                       <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> Coordinates
                     </p>
                     <p className="mt-1 font-mono text-xs font-bold text-navy-950">
@@ -132,22 +132,22 @@ export default function BusDetailsPage() {
                     </p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
                       <Radio className="h-3.5 w-3.5" aria-hidden="true" /> Nearest mapped stop (approx.)
                     </p>
                     <p className="mt-1 text-sm font-bold text-navy-950">{nearestStop.stop.name}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
                       <Clock3 className="h-3.5 w-3.5" aria-hidden="true" /> Last update
                     </p>
                     <p className="mt-1 text-sm font-bold text-navy-950">
                       {formatRelativeTime(snapshot.lastUpdateAt, state.currentTime)}
                     </p>
-                    <p className="text-[11px] text-slate-500">{formatDateTime(snapshot.lastUpdateAt)} IST</p>
+                    <p className="text-xs text-slate-500">{formatDateTime(snapshot.lastUpdateAt)} IST</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
                       <Wifi className="h-3.5 w-3.5" aria-hidden="true" /> Source
                     </p>
                     <p className="mt-1 text-sm font-bold text-navy-950">{snapshot.sourceLabel}</p>

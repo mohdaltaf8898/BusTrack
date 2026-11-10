@@ -75,8 +75,8 @@ export function RoutePreview({
           );
         })}
       </svg>
-      <span className="absolute bottom-2 right-2 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-slate-500">
-        Schematic · not to scale
+      <span className="absolute bottom-2 right-2 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-500">
+        Schematic, not to scale
       </span>
     </div>
   );

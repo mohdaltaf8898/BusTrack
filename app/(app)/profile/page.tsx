@@ -39,7 +39,7 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-2xl space-y-5">
         <PageHeader eyebrow="Profile" title="You are signed out" />
         <EmptyState
-          icon={<UserRound className="h-6 w-6" />}
+          icon={<UserRound className="h-7 w-7" strokeWidth={1.5} />}
           title="Sign in to personalize BusTrack"
           description="Your account details, selected stop and notification settings are only available after signing in."
           action={<ButtonLink href="/login">Go to sign in</ButtonLink>}
@@ -104,7 +104,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <RouteSelector />
-              <div className="rounded-2xl border border-slate-100 p-3.5">
+              <div className="border-t border-slate-100 pt-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-2.5">
                     <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />

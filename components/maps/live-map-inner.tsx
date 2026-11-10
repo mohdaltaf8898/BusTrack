@@ -123,7 +123,10 @@ export function LiveMapInner({
     const map = L.map(containerRef.current, {
       zoomControl: false,
       attributionControl: true,
-      preferCanvas: true,
+      // SVG renderer: three polylines and a few dozen markers do not need the
+      // canvas renderer, whose teardown can race a pending redraw
+      // ("Cannot read properties of undefined (reading 'clearRect')").
+      preferCanvas: false,
       zoomSnap: 0.25,
       minZoom: 9,
       maxZoom: 18,
@@ -280,7 +283,9 @@ export function LiveMapInner({
   return (
     <div
       className={cn(
-        "relative h-[340px] w-full overflow-hidden rounded-3xl border border-slate-200 bg-[#eaf1f8] shadow-card md:h-[440px]",
+        // The map always sits inside a card (or full-bleed on the phone Track
+        // page), so it is an inset panel, not a second framed card.
+        "relative h-[340px] w-full overflow-hidden rounded-2xl bg-[#eaf1f8] md:h-[440px]",
         className,
       )}
       style={{ "--map-inset-b": `${bottomInset}px` } as CSSProperties}
@@ -307,7 +312,7 @@ export function LiveMapInner({
             </div>
           )}
           {tilesLoaded && <div className="pointer-events-none absolute left-3 top-3 z-[500] flex max-w-[calc(100%-1.5rem)] flex-wrap gap-1.5">
-            <span className="glass glass-edge pointer-events-auto inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-navy-900">
+            <span className="glass glass-edge pointer-events-auto inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-bold text-navy-900">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: route.color }} />
               {route.code} · {route.busNumber}
             </span>
@@ -346,7 +351,7 @@ export function LiveMapInner({
               )}
             </div>
           )}
-          {tilesLoaded && <div className="glass glass-edge pointer-events-none absolute bottom-[calc(0.75rem+var(--map-inset-b,0px))] left-3 z-[500] flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-semibold text-slate-600">
+          {tilesLoaded && <div className="glass glass-edge pointer-events-none absolute bottom-[calc(0.75rem+var(--map-inset-b,0px))] left-3 z-[500] flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-600">
             <Navigation className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
             Heading {bearingToCompass(busPosition.bearing)} · {Math.round(busPosition.bearing)}°
           </div>}
@@ -380,7 +385,7 @@ export function LiveMapInner({
         </div>
       )}
       {browserOffline && (
-        <div className="absolute right-3 top-3 z-[600] rounded-xl bg-amber-100 px-2.5 py-1.5 text-[11px] font-bold text-amber-900 shadow-card">
+        <div className="absolute right-3 top-3 z-[600] rounded-xl bg-amber-100 px-2.5 py-1.5 text-xs font-bold text-amber-900 shadow-card">
           <span className="inline-flex items-center gap-1.5">
             <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
             Offline

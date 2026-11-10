@@ -148,7 +148,7 @@ export function DragSheet({
         >
           <span className="h-1.5 w-10 rounded-full bg-slate-300 transition-colors group-focus-visible:bg-brand-600" />
           <m.span
-            className="mt-1 text-slate-400"
+            className="mt-1 text-slate-500"
             animate={{ rotate: snap === "full" ? 180 : 0 }}
             transition={{ duration: 0.2 }}
             aria-hidden="true"

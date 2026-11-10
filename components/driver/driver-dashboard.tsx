@@ -242,7 +242,7 @@ export function DriverDashboard() {
   if (!assignedBus) {
     return (
       <EmptyState
-        icon={<BusFront className="h-6 w-6" />}
+        icon={<BusFront className="h-7 w-7" strokeWidth={1.5} />}
         title="No bus assigned"
         description="Ask an administrator to assign a bus to your driver profile before starting a trip."
         action={<ButtonLink href="/admin">Open admin dashboard</ButtonLink>}
@@ -390,13 +390,13 @@ export function DriverDashboard() {
                       </option>
                     ))}
                   </Select>
-                  <p className="mt-1.5 text-[11px] text-slate-500">
+                  <p className="mt-1.5 text-xs text-slate-500">
                     Testing selector only. An assigned driver receives one bus and route from Supabase.
                   </p>
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 p-3.5">
+              <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-bold text-navy-950">
                     <LocateFixed className="h-4 w-4 text-brand-600" aria-hidden="true" />
